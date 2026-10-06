@@ -1,0 +1,308 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quán ăn | Trang quản trị</title>
+    <style>
+        :root { --ink: #173042; --muted: #6c7d86; --accent: #e46b3f; --paper: #fffaf2; --line: #eadfce; --green: #2e7d32; }
+        * { box-sizing: border-box; }
+        body { margin: 0; color: var(--ink); background: #f4eee4; font: 15px Georgia, serif; }
+        header { padding: 20px max(24px, calc((100% - 1200px) / 2)); background: var(--ink); color: #fffaf2; display: flex; align-items: center; gap: 24px; flex-wrap: wrap; }
+        header h1 { margin: 0; font-size: 28px; font-weight: 500; flex: 1; }
+        nav { display: flex; gap: 8px; }
+        nav button { background: transparent; border: 1px solid #fffaf255; color: #fffaf2; padding: 8px 18px; cursor: pointer; font: inherit; font-size: 14px; transition: background .2s; }
+        nav button.active, nav button:hover { background: var(--accent); border-color: var(--accent); }
+        main { max-width: 1200px; margin: 24px auto; padding: 0 24px 48px; }
+        .layout { display: grid; grid-template-columns: 340px 1fr; gap: 24px; align-items: start; }
+        section { background: var(--paper); border: 1px solid var(--line); padding: 22px; box-shadow: 0 10px 24px #8c775c18; }
+        h2 { margin: 0 0 18px; font-size: 20px; border-bottom: 1px solid var(--line); padding-bottom: 10px; }
+        label { display: block; margin: 10px 0 5px; color: var(--muted); font-size: 13px; }
+        input, textarea, select { width: 100%; padding: 9px 11px; border: 1px solid #cbbda9; background: #fff; color: var(--ink); font: inherit; border-radius: 2px; }
+        textarea { min-height: 70px; resize: vertical; }
+        .actions { display: flex; gap: 8px; margin-top: 16px; }
+        button { border: 0; padding: 9px 16px; cursor: pointer; font: inherit; border-radius: 2px; }
+        button.primary { background: var(--accent); color: white; }
+        button.secondary { background: #e9dfd0; color: var(--ink); }
+        button.danger { background: #c62828; color: white; }
+        table { width: 100%; border-collapse: collapse; }
+        th, td { border-bottom: 1px solid var(--line); padding: 10px 8px; text-align: left; vertical-align: top; font-size: 14px; }
+        th { color: var(--muted); font-weight: normal; font-size: 13px; }
+        td strong { display: block; }
+        td small { color: var(--muted); font-size: 12px; }
+        .row-actions { white-space: nowrap; }
+        .row-actions button { padding: 5px 9px; margin-right: 4px; font-size: 13px; }
+        #msg-product, #msg-category { min-height: 20px; margin-top: 12px; font-size: 13px; }
+        .ok { color: var(--green); } .err { color: #c62828; }
+        .tab-panel { display: none; } .tab-panel.active { display: block; }
+        .badge { display: inline-block; background: var(--accent); color: white; font-size: 11px; padding: 1px 7px; border-radius: 10px; margin-left: 6px; }
+        @media (max-width: 800px) { .layout { grid-template-columns: 1fr; } nav button { padding: 7px 12px; font-size: 13px; } }
+    </style>
+</head>
+<body>
+<header>
+    <h1>🍽️ Quán ăn — Trang quản trị</h1>
+    <nav>
+        <button class="active" onclick="switchTab('product', this)">Món ăn</button>
+        <button onclick="switchTab('category', this)">Danh mục</button>
+    </nav>
+</header>
+<main>
+
+    <!-- ===== TAB: PRODUCT ===== -->
+    <div id="tab-product" class="tab-panel active">
+        <div class="layout">
+            <section>
+                <h2 id="form-title-product">➕ Thêm món ăn</h2>
+                <form id="product-form">
+                    <input id="product-id" type="hidden">
+                    <label>Tên món <span style="color:red">*</span></label>
+                    <input id="name" required placeholder="Ví dụ: Cơm gà nướng">
+                    <label>Mô tả</label>
+                    <textarea id="description" placeholder="Thành phần, ghi chú phục vụ..."></textarea>
+                    <label>Giá bán (VND) <span style="color:red">*</span></label>
+                    <input id="price" type="number" min="0" step="1000" required placeholder="75000">
+                    <label>Số lượng <span style="color:red">*</span></label>
+                    <input id="quantity" type="number" min="0" required placeholder="50">
+                    <label>Danh mục <span style="color:red">*</span></label>
+                    <select id="category-select"></select>
+                    <div class="actions">
+                        <button class="primary" type="submit">💾 Lưu món</button>
+                        <button class="secondary" type="button" id="cancel-product">Huỷ</button>
+                    </div>
+                </form>
+                <div id="msg-product" role="status"></div>
+            </section>
+            <section>
+                <h2>📋 Danh sách món ăn</h2>
+                <table>
+                    <thead><tr><th>Tên món</th><th>Giá</th><th>Số lượng</th><th>Danh mục</th><th>Thao tác</th></tr></thead>
+                    <tbody id="product-list"><tr><td colspan="5" style="color:var(--muted)">Đang tải...</td></tr></tbody>
+                </table>
+            </section>
+        </div>
+    </div>
+
+    <!-- ===== TAB: CATEGORY ===== -->
+    <div id="tab-category" class="tab-panel">
+        <div class="layout">
+            <section>
+                <h2 id="form-title-category">➕ Thêm danh mục</h2>
+                <form id="category-form">
+                    <input id="category-id-hidden" type="hidden">
+                    <label>Tên danh mục <span style="color:red">*</span></label>
+                    <input id="cat-name" required placeholder="Ví dụ: Món chính">
+                    <label>Mô tả</label>
+                    <textarea id="cat-description" placeholder="Ghi chú về danh mục..."></textarea>
+                    <div class="actions">
+                        <button class="primary" type="submit">💾 Lưu danh mục</button>
+                        <button class="secondary" type="button" id="cancel-category">Huỷ</button>
+                    </div>
+                </form>
+                <div id="msg-category" role="status"></div>
+            </section>
+            <section>
+                <h2>📋 Danh sách danh mục</h2>
+                <table>
+                    <thead><tr><th>ID</th><th>Tên danh mục</th><th>Mô tả</th><th>Thao tác</th></tr></thead>
+                    <tbody id="category-list"><tr><td colspan="4" style="color:var(--muted)">Đang tải...</td></tr></tbody>
+                </table>
+            </section>
+        </div>
+    </div>
+
+</main>
+<script>
+    // ───────── TAB SWITCH ─────────
+    function switchTab(name, btn) {
+        document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+        document.querySelectorAll('nav button').forEach(b => b.classList.remove('active'));
+        document.getElementById('tab-' + name).classList.add('active');
+        btn.classList.add('active');
+        if (name === 'category') loadCategories();
+        if (name === 'product') { loadCategoryOptions(); loadProducts(); }
+    }
+
+    // ───────── HELPERS ─────────
+    const $ = id => document.getElementById(id);
+    function escHtml(v) {
+        return String(v || '').replace(/[&<>'"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;',"'":"&#039;",'"':'&quot;'}[c]));
+    }
+    function showMsg(id, text, ok = true) {
+        const el = $(id);
+        el.textContent = text;
+        el.className = ok ? 'ok' : 'err';
+        setTimeout(() => { el.textContent = ''; }, 5000);
+    }
+    async function apiFetch(url, opts = {}) {
+        const res = await fetch(url, { headers: { 'Content-Type': 'application/json' }, ...opts });
+        const data = await res.json().catch(() => null);
+        if (!res.ok) throw new Error(data?.message || 'Lỗi không xác định (HTTP ' + res.status + ')');
+        return data;
+    }
+
+    // ─────────────────────────────────────────────────────────
+    // PRODUCT
+    // ─────────────────────────────────────────────────────────
+    let categoryMap = {};   // id → name
+
+    async function loadCategoryOptions() {
+        try {
+            const cats = await apiFetch('/api/categories');
+            categoryMap = {};
+            cats.forEach(c => { categoryMap[c.id] = c.name; });
+            const sel = $('category-select');
+            sel.innerHTML = cats.map(c => `<option value="${c.id}">${escHtml(c.name)}</option>`).join('');
+        } catch (e) {
+            $('category-select').innerHTML = '<option value="1">-- Không tải được --</option>';
+        }
+    }
+
+    async function loadProducts() {
+        try {
+            const products = await apiFetch('/api/products');
+            $('product-list').innerHTML = products.length === 0
+                ? '<tr><td colspan="5" style="color:var(--muted)">Chưa có món ăn nào.</td></tr>'
+                : products.map(p => `
+                <tr>
+                    <td><strong>${escHtml(p.name)}</strong><small>${escHtml(p.description)}</small></td>
+                    <td>${Number(p.price).toLocaleString('vi-VN')} ₫</td>
+                    <td>${p.quantity}</td>
+                    <td>${escHtml(p.categoryName || categoryMap[p.categoryId] || '#' + p.categoryId)}</td>
+                    <td class="row-actions">
+                        <button class="secondary" onclick="editProduct(${p.id})">✏️ Sửa</button>
+                        <button class="danger"    onclick="deleteProduct(${p.id})">🗑️ Xoá</button>
+                    </td>
+                </tr>`).join('');
+        } catch (e) {
+            $('product-list').innerHTML = `<tr><td colspan="5" class="err">${escHtml(e.message)}</td></tr>`;
+        }
+    }
+
+    async function editProduct(id) {
+        try {
+            const p = await apiFetch('/api/products/' + id);
+            $('product-id').value    = p.id;
+            $('name').value          = p.name;
+            $('description').value   = p.description || '';
+            $('price').value         = p.price;
+            $('quantity').value      = p.quantity;
+            $('category-select').value = p.categoryId;
+            $('form-title-product').textContent = '✏️ Cập nhật món ăn';
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        } catch (e) { showMsg('msg-product', e.message, false); }
+    }
+
+    async function deleteProduct(id) {
+        if (!confirm('Xoá món ăn này?')) return;
+        try {
+            const res = await fetch('/api/products/' + id, { method: 'DELETE' });
+            if (!res.ok) {
+                const data = await res.json().catch(() => null);
+                throw new Error(data?.message || 'Không xoá được món ăn.');
+            }
+            showMsg('msg-product', '✅ Đã xoá món ăn.', true);
+            await loadProducts();
+        } catch (e) { showMsg('msg-product', '❌ ' + e.message, false); }
+    }
+
+    $('product-form').addEventListener('submit', async ev => {
+        ev.preventDefault();
+        const id = $('product-id').value;
+        const body = {
+            name:        $('name').value,
+            description: $('description').value,
+            price:       Number($('price').value),
+            quantity:    Number($('quantity').value),
+            categoryId:  Number($('category-select').value)
+        };
+        try {
+            await apiFetch(id ? '/api/products/' + id : '/api/products', {
+                method: id ? 'PUT' : 'POST', body: JSON.stringify(body)
+            });
+            resetProductForm();
+            showMsg('msg-product', id ? '✅ Đã cập nhật món ăn.' : '✅ Đã thêm món ăn.', true);
+            await loadProducts();
+        } catch (e) { showMsg('msg-product', '❌ ' + e.message, false); }
+    });
+
+    $('cancel-product').addEventListener('click', resetProductForm);
+    function resetProductForm() {
+        $('product-form').reset();
+        $('product-id').value = '';
+        $('form-title-product').textContent = '➕ Thêm món ăn';
+    }
+
+    // ─────────────────────────────────────────────────────────
+    // CATEGORY
+    // ─────────────────────────────────────────────────────────
+    async function loadCategories() {
+        try {
+            const cats = await apiFetch('/api/categories');
+            $('category-list').innerHTML = cats.length === 0
+                ? '<tr><td colspan="4" style="color:var(--muted)">Chưa có danh mục nào.</td></tr>'
+                : cats.map(c => `
+                <tr>
+                    <td>${c.id}</td>
+                    <td><strong>${escHtml(c.name)}</strong></td>
+                    <td><small>${escHtml(c.description)}</small></td>
+                    <td class="row-actions">
+                        <button class="secondary" onclick="editCategory(${c.id})">✏️ Sửa</button>
+                        <button class="danger"    onclick="deleteCategory(${c.id})">🗑️ Xoá</button>
+                    </td>
+                </tr>`).join('');
+        } catch (e) {
+            $('category-list').innerHTML = `<tr><td colspan="4" class="err">${escHtml(e.message)}</td></tr>`;
+        }
+    }
+
+    async function editCategory(id) {
+        try {
+            const c = await apiFetch('/api/categories/' + id);
+            $('category-id-hidden').value = c.id;
+            $('cat-name').value           = c.name;
+            $('cat-description').value    = c.description || '';
+            $('form-title-category').textContent = '✏️ Cập nhật danh mục';
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        } catch (e) { showMsg('msg-category', e.message, false); }
+    }
+
+    async function deleteCategory(id) {
+        if (!confirm('Xoá danh mục này? (Không xoá được nếu còn món ăn thuộc danh mục)')) return;
+        try {
+            const res = await fetch('/api/categories/' + id, { method: 'DELETE' });
+            if (!res.ok) {
+                const data = await res.json().catch(() => null);
+                throw new Error(data?.message || 'Không xoá được danh mục.');
+            }
+            showMsg('msg-category', '✅ Đã xoá danh mục.', true);
+            await loadCategories();
+        } catch (e) { showMsg('msg-category', '❌ ' + e.message, false); }
+    }
+
+    $('category-form').addEventListener('submit', async ev => {
+        ev.preventDefault();
+        const id = $('category-id-hidden').value;
+        const body = { name: $('cat-name').value, description: $('cat-description').value };
+        try {
+            await apiFetch(id ? '/api/categories/' + id : '/api/categories', {
+                method: id ? 'PUT' : 'POST', body: JSON.stringify(body)
+            });
+            resetCategoryForm();
+            showMsg('msg-category', id ? '✅ Đã cập nhật danh mục.' : '✅ Đã thêm danh mục.', true);
+            await loadCategories();
+        } catch (e) { showMsg('msg-category', '❌ ' + e.message, false); }
+    });
+
+    $('cancel-category').addEventListener('click', resetCategoryForm);
+    function resetCategoryForm() {
+        $('category-form').reset();
+        $('category-id-hidden').value = '';
+        $('form-title-category').textContent = '➕ Thêm danh mục';
+    }
+
+    // ───────── INIT ─────────
+    loadCategoryOptions().then(loadProducts);
+</script>
+</body>
+</html>
