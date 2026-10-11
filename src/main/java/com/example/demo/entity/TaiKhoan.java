@@ -18,8 +18,9 @@ public class TaiKhoan {
     private String password;
     private String email;
 
-    @Column(name = "pq_id")
-    private Integer pqId;
+    @ManyToOne
+    @JoinColumn(name = "pq_id")
+    private PhanQuyen phanQuyen;
 
     @Column(name = "trang_thai")
     private Integer trangThai;
