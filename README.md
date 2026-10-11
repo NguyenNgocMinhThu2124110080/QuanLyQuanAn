@@ -16,7 +16,7 @@
 ---
 
 ### 📍 BUỔI 3: NGHIỆP VỤ NÂNG CAO (BUSINESS LOGIC & SERVICE LAYER)
-> Nhánh đang thực hiện: `buoi3-thu` (Tách từ `buoi-3`)
+> Nhánh đang thực hiện: `buoi3-quy` (Tách từ `buoi-3`)
 
 #### 👤 1. Đặng Vũ Thanh Phát (ĐÃ HOÀN THÀNH 100%):
 1. **Xác thực Đăng nhập & Quản lý Tài khoản:**
@@ -55,6 +55,26 @@
      - API Thêm/xóa định lượng nguyên liệu cho món ăn.
 4. **DTOs Chuyên dụng:**
    - `NhapXuatKhoRequest`, `NguyenLieuTonKhoResponse`.
+
+#### 👤 3. Nguyễn Xuân Quý (ĐÃ HOÀN THÀNH 100%):
+1. **Mở Bàn, Đặt Món & Tự Động Tính Tiền:**
+   - `DonHangService.java` & `DonHangController.java`:
+     - API Mở bàn tạo đơn: `POST /api/don-hang/mo-ban-tao-don` (Tự động đổi trạng thái bàn ăn sang `CO_KHACH`).
+     - API Thêm món (Gọi món): `POST /api/don-hang/them-mon` (Tự động tính `thanhTien = donGia * soLuong` và **cộng dồn tổng tiền đơn hàng**).
+     - API Huỷ món khỏi đơn: `DELETE /api/don-hang/huy-mon/{maCtdh}` (Tự động trừ tiền ra khỏi tổng tiền của đơn hàng).
+     - API Chi tiết hoá đơn đầy đủ: `GET /api/don-hang/{maDon}/chi-tiet-hoa-don` (Hiển thị chi tiết từng món ăn đã gọi).
+     - API Huỷ đơn hàng: `PUT /api/don-hang/{maDon}/huy-don` (Tự động trả bàn ăn về trạng thái `TRONG`).
+2. **Quản lý Danh Mục & Món Ăn Nâng Cao:**
+   - `MonAnController.java` & `DanhMucMonAnController.java`:
+     - API Tìm kiếm món ăn theo tên: `GET /api/mon-an/tim-kiem?ten=...`.
+     - API Lọc món theo danh mục: `GET /api/mon-an/danh-muc/{maDanhmuc}`.
+     - API Đổi trạng thái món ăn (Còn món / Hết món): `PUT /api/mon-an/{id}/trang-thai`.
+3. **Quản lý Bàn Ăn:**
+   - `BanAnController.java`:
+     - API Lấy danh sách bàn đang trống: `GET /api/ban-an/ban-trong`.
+     - API Cập nhật trạng thái bàn ăn: `PUT /api/ban-an/{id}/trang-thai`.
+4. **DTOs Chuyên dụng:**
+   - `TaoDonHangRequest`, `ThemMonVaoDonRequest`, `DonHangChiTietResponse`.
 
 ---
 

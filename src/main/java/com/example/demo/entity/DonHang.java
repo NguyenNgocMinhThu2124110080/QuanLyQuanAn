@@ -8,7 +8,7 @@ import lombok.Data;
 public class DonHang {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "maDon")
+    @Column(name = "ma_don")
     private Integer maDon;
     @Column(name = "ngay_dat")
     private java.time.LocalDateTime ngayDat;
