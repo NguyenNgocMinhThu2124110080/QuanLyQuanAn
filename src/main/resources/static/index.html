@@ -56,14 +56,7 @@
                 <h2 id="form-title-product">➕ Thêm món ăn</h2>
                 <form id="product-form">
                     <input id="product-id" type="hidden">
-                    <label>Tên món <span style="color:red">*</span></label>
-                    <input id="name" required placeholder="Ví dụ: Cơm gà nướng">
-                    <label>Mô tả</label>
-                    <textarea id="description" placeholder="Thành phần, ghi chú phục vụ..."></textarea>
-                    <label>Giá bán (VND) <span style="color:red">*</span></label>
-                    <input id="price" type="number" min="0" step="1000" required placeholder="75000">
-                    <label>Số lượng <span style="color:red">*</span></label>
-                    <input id="quantity" type="number" min="0" required placeholder="50">
+                    
                     <label>Danh mục <span style="color:red">*</span></label>
                     <select id="category-select"></select>
                     <div class="actions">
@@ -76,7 +69,7 @@
             <section>
                 <h2>📋 Danh sách món ăn</h2>
                 <table>
-                    <thead><tr><th>Tên món</th><th>Giá</th><th>Số lượng</th><th>Danh mục</th><th>Thao tác</th></tr></thead>
+                    <thead><tr><th>Tên món</th><th>Giá</th><th>Danh mục</th><th>Thao tác</th></tr></thead>
                     <tbody id="product-list"><tr><td colspan="5" style="color:var(--muted)">Đang tải...</td></tr></tbody>
                 </table>
             </section>
@@ -148,11 +141,11 @@
 
     async function loadCategoryOptions() {
         try {
-            const cats = await apiFetch('/api/categories');
+            const cats = await apiFetch('/api/danh-muc-mon-an');
             categoryMap = {};
-            cats.forEach(c => { categoryMap[c.id] = c.name; });
+            cats.forEach(c => { categoryMap[c.maDanhmuc] = c.tenDanhmuc; });
             const sel = $('category-select');
-            sel.innerHTML = cats.map(c => `<option value="${c.id}">${escHtml(c.name)}</option>`).join('');
+            sel.innerHTML = cats.map(c => `<option value="${c.maDanhmuc}">${escHtml(c.tenDanhmuc)}</option>`).join('');
         } catch (e) {
             $('category-select').innerHTML = '<option value="1">-- Không tải được --</option>';
         }
@@ -160,18 +153,17 @@
 
     async function loadProducts() {
         try {
-            const products = await apiFetch('/api/products');
+            const products = await apiFetch('/api/mon-an');
             $('product-list').innerHTML = products.length === 0
                 ? '<tr><td colspan="5" style="color:var(--muted)">Chưa có món ăn nào.</td></tr>'
                 : products.map(p => `
                 <tr>
-                    <td><strong>${escHtml(p.name)}</strong><small>${escHtml(p.description)}</small></td>
-                    <td>${Number(p.price).toLocaleString('vi-VN')} ₫</td>
-                    <td>${p.quantity}</td>
-                    <td>${escHtml(p.categoryName || categoryMap[p.categoryId] || '#' + p.categoryId)}</td>
+                    <td><strong>${escHtml(p.tenMon)}</strong><small>${escHtml(p.moTa)}</small></td>
+                    <td>${Number(p.gia).toLocaleString('vi-VN')} ₫</td>
+                    <td>${escHtml((p.danhMuc ? p.danhMuc.tenDanhmuc : null) || categoryMap[(p.danhMuc ? p.danhMuc.maDanhmuc : null)] || '#' + (p.danhMuc ? p.danhMuc.maDanhmuc : null))}</td>
                     <td class="row-actions">
-                        <button class="secondary" onclick="editProduct(${p.id})">✏️ Sửa</button>
-                        <button class="danger"    onclick="deleteProduct(${p.id})">🗑️ Xoá</button>
+                        <button class="secondary" onclick="editProduct(${p.maMon})">✏️ Sửa</button>
+                        <button class="danger"    onclick="deleteProduct(${p.maMon})">🗑️ Xoá</button>
                     </td>
                 </tr>`).join('');
         } catch (e) {
@@ -181,13 +173,12 @@
 
     async function editProduct(id) {
         try {
-            const p = await apiFetch('/api/products/' + id);
-            $('product-id').value    = p.id;
-            $('name').value          = p.name;
-            $('description').value   = p.description || '';
-            $('price').value         = p.price;
-            $('quantity').value      = p.quantity;
-            $('category-select').value = p.categoryId;
+            const p = await apiFetch('/api/mon-an/' + id);
+            $('product-id').value    = p.maMon;
+            $('name').value          = p.tenMon;
+            $('description').value   = p.moTa || '';
+            $('price').value         = p.gia;
+            $('category-select').value = (p.danhMuc ? p.danhMuc.maDanhmuc : null);
             $('form-title-product').textContent = '✏️ Cập nhật món ăn';
             window.scrollTo({ top: 0, behavior: 'smooth' });
         } catch (e) { showMsg('msg-product', e.message, false); }
@@ -196,7 +187,7 @@
     async function deleteProduct(id) {
         if (!confirm('Xoá món ăn này?')) return;
         try {
-            const res = await fetch('/api/products/' + id, { method: 'DELETE' });
+            const res = await fetch('/api/mon-an/' + id, { method: 'DELETE' });
             if (!res.ok) {
                 const data = await res.json().catch(() => null);
                 throw new Error(data?.message || 'Không xoá được món ăn.');
@@ -210,14 +201,10 @@
         ev.preventDefault();
         const id = $('product-id').value;
         const body = {
-            name:        $('name').value,
-            description: $('description').value,
-            price:       Number($('price').value),
-            quantity:    Number($('quantity').value),
-            categoryId:  Number($('category-select').value)
+            tenMon: $('name').value, moTa: $('description').value, gia: Number($('price').value), danhMuc: { maDanhmuc: Number($('category-select').value) }
         };
         try {
-            await apiFetch(id ? '/api/products/' + id : '/api/products', {
+            await apiFetch(id ? '/api/mon-an/' + id : '/api/mon-an', {
                 method: id ? 'PUT' : 'POST', body: JSON.stringify(body)
             });
             resetProductForm();
@@ -238,17 +225,17 @@
     // ─────────────────────────────────────────────────────────
     async function loadCategories() {
         try {
-            const cats = await apiFetch('/api/categories');
+            const cats = await apiFetch('/api/danh-muc-mon-an');
             $('category-list').innerHTML = cats.length === 0
                 ? '<tr><td colspan="4" style="color:var(--muted)">Chưa có danh mục nào.</td></tr>'
                 : cats.map(c => `
                 <tr>
-                    <td>${c.id}</td>
-                    <td><strong>${escHtml(c.name)}</strong></td>
-                    <td><small>${escHtml(c.description)}</small></td>
+                    <td>${c.maDanhmuc}</td>
+                    <td><strong>${escHtml(c.tenDanhmuc)}</strong></td>
+                    <td><small>${escHtml(c.moTa)}</small></td>
                     <td class="row-actions">
-                        <button class="secondary" onclick="editCategory(${c.id})">✏️ Sửa</button>
-                        <button class="danger"    onclick="deleteCategory(${c.id})">🗑️ Xoá</button>
+                        <button class="secondary" onclick="editCategory(${c.maDanhmuc})">✏️ Sửa</button>
+                        <button class="danger"    onclick="deleteCategory(${c.maDanhmuc})">🗑️ Xoá</button>
                     </td>
                 </tr>`).join('');
         } catch (e) {
@@ -258,10 +245,10 @@
 
     async function editCategory(id) {
         try {
-            const c = await apiFetch('/api/categories/' + id);
-            $('category-id-hidden').value = c.id;
-            $('cat-name').value           = c.name;
-            $('cat-description').value    = c.description || '';
+            const c = await apiFetch('/api/danh-muc-mon-an/' + id);
+            $('category-id-hidden').value = c.maDanhmuc;
+            $('cat-name').value           = c.tenDanhmuc;
+            $('cat-description').value    = c.moTa || '';
             $('form-title-category').textContent = '✏️ Cập nhật danh mục';
             window.scrollTo({ top: 0, behavior: 'smooth' });
         } catch (e) { showMsg('msg-category', e.message, false); }
@@ -270,7 +257,7 @@
     async function deleteCategory(id) {
         if (!confirm('Xoá danh mục này? (Không xoá được nếu còn món ăn thuộc danh mục)')) return;
         try {
-            const res = await fetch('/api/categories/' + id, { method: 'DELETE' });
+            const res = await fetch('/api/danh-muc-mon-an/' + id, { method: 'DELETE' });
             if (!res.ok) {
                 const data = await res.json().catch(() => null);
                 throw new Error(data?.message || 'Không xoá được danh mục.');
@@ -283,9 +270,9 @@
     $('category-form').addEventListener('submit', async ev => {
         ev.preventDefault();
         const id = $('category-id-hidden').value;
-        const body = { name: $('cat-name').value, description: $('cat-description').value };
+        const body = { tenDanhmuc: $('cat-name').value, moTa: $('cat-description').value };
         try {
-            await apiFetch(id ? '/api/categories/' + id : '/api/categories', {
+            await apiFetch(id ? '/api/danh-muc-mon-an/' + id : '/api/danh-muc-mon-an', {
                 method: id ? 'PUT' : 'POST', body: JSON.stringify(body)
             });
             resetCategoryForm();
