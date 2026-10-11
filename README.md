@@ -16,9 +16,9 @@
 ---
 
 ### 📍 BUỔI 3: NGHIỆP VỤ NÂNG CAO (BUSINESS LOGIC & SERVICE LAYER)
-> Nhánh đang thực hiện: `buoi3-phat` (Tách từ `buoi-3`)
+> Nhánh đang thực hiện: `buoi3-thu` (Tách từ `buoi-3`)
 
-#### 👤 Đặng Vũ Thanh Phát (ĐÃ HOÀN THÀNH 100%):
+#### 👤 1. Đặng Vũ Thanh Phát (ĐÃ HOÀN THÀNH 100%):
 1. **Xác thực Đăng nhập & Quản lý Tài khoản:**
    - `TaiKhoanService.java` & `TaiKhoanController.java`:
      - API Đăng nhập: `POST /api/tai-khoan/dang-nhap` (kiểm tra trạng thái khoá, mật khẩu, trả về vai trò và họ tên nhân viên).
@@ -36,6 +36,25 @@
      - API Tra cứu giao dịch theo đơn: `GET /api/thanh-toan/don-hang/{maDon}`.
 4. **DTOs Chuyên dụng:**
    - `LoginRequest`, `LoginResponse`, `DoiMatKhauRequest`, `TaoNhanVienRequest`, `ThanhToanRequest`.
+
+#### 👤 2. Nguyễn Ngọc Minh Thư (ĐÃ HOÀN THÀNH 100%):
+1. **Quản lý Nhập / Xuất Kho & Cập nhật Tồn kho tự động:**
+   - `KhoService.java` & `PhieuNhapXuatController.java`:
+     - API Lập phiếu Nhập/Xuất: `POST /api/phieu-nhap-xuat/lap-phieu`.
+     - Nghiệp vụ Nhập: Tự động cộng số lượng tồn kho nguyên liệu, cập nhật đơn giá nhập mới nhất.
+     - Nghiệp vụ Xuất: Tự động trừ số lượng tồn kho nguyên liệu, **chặn xuất nếu số lượng tồn trong kho không đủ** (báo lỗi tức thì).
+     - API Lịch sử nhập xuất theo nguyên liệu: `GET /api/phieu-nhap-xuat/lich-su/nguyen-lieu/{nlId}`.
+2. **Báo cáo & Cảnh báo Tồn kho:**
+   - `NguyenLieuController.java`:
+     - API Báo cáo tồn kho: `GET /api/nguyen-lieu/bao-cao-ton-kho` (Tự động phân loại `AN_TOAN`, `SAP_HET`, `HET_HANG`).
+     - API Tìm kiếm nguyên liệu theo tên: `GET /api/nguyen-lieu/tim-kiem?ten=...`.
+     - API Lọc nguyên liệu theo Nhà cung cấp: `GET /api/nguyen-lieu/nha-cung-cap/{nccId}`.
+3. **Quản lý Định lượng & Công thức Món:**
+   - `CongThucMonController.java`:
+     - API Xem định lượng nguyên liệu theo món: `GET /api/cong-thuc-mon/mon/{maMon}`.
+     - API Thêm/xóa định lượng nguyên liệu cho món ăn.
+4. **DTOs Chuyên dụng:**
+   - `NhapXuatKhoRequest`, `NguyenLieuTonKhoResponse`.
 
 ---
 
