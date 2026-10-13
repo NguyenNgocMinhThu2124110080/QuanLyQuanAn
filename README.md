@@ -4,7 +4,7 @@
 
 ---
 
-## 👥 BẢNG TIẾN ĐỘ & PHÂN CÔNG CÔNG VIỆC THEO TUẦN
+## 👥 BẢNG PHÂN CÔNG CÔNG VIỆC THEO TUẦN
 
 ### 📍 BUỔI 2: KHỞI TẠO BỘ KHUNG BACKEND & 15 BẢNG CRUD
 | STT | Thành viên | Nhiệm vụ / Module phụ trách | Các file mã nguồn (Entity, Repository, Controller) |
@@ -16,65 +16,64 @@
 ---
 
 ### 📍 BUỔI 3: NGHIỆP VỤ NÂNG CAO (BUSINESS LOGIC & SERVICE LAYER)
-> Nhánh đang thực hiện: `buoi3-quy` (Tách từ `buoi-3`)
 
-#### 👤 1. Đặng Vũ Thanh Phát (ĐÃ HOÀN THÀNH 100%):
-1. **Xác thực Đăng nhập & Quản lý Tài khoản:**
-   - `TaiKhoanService.java` & `TaiKhoanController.java`:
-     - API Đăng nhập: `POST /api/tai-khoan/dang-nhap` (kiểm tra trạng thái khoá, mật khẩu, trả về vai trò và họ tên nhân viên).
-     - API Đổi mật khẩu: `POST /api/tai-khoan/doi-mat-khau`.
-     - API Khoá/Mở khoá tài khoản: `PUT /api/tai-khoan/{id}/trang-thai`.
-2. **Quản lý Hồ sơ Nhân sự trọn gói:**
-   - `NhanVienService.java` & `NhanVienController.java`:
-     - API Tạo nhân viên trọn gói: `POST /api/nhan-vien/tao-tron-goi` (Tự động khởi tạo `TaiKhoan` -> `NguoiDung` -> `NhanVien` trong một giao dịch an toàn `@Transactional`).
-     - API Cập nhật lương và chức vụ: `PUT /api/nhan-vien/{id}/luong-chuc-vu`.
-3. **Quy trình Thanh toán & Giải phóng Bàn:**
-   - `ThanhToanService.java` & `ThanhToanController.java`:
-     - API Thanh toán đơn hàng: `POST /api/thanh-toan/thuc-hien`.
-     - Tự động chuyển trạng thái đơn hàng sang `DA_THANH_TOAN`.
-     - Tự động giải phóng bàn ăn chuyển sang trạng thái `TRONG`.
-     - API Tra cứu giao dịch theo đơn: `GET /api/thanh-toan/don-hang/{maDon}`.
-4. **DTOs Chuyên dụng:**
-   - `LoginRequest`, `LoginResponse`, `DoiMatKhauRequest`, `TaoNhanVienRequest`, `ThanhToanRequest`.
+#### 👤 1. Đặng Vũ Thanh Phát
+- **Xác thực Đăng nhập & Quản lý Tài khoản:**
+  - `TaiKhoanService.java` & `TaiKhoanController.java`:
+    - API Đăng nhập: `POST /api/tai-khoan/dang-nhap` (kiểm tra trạng thái tài khoản, mật khẩu, xác thực vai trò và thông tin cá nhân).
+    - API Đổi mật khẩu: `POST /api/tai-khoan/doi-mat-khau`.
+    - API Khoá/Mở khoá tài khoản: `PUT /api/tai-khoan/{id}/trang-thai`.
+- **Quản lý Hồ sơ Nhân sự:**
+  - `NhanVienService.java` & `NhanVienController.java`:
+    - API Tạo nhân viên trọn gói: `POST /api/nhan-vien/tao-tron-goi` (khởi tạo liên kết `TaiKhoan` -> `NguoiDung` -> `NhanVien` với transaction `@Transactional`).
+    - API Cập nhật lương và chức vụ: `PUT /api/nhan-vien/{id}/luong-chuc-vu`.
+- **Quy trình Thanh toán & Giải phóng Bàn:**
+  - `ThanhToanService.java` & `ThanhToanController.java`:
+    - API Thanh toán đơn hàng: `POST /api/thanh-toan/thuc-hien`.
+    - Tự động chuyển trạng thái đơn hàng sang `DA_THANH_TOAN`.
+    - Tự động giải phóng bàn ăn về trạng thái `TRONG`.
+    - API Tra cứu giao dịch theo đơn: `GET /api/thanh-toan/don-hang/{maDon}`.
+- **DTOs liên quan:**
+  - `LoginRequest`, `LoginResponse`, `DoiMatKhauRequest`, `TaoNhanVienRequest`, `ThanhToanRequest`.
 
-#### 👤 2. Nguyễn Ngọc Minh Thư (ĐÃ HOÀN THÀNH 100%):
-1. **Quản lý Nhập / Xuất Kho & Cập nhật Tồn kho tự động:**
-   - `KhoService.java` & `PhieuNhapXuatController.java`:
-     - API Lập phiếu Nhập/Xuất: `POST /api/phieu-nhap-xuat/lap-phieu`.
-     - Nghiệp vụ Nhập: Tự động cộng số lượng tồn kho nguyên liệu, cập nhật đơn giá nhập mới nhất.
-     - Nghiệp vụ Xuất: Tự động trừ số lượng tồn kho nguyên liệu, **chặn xuất nếu số lượng tồn trong kho không đủ** (báo lỗi tức thì).
-     - API Lịch sử nhập xuất theo nguyên liệu: `GET /api/phieu-nhap-xuat/lich-su/nguyen-lieu/{nlId}`.
-2. **Báo cáo & Cảnh báo Tồn kho:**
-   - `NguyenLieuController.java`:
-     - API Báo cáo tồn kho: `GET /api/nguyen-lieu/bao-cao-ton-kho` (Tự động phân loại `AN_TOAN`, `SAP_HET`, `HET_HANG`).
-     - API Tìm kiếm nguyên liệu theo tên: `GET /api/nguyen-lieu/tim-kiem?ten=...`.
-     - API Lọc nguyên liệu theo Nhà cung cấp: `GET /api/nguyen-lieu/nha-cung-cap/{nccId}`.
-3. **Quản lý Định lượng & Công thức Món:**
-   - `CongThucMonController.java`:
-     - API Xem định lượng nguyên liệu theo món: `GET /api/cong-thuc-mon/mon/{maMon}`.
-     - API Thêm/xóa định lượng nguyên liệu cho món ăn.
-4. **DTOs Chuyên dụng:**
-   - `NhapXuatKhoRequest`, `NguyenLieuTonKhoResponse`.
+#### 👤 2. Nguyễn Ngọc Minh Thư
+- **Quản lý Nhập / Xuất Kho & Cập nhật Tồn kho tự động:**
+  - `KhoService.java` & `PhieuNhapXuatController.java`:
+    - API Lập phiếu Nhập/Xuất: `POST /api/phieu-nhap-xuat/lap-phieu`.
+    - Nghiệp vụ Nhập: Tự động cộng dồn số lượng tồn kho nguyên liệu, cập nhật đơn giá nhập.
+    - Nghiệp vụ Xuất: Tự động trừ số lượng tồn kho, kiểm tra và chặn xuất nếu không đủ hàng tồn.
+    - API Lịch sử nhập xuất theo nguyên liệu: `GET /api/phieu-nhap-xuat/lich-su/nguyen-lieu/{nlId}`.
+- **Báo cáo & Cảnh báo Tồn kho:**
+  - `NguyenLieuController.java`:
+    - API Báo cáo tồn kho: `GET /api/nguyen-lieu/bao-cao-ton-kho` (phân loại `AN_TOAN`, `SAP_HET`, `HET_HANG`).
+    - API Tìm kiếm nguyên liệu theo tên: `GET /api/nguyen-lieu/tim-kiem?ten=...`.
+    - API Lọc nguyên liệu theo Nhà cung cấp: `GET /api/nguyen-lieu/nha-cung-cap/{nccId}`.
+- **Quản lý Định lượng & Công thức Món:**
+  - `CongThucMonController.java`:
+    - API Xem định lượng nguyên liệu theo món: `GET /api/cong-thuc-mon/mon/{maMon}`.
+    - API Thêm/xóa định lượng nguyên liệu cho món ăn.
+- **DTOs liên quan:**
+  - `NhapXuatKhoRequest`, `NguyenLieuTonKhoResponse`.
 
-#### 👤 3. Nguyễn Xuân Quý (ĐÃ HOÀN THÀNH 100%):
-1. **Mở Bàn, Đặt Món & Tự Động Tính Tiền:**
-   - `DonHangService.java` & `DonHangController.java`:
-     - API Mở bàn tạo đơn: `POST /api/don-hang/mo-ban-tao-don` (Tự động đổi trạng thái bàn ăn sang `CO_KHACH`).
-     - API Thêm món (Gọi món): `POST /api/don-hang/them-mon` (Tự động tính `thanhTien = donGia * soLuong` và **cộng dồn tổng tiền đơn hàng**).
-     - API Huỷ món khỏi đơn: `DELETE /api/don-hang/huy-mon/{maCtdh}` (Tự động trừ tiền ra khỏi tổng tiền của đơn hàng).
-     - API Chi tiết hoá đơn đầy đủ: `GET /api/don-hang/{maDon}/chi-tiet-hoa-don` (Hiển thị chi tiết từng món ăn đã gọi).
-     - API Huỷ đơn hàng: `PUT /api/don-hang/{maDon}/huy-don` (Tự động trả bàn ăn về trạng thái `TRONG`).
-2. **Quản lý Danh Mục & Món Ăn Nâng Cao:**
-   - `MonAnController.java` & `DanhMucMonAnController.java`:
-     - API Tìm kiếm món ăn theo tên: `GET /api/mon-an/tim-kiem?ten=...`.
-     - API Lọc món theo danh mục: `GET /api/mon-an/danh-muc/{maDanhmuc}`.
-     - API Đổi trạng thái món ăn (Còn món / Hết món): `PUT /api/mon-an/{id}/trang-thai`.
-3. **Quản lý Bàn Ăn:**
-   - `BanAnController.java`:
-     - API Lấy danh sách bàn đang trống: `GET /api/ban-an/ban-trong`.
-     - API Cập nhật trạng thái bàn ăn: `PUT /api/ban-an/{id}/trang-thai`.
-4. **DTOs Chuyên dụng:**
-   - `TaoDonHangRequest`, `ThemMonVaoDonRequest`, `DonHangChiTietResponse`.
+#### 👤 3. Nguyễn Xuân Quý
+- **Mở Bàn, Đặt Món & Tự Động Tính Tiền:**
+  - `DonHangService.java` & `DonHangController.java`:
+    - API Mở bàn tạo đơn: `POST /api/don-hang/mo-ban-tao-don` (tự động chuyển trạng thái bàn sang `CO_KHACH`).
+    - API Thêm món (Gọi món): `POST /api/don-hang/them-mon` (tự động tính thành tiền và cộng dồn vào tổng tiền đơn hàng).
+    - API Huỷ món khỏi đơn: `DELETE /api/don-hang/huy-mon/{maCtdh}` (tự động trừ tiền khỏi tổng đơn hàng).
+    - API Chi tiết hoá đơn: `GET /api/don-hang/{maDon}/chi-tiet-hoa-don` (hiển thị danh sách món đã gọi).
+    - API Huỷ đơn hàng: `PUT /api/don-hang/{maDon}/huy-don` (tự động trả bàn ăn về `TRONG`).
+- **Quản lý Danh Mục & Món Ăn:**
+  - `MonAnController.java` & `DanhMucMonAnController.java`:
+    - API Tìm kiếm món ăn theo tên: `GET /api/mon-an/tim-kiem?ten=...`.
+    - API Lọc món theo danh mục: `GET /api/mon-an/danh-muc/{maDanhmuc}`.
+    - API Đổi trạng thái món ăn: `PUT /api/mon-an/{id}/trang-thai`.
+- **Quản lý Bàn Ăn:**
+  - `BanAnController.java`:
+    - API Lấy danh sách bàn đang trống: `GET /api/ban-an/ban-trong`.
+    - API Cập nhật trạng thái bàn: `PUT /api/ban-an/{id}/trang-thai`.
+- **DTOs liên quan:**
+  - `TaoDonHangRequest`, `ThemMonVaoDonRequest`, `DonHangChiTietResponse`.
 
 ---
 
