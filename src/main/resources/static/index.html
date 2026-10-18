@@ -1639,17 +1639,7 @@
 
         if (res.status === 401) {
             console.warn("401 Unauthorized:", url);
-            // Xóa token lỗi trong session nếu có
-            if (currentUser && currentUser.token) {
-                currentUser = { token: '', username: '', hoTen: '', vaiTro: '', nvId: null };
-                localStorage.removeItem('jwt_token');
-                localStorage.removeItem('jwt_username');
-                localStorage.removeItem('jwt_hoten');
-                localStorage.removeItem('jwt_vaitro');
-                localStorage.removeItem('jwt_nvid');
-                updateUserHeader();
-            }
-            throw new Error('Bạn cần đăng nhập tài khoản có thẩm quyền để thực hiện thao tác này!');
+            throw new Error('Bạn cần đăng nhập tài khoản có thẩm quyền để thực hiện thao tác này (401)!');
         }
 
         if (res.status === 403) {
@@ -2802,17 +2792,19 @@
 
     async function loadDailyRevenue() {
         const dateInput = $('revenue-date-picker');
-        if (!dateInput.value) {
+        if (dateInput && !dateInput.value) {
             dateInput.value = new Date().toISOString().split('T')[0];
         }
-        const selectedDate = dateInput.value;
+        const selectedDate = (dateInput && dateInput.value) ? dateInput.value : new Date().toISOString().split('T')[0];
 
         try {
             const data = await apiFetch(`/api/thanh-toan/doanh-thu-theo-ngay?ngay=${selectedDate}`);
-            $('kpi-rev-total').textContent = formatVND(data.tongDoanhThu);
-            $('kpi-rev-count').textContent = data.tongSoDonThanhToan || 0;
-            $('kpi-rev-cash').textContent = formatVND(data.tienMat);
-            $('kpi-rev-transfer').textContent = formatVND((data.chuyenKhoan || 0) + (data.the || 0));
+            if (data) {
+                if ($('kpi-rev-total')) $('kpi-rev-total').textContent = formatVND(data.tongDoanhThu);
+                if ($('kpi-rev-count')) $('kpi-rev-count').textContent = data.tongSoDonThanhToan || 0;
+                if ($('kpi-rev-cash')) $('kpi-rev-cash').textContent = formatVND(data.tienMat);
+                if ($('kpi-rev-transfer')) $('kpi-rev-transfer').textContent = formatVND((data.chuyenKhoan || 0) + (data.the || 0));
+            }
         } catch (e) {
             console.warn('Lỗi lấy doanh thu:', e);
         }

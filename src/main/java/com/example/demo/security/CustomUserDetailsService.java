@@ -33,6 +33,12 @@ public class CustomUserDetailsService implements UserDetailsService {
 
         boolean enabled = (tk.getTrangThai() == null || tk.getTrangThai() == 1);
 
+        java.util.List<org.springframework.security.core.GrantedAuthority> authorities = new java.util.ArrayList<>();
+        authorities.add(new SimpleGrantedAuthority(role));
+        if (!role.startsWith("ROLE_")) {
+            authorities.add(new SimpleGrantedAuthority("ROLE_" + role));
+        }
+
         return new User(
                 tk.getUsername(),
                 tk.getPassword(),
@@ -40,7 +46,7 @@ public class CustomUserDetailsService implements UserDetailsService {
                 true,
                 true,
                 true,
-                Collections.singletonList(new SimpleGrantedAuthority(role))
+                authorities
         );
     }
 }
