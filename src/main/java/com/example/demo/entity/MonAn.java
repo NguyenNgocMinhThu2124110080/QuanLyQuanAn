@@ -1,13 +1,11 @@
 package com.example.demo.entity;
 
 import jakarta.persistence.*;
-import lombok.Data;
 import java.math.BigDecimal;
 
-// PHẦN CỦA: NGUYỄN XUÂN QUÝ
+// PHáº¦N Cá»¦A: NGUYá»„N XUÃ‚N QUÃ
 @Entity
 @Table(name = "mon_an")
-@Data
 public class MonAn {
     @Id 
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -91,3 +89,4 @@ public class MonAn {
         this.danhMuc = danhMuc;
     }
 }
+

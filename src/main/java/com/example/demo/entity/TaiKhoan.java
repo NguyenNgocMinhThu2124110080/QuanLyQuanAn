@@ -1,13 +1,11 @@
 package com.example.demo.entity;
 
 import jakarta.persistence.*;
-import lombok.Data;
 
-// PHẦN CỦA: ĐẶNG VŨ THANH PHÁT
-// Chịu trách nhiệm bảo mật và quản lý tài khoản.
+// PHáº¦N Cá»¦A: Äáº¶NG VÅ¨ THANH PHÃT
+// Chá»‹u trÃ¡ch nhiá»‡m báº£o máº­t vÃ  quáº£n lÃ½ tÃ i khoáº£n.
 @Entity
 @Table(name = "tai_khoan")
-@Data
 public class TaiKhoan {
     @Id 
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -73,3 +71,4 @@ public class TaiKhoan {
         this.trangThai = trangThai;
     }
 }
+

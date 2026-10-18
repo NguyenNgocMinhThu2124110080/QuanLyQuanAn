@@ -1,13 +1,11 @@
 package com.example.demo.entity;
 
 import jakarta.persistence.*;
-import lombok.Data;
 import java.math.BigDecimal;
 
-// PHẦN CỦA: NGUYỄN NGỌC MINH THƯ
+// PHáº¦N Cá»¦A: NGUYá»„N NGá»ŒC MINH THÆ¯
 @Entity
 @Table(name = "cong_thuc_mon")
-@Data
 public class CongThucMon {
     @EmbeddedId
     private CongThucMonId id;
@@ -58,3 +56,4 @@ public class CongThucMon {
         this.soLuongDung = soLuongDung;
     }
 }
+

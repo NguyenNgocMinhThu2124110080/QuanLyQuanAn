@@ -1,14 +1,12 @@
 package com.example.demo.entity;
 
 import jakarta.persistence.*;
-import lombok.Data;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 
-// PHẦN CỦA: ĐẶNG VŨ THANH PHÁT
+// PHáº¦N Cá»¦A: Äáº¶NG VÅ¨ THANH PHÃT
 @Entity
 @Table(name = "nhan_vien")
-@Data
 public class NhanVien {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -78,3 +76,4 @@ public class NhanVien {
         this.nguoiDung = nguoiDung;
     }
 }
+

@@ -1,12 +1,10 @@
 package com.example.demo.entity;
 
 import jakarta.persistence.*;
-import lombok.Data;
 
-// PHẦN CỦA: ĐẶNG VŨ THANH PHÁT
+// PHáº¦N Cá»¦A: Äáº¶NG VÅ¨ THANH PHÃT
 @Entity
 @Table(name = "phan_quyen")
-@Data
 public class PhanQuyen {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -54,3 +52,4 @@ public class PhanQuyen {
         this.trangThai = trangThai;
     }
 }
+
