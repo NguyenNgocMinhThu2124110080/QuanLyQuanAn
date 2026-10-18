@@ -14,7 +14,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 // PHẦN CỦA: NGUYỄN XUÂN QUÝ
-// Buổi 3: API Tạo Đơn Hàng, Gọi Món, Huỷ Món & Tính Hoá Đơn Tự Động
+// Buổi 4: API Quản lý Vòng đời Đơn hàng, Đặt món, Tự trừ kho & Chặn sửa/xóa đơn đã thanh toán
 @RestController
 @RequestMapping("/api/don-hang")
 @RequiredArgsConstructor
@@ -38,6 +38,16 @@ public class DonHangController {
         try {
             ChiTietDonHang ctdh = donHangService.themMonVaoDon(request);
             return ResponseEntity.ok(ctdh);
+        } catch (IllegalArgumentException | IllegalStateException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
+    }
+
+    @PutMapping("/{id}/trang-thai")
+    public ResponseEntity<?> capNhatTrangThai(@PathVariable Integer id, @RequestParam String trangThai) {
+        try {
+            DonHang dh = donHangService.capNhatTrangThaiDon(id, trangThai);
+            return ResponseEntity.ok(dh);
         } catch (IllegalArgumentException | IllegalStateException e) {
             return ResponseEntity.badRequest().body(e.getMessage());
         }
@@ -79,7 +89,7 @@ public class DonHangController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<DonHang> getById(@PathVariable Integer id) {
+    public ResponseEntity<?> getById(@PathVariable Integer id) {
         return donHangRepository.findById(id)
                 .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.notFound().build());
@@ -88,5 +98,20 @@ public class DonHangController {
     @GetMapping("/trang-thai/{trangThai}")
     public List<DonHang> layTheoTrangThai(@PathVariable String trangThai) {
         return donHangRepository.findByTrangThai(trangThai);
+    }
+
+    /**
+     * Ràng buộc nghiệp vụ: Không được phép xóa đơn hàng đã thanh toán
+     */
+    @DeleteMapping("/{id}")
+    public ResponseEntity<?> delete(@PathVariable Integer id) {
+        try {
+            donHangService.xoaDonHang(id);
+            return ResponseEntity.ok("Đã xóa đơn hàng thành công!");
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.notFound().build();
+        } catch (IllegalStateException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
     }
 }
