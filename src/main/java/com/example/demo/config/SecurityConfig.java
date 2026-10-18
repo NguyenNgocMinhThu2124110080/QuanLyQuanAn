@@ -71,11 +71,16 @@ public class SecurityConfig {
                     "/error"
                 ).permitAll()
 
-                // Cho phép xem thực đơn, danh mục và bàn ăn công khai (GET requests)
+                // Cho phép xem thực đơn, danh mục, bàn ăn, kho hàng và báo cáo công khai (GET requests)
                 .requestMatchers(HttpMethod.GET,
                     "/api/ban-an/**",
                     "/api/mon-an/**",
-                    "/api/danh-muc-mon-an/**"
+                    "/api/danh-muc-mon-an/**",
+                    "/api/nguyen-lieu/**",
+                    "/api/nha-cung-cap/**",
+                    "/api/phieu-nhap-xuat/**",
+                    "/api/don-hang/**",
+                    "/api/thanh-toan/**"
                 ).permitAll()
 
                 // 2. Phân quyền chỉ dành riêng cho ADMIN
