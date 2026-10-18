@@ -148,6 +148,11 @@ public class DonHangService {
         }
 
         dh.setTrangThai(trangThaiMoi.toUpperCase());
+        if ("HUY".equalsIgnoreCase(trangThaiMoi) && dh.getBan() != null) {
+            BanAn ban = dh.getBan();
+            ban.setTrangThai("TRONG");
+            banAnRepository.save(ban);
+        }
         return donHangRepository.save(dh);
     }
 

@@ -34,9 +34,24 @@ public class ThanhToanController {
     }
 
     @GetMapping("/doanh-thu-theo-ngay")
-    public ResponseEntity<?> getDoanhThuTheoNgay(
-            @RequestParam(required = false) @org.springframework.format.annotation.DateTimeFormat(iso = org.springframework.format.annotation.DateTimeFormat.ISO.DATE) java.time.LocalDate ngay) {
-        return ResponseEntity.ok(thanhToanService.thongKeDoanhThuTheoNgay(ngay));
+    public ResponseEntity<?> getDoanhThuTheoNgay(@RequestParam(required = false) String ngay) {
+        java.time.LocalDate date = null;
+        if (ngay != null && !ngay.trim().isEmpty()) {
+            String clean = ngay.trim();
+            try {
+                if (clean.contains("-")) {
+                    date = java.time.LocalDate.parse(clean);
+                } else if (clean.contains("/")) {
+                    date = java.time.LocalDate.parse(clean, java.time.format.DateTimeFormatter.ofPattern("dd/MM/yyyy"));
+                }
+            } catch (Exception ignored) {
+                date = java.time.LocalDate.now();
+            }
+        }
+        if (date == null) {
+            date = java.time.LocalDate.now();
+        }
+        return ResponseEntity.ok(thanhToanService.thongKeDoanhThuTheoNgay(date));
     }
 
     @GetMapping("/don-hang/{maDon}")

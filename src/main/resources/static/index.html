@@ -1164,6 +1164,7 @@
                 <div style="display:flex; align-items:center; gap:8px;">
                     <label style="margin:0; font-size:13px;">Chọn ngày:</label>
                     <input type="date" id="revenue-date-picker" onchange="loadDailyRevenue()" style="width:auto; padding:6px 10px;">
+                    <button class="btn btn-secondary btn-sm" onclick="loadDailyRevenue()">🔄 Làm mới</button>
                 </div>
             </div>
             <div class="grid-4">
@@ -1579,10 +1580,9 @@
                     pendingAuthAction = null;
                     await act();
                 } else if (!isBackground) {
-                    if (selectedTable) {
+                    refreshCurrentTab();
+                    if (selectedTable && currentTabName === 'tables') {
                         await selectTable(selectedTable.maBan);
-                    } else {
-                        refreshCurrentTab();
                     }
                 }
                 return currentUser.token;
@@ -2720,6 +2720,7 @@
                     <td style="font-weight:700; color:var(--primary);">${formatVND(o.tongTien)}</td>
                     <td>
                         <button class="btn btn-success btn-sm" onclick="openPaymentForOrder(${o.maDon})">💳 Thanh toán</button>
+                        ${Number(o.tongTien) === 0 ? `<button class="btn btn-secondary btn-sm" style="margin-left:4px;" onclick="cancelEmptyOrder(${o.maDon})" title="Hủy đơn trống">🗑️ Hủy</button>` : ''}
                     </td>
                 </tr>
             `).join('');
@@ -2735,6 +2736,18 @@
                     </div>
                 </td></tr>
             `;
+        }
+    }
+
+    async function cancelEmptyOrder(maDon) {
+        if (!confirm(`Hủy đơn hàng trống #${maDon} và giải phóng bàn ăn?`)) return;
+        try {
+            await apiFetch(`/api/don-hang/${maDon}/trang-thai?trangThai=HUY`, { method: 'PUT' });
+            showToast(`Đã hủy đơn hàng trống #${maDon} thành công!`);
+            await loadTables();
+            await loadPendingOrders();
+        } catch (e) {
+            showToast('Lỗi hủy đơn: ' + e.message, 'error');
         }
     }
 
@@ -2792,10 +2805,17 @@
 
     async function loadDailyRevenue() {
         const dateInput = $('revenue-date-picker');
-        if (dateInput && !dateInput.value) {
-            dateInput.value = new Date().toISOString().split('T')[0];
+        let selectedDate = '';
+        if (dateInput && dateInput.value) {
+            selectedDate = dateInput.value;
+        } else {
+            const today = new Date();
+            const yyyy = today.getFullYear();
+            const mm = String(today.getMonth() + 1).padStart(2, '0');
+            const dd = String(today.getDate()).padStart(2, '0');
+            selectedDate = `${yyyy}-${mm}-${dd}`;
+            if (dateInput) dateInput.value = selectedDate;
         }
-        const selectedDate = (dateInput && dateInput.value) ? dateInput.value : new Date().toISOString().split('T')[0];
 
         try {
             const data = await apiFetch(`/api/thanh-toan/doanh-thu-theo-ngay?ngay=${selectedDate}`);
@@ -2807,6 +2827,7 @@
             }
         } catch (e) {
             console.warn('Lỗi lấy doanh thu:', e);
+            showToast('Không thể tải thống kê doanh thu: ' + e.message, 'error');
         }
     }
 
@@ -3143,11 +3164,24 @@
 
         updateUserHeader();
 
+        // Khởi tạo ngày cho bộ lọc doanh thu
+        const revPicker = $('revenue-date-picker');
+        if (revPicker && !revPicker.value) {
+            const today = new Date();
+            const yyyy = today.getFullYear();
+            const mm = String(today.getMonth() + 1).padStart(2, '0');
+            const dd = String(today.getDate()).padStart(2, '0');
+            revPicker.value = `${yyyy}-${mm}-${dd}`;
+        }
+
         // Tải các tài nguyên khởi tạo tuần tự
         await loadTables();
         await loadDishes();
         await loadCategories();
         await loadInventoryReport();
+        if (currentTabName === 'cashier') {
+            await loadDailyRevenue();
+        }
     }
 
     window.addEventListener('DOMContentLoaded', initApp);
