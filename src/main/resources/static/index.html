@@ -3,6 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
     <title>Hệ Thống Quản Lý Quán Ăn — Nhóm 10</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -1300,7 +1303,9 @@
 
     async function ensureAuth() {
         if (!authPromise) {
-            authPromise = doLogin(currentUser.username || 'admin', '123456', true).finally(() => {
+            const validUsers = ['admin', 'quanly01', 'phucvu01', 'daubep01'];
+            const u = validUsers.includes(currentUser.username) ? currentUser.username : 'admin';
+            authPromise = doLogin(u, '123456', true).finally(() => {
                 authPromise = null;
             });
         }
@@ -1328,7 +1333,10 @@
             console.warn("401 Unauthorized - Token hết hạn, đang tự động đăng nhập lại...");
             try {
                 currentUser.token = '';
-                const newToken = await ensureAuth();
+                localStorage.removeItem('jwt_token');
+                const validUsers = ['admin', 'quanly01', 'phucvu01', 'daubep01'];
+                const u = validUsers.includes(currentUser.username) ? currentUser.username : 'admin';
+                const newToken = await doLogin(u, '123456', true);
                 if (newToken) {
                     headers['Authorization'] = `Bearer ${newToken}`;
                     res = await fetch(url, { ...options, headers });
@@ -1487,12 +1495,30 @@
         try {
             const order = await apiFetch('/api/don-hang/mo-ban-tao-don', {
                 method: 'POST',
-                body: JSON.stringify({ maBan: maBan, maNv: currentUser.nvId })
+                body: JSON.stringify({ maBan: maBan, maNv: currentUser.nvId || 1 })
             });
             showToast(`Đã mở ${selectedTable ? selectedTable.tenBan : 'bàn'} thành công!`);
             await loadTables();
             await selectTable(maBan);
         } catch (e) {
+            if (e.message && (e.message.includes('Token') || e.message.includes('đăng nhập') || e.message.includes('401'))) {
+                try {
+                    currentUser.token = '';
+                    localStorage.removeItem('jwt_token');
+                    await ensureAuth();
+                    const order = await apiFetch('/api/don-hang/mo-ban-tao-don', {
+                        method: 'POST',
+                        body: JSON.stringify({ maBan: maBan, maNv: currentUser.nvId || 1 })
+                    });
+                    showToast(`Đã mở ${selectedTable ? selectedTable.tenBan : 'bàn'} thành công!`);
+                    await loadTables();
+                    await selectTable(maBan);
+                    return;
+                } catch (retryErr) {
+                    showToast('Lỗi mở bàn: ' + retryErr.message, 'error');
+                    return;
+                }
+            }
             showToast('Lỗi mở bàn: ' + e.message, 'error');
         }
     }
