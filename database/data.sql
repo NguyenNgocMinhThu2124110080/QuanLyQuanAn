@@ -57,14 +57,37 @@ INSERT INTO danh_muc_mon_an (ten_danhmuc, mo_ta) VALUES
 
 -- 6. Món ăn
 INSERT INTO mon_an (ten_mon, gia, mo_ta, ma_danhmuc) VALUES
-('Cơm gà nướng', 55000, 'Cơm tấm gà nướng mật ong', 1),
-('Phở bò', 60000, 'Phở bò tái nạm', 1),
-('Khoai tây chiên', 30000, 'Khoai tây chiên giòn', 2),
-('Trà đào cam sả', 35000, 'Trà đào thanh mát', 3);
+('Cơm gà nướng mật ong', 55000, 'Cơm tấm gà nướng mật ong vàng ruộm kèm đồ chua', 1),
+('Phở bò tái nạm đặc biệt', 60000, 'Phở bò nước hầm xương 24h, kèm quẩy giòn', 1),
+('Cơm sườn bì chả nướng', 50000, 'Cơm tấm sườn nướng mỡ hành đậm đà', 1),
+('Bún bò Huế giò heo', 55000, 'Bún bò cay nồng chuẩn vị cố đô', 1),
+('Mì xào giòn hải sản', 65000, 'Tôm mực tươi rói sốt nấm rau củ', 1),
+('Cơm chiên Dương Châu', 45000, 'Cơm chiên hạt vàng lạp xưởng tôm khô', 1),
+('Khoai tây chiên giòn bơ tỏi', 30000, 'Khoai tây chiên giòn rụm thơm lừng sốt bơ tỏi', 2),
+('Nem chua rán Hà Nội', 35000, 'Nem chua lăn bột chiên xù chấm tương ớt', 2),
+('Gà rán sốt cay Hàn Quốc', 48000, 'Gà giòn tan đẫm sốt cay ngọt mè rang', 2),
+('Mực chiên giòn muối tiêu', 65000, 'Mực ống giòn thơm kèm tương ớt xí muội', 2),
+('Trà đào cam sả thanh mát', 35000, 'Trà đào thơm nức hòa quyện cam tươi và sả', 3),
+('Trà sữa trân châu đường đen', 38000, 'Trà sữa đậm vị kèm trân châu hoàng kim dai giòn', 3),
+('Cà phê muối béo ngậy', 28000, 'Cà phê phin truyền thống phủ lớp kem muối sánh mịn', 3),
+('Nước ép dưa hấu tươi', 30000, 'Nước ép dưa hấu 100% nguyên chất giải nhiệt', 3),
+('Trà tắc hạt chia mật ong', 25000, 'Trà tắc mát lạnh hạt chia giòn sần sật', 3),
+('Chè khúc bạch thanh mát', 35000, 'Khúc bạch phô mai hạnh nhân nước đường phèn', 4),
+('Chè bưởi nước cốt dừa', 25000, 'Cùi bưởi giòn giòn hòa quyện cốt dừa béo ngậy', 4),
+('Bánh Flan trứng sữa caramen', 20000, 'Bánh flan mềm mịn thơm phức cà phê sữa', 4);
 
 -- 7. Bàn ăn
 INSERT INTO ban_an (ten_ban, so_cho_ngoi) VALUES
-('Bàn 01', 4), ('Bàn 02', 4), ('Bàn 03', 2), ('Bàn VIP 01', 8);
+('Bàn 01', 4),
+('Bàn 02', 4),
+('Bàn 03', 2),
+('Bàn 04', 4),
+('Bàn 05', 4),
+('Bàn 06', 6),
+('Bàn 07 (Sân vườn)', 4),
+('Bàn 08 (Sân vườn)', 6),
+('Bàn VIP 01 (Phòng hoa)', 8),
+('Bàn VIP 02 (Phòng tiệc)', 12);
 
 -- 8. Nhà cung cấp
 INSERT INTO nha_cung_cap (ten_ncc, dia_chi, so_dien_thoai, email) VALUES
