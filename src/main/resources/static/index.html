@@ -1281,13 +1281,26 @@
         }
     }
 
+    function isTokenExpired(token) {
+        if (!token) return true;
+        try {
+            const parts = token.split('.');
+            if (parts.length !== 3) return true;
+            const payload = JSON.parse(atob(parts[1].replace(/-/g, '+').replace(/_/g, '/')));
+            if (!payload.exp) return false;
+            return (Date.now() / 1000) >= (payload.exp - 60);
+        } catch (e) {
+            return true;
+        }
+    }
+
     async function quickLogin(username, password) {
         return doLogin(username, password, false);
     }
 
     async function ensureAuth() {
         if (!authPromise) {
-            authPromise = doLogin('admin', '123456', true).finally(() => {
+            authPromise = doLogin(currentUser.username || 'admin', '123456', true).finally(() => {
                 authPromise = null;
             });
         }
@@ -1295,11 +1308,11 @@
     }
 
     async function apiFetch(url, options = {}) {
-        if (!currentUser.token) {
+        if (!currentUser.token || isTokenExpired(currentUser.token)) {
             try {
                 await ensureAuth();
             } catch (err) {
-                console.warn('Chưa có token và auto-login lỗi:', err);
+                console.warn('Chưa có token hoặc token hết hạn, auto-login lỗi:', err);
             }
         }
 
@@ -1314,6 +1327,7 @@
         if (res.status === 401) {
             console.warn("401 Unauthorized - Token hết hạn, đang tự động đăng nhập lại...");
             try {
+                currentUser.token = '';
                 const newToken = await ensureAuth();
                 if (newToken) {
                     headers['Authorization'] = `Bearer ${newToken}`;
@@ -2129,7 +2143,7 @@
         updateUserHeader();
 
         // Đảm bảo có token trước khi nạp dữ liệu
-        if (!currentUser.token) {
+        if (!currentUser.token || isTokenExpired(currentUser.token)) {
             try {
                 await ensureAuth();
             } catch (e) {
