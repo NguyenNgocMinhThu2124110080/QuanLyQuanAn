@@ -1141,10 +1141,12 @@
             <p style="font-size:13px; color:var(--text-muted); margin-bottom:12px;">Đăng nhập để nhận JWT Token xác thực theo phân quyền Spring Security.</p>
             
             <!-- NÚT ĐĂNG NHẬP NHANH DEMO -->
-            <label>Đăng nhập nhanh (1-Click Demo):</label>
+            <label>Đăng nhập nhanh theo vai trò (Mật khẩu chung: 123456):</label>
             <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-bottom:14px;">
-                <button class="btn btn-secondary btn-sm" onclick="quickLogin('admin', '123456')">👑 Admin (Phát)</button>
-                <button class="btn btn-secondary btn-sm" onclick="quickLogin('nv_thu', '123456')">📦 Thủ kho (Thư)</button>
+                <button class="btn btn-secondary btn-sm" onclick="quickLogin('admin', '123456')">👑 Admin (admin)</button>
+                <button class="btn btn-secondary btn-sm" onclick="quickLogin('quanly01', '123456')">👔 Quản lý (quanly01)</button>
+                <button class="btn btn-secondary btn-sm" onclick="quickLogin('phucvu01', '123456')">🛎️ Phục vụ (phucvu01)</button>
+                <button class="btn btn-secondary btn-sm" onclick="quickLogin('daubep01', '123456')">🍳 Đầu bếp / Kho (daubep01)</button>
             </div>
 
             <form onsubmit="handleManualLogin(event)">
