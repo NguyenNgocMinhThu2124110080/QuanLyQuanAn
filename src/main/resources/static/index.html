@@ -193,6 +193,12 @@
             font-weight: 500;
         }
 
+        .active-cat-pill {
+            background: var(--primary) !important;
+            color: white !important;
+            border-color: var(--primary) !important;
+        }
+
         /* MAIN CONTENT CONTAINER */
         main {
             flex: 1;
@@ -775,21 +781,34 @@
     </div>
 </header>
 
+<!-- ===== ROLE PERMISSION BANNER ===== -->
+<div id="role-permission-hint" style="background:#f8fafc; padding:8px 28px; font-size:12px; border-bottom:1px solid var(--border); display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:8px;">
+    <div>
+        <span id="role-hint-icon">🛎️</span> 
+        <strong>Phân quyền truy cập:</strong> 
+        <span id="role-hint-text">Đang tải quyền hạn...</span>
+    </div>
+    <div style="color:var(--text-muted); font-size:11px; display:flex; align-items:center; gap:6px;">
+        <span style="display:inline-block; width:8px; height:8px; background:#10b981; border-radius:50%;"></span>
+        <span>Spring Security RBAC</span>
+    </div>
+</div>
+
 <!-- ===== NAVIGATION ===== -->
-<nav class="main-nav">
-    <button class="active" onclick="switchNav('tables', this)">
+<nav class="main-nav" id="main-nav-bar">
+    <button id="nav-btn-tables" class="active" onclick="switchNav('tables', this)">
         🪑 Sơ đồ Bàn & Gọi món
         <span class="badge-member">Quý</span>
     </button>
-    <button onclick="switchNav('menu', this)">
+    <button id="nav-btn-menu" onclick="switchNav('menu', this)">
         🍲 Thực đơn & Món ăn
         <span class="badge-member">Quý</span>
     </button>
-    <button onclick="switchNav('inventory', this)">
+    <button id="nav-btn-inventory" onclick="switchNav('inventory', this)">
         📦 Kho & Nguyên liệu
         <span class="badge-member">Thư</span>
     </button>
-    <button onclick="switchNav('cashier', this)">
+    <button id="nav-btn-cashier" onclick="switchNav('cashier', this)">
         💰 Thu ngân & Doanh thu
         <span class="badge-member">Phát</span>
     </button>
@@ -845,7 +864,29 @@
 
                         <!-- THÊM MÓN NHANH VÀO ĐƠN -->
                         <div style="background:#f8fafc; padding:12px; border-radius:var(--radius-sm); border:1px solid var(--border); margin-bottom:14px;">
-                            <label style="margin:0 0 4px 0;">➕ Gọi món cho bàn:</label>
+                            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
+                                <label style="margin:0; font-weight:700;">➕ Gọi món cho bàn:</label>
+                                <span id="dish-filter-count" style="font-size:11px; color:var(--text-muted);">19 món</span>
+                            </div>
+
+                            <!-- Ô TÌM KIẾM MÓN ĂN NHANH -->
+                            <div style="position:relative; margin-bottom:6px;">
+                                <input type="text" id="order-search-dish" 
+                                       placeholder="🔍 Gõ tìm nhanh món (vd: cơm, phở, bún, chè, trà...)" 
+                                       oninput="filterDishDropdown(this.value)" 
+                                       style="width:100%; padding:6px 28px 6px 10px; font-size:12px; border:1px solid #cbd5e1; border-radius:6px; background:#fff;">
+                                <span onclick="clearOrderDishSearch()" style="position:absolute; right:8px; top:6px; cursor:pointer; color:#94a3b8; font-size:12px; display:none;" id="btn-clear-dish-search">&times;</span>
+                            </div>
+
+                            <!-- DANH MỤC LỌC NHANH DẠNG PILLS -->
+                            <div style="display:flex; gap:4px; margin-bottom:8px; flex-wrap:wrap;">
+                                <button type="button" class="btn btn-secondary btn-sm active-cat-pill" id="cat-pill-0" style="font-size:10px; padding:2px 8px; border-radius:10px;" onclick="filterDishByCategory(0, this)">Tất cả</button>
+                                <button type="button" class="btn btn-secondary btn-sm" id="cat-pill-1" style="font-size:10px; padding:2px 8px; border-radius:10px;" onclick="filterDishByCategory(1, this)">Món chính</button>
+                                <button type="button" class="btn btn-secondary btn-sm" id="cat-pill-2" style="font-size:10px; padding:2px 8px; border-radius:10px;" onclick="filterDishByCategory(2, this)">Ăn vặt</button>
+                                <button type="button" class="btn btn-secondary btn-sm" id="cat-pill-3" style="font-size:10px; padding:2px 8px; border-radius:10px;" onclick="filterDishByCategory(3, this)">Nước uống</button>
+                                <button type="button" class="btn btn-secondary btn-sm" id="cat-pill-4" style="font-size:10px; padding:2px 8px; border-radius:10px;" onclick="filterDishByCategory(4, this)">Tráng miệng</button>
+                            </div>
+
                             <div style="display:flex; gap:6px;">
                                 <select id="select-food-to-order" style="flex:1;">
                                     <option value="">-- Chọn món ăn --</option>
@@ -891,6 +932,10 @@
                     <button class="btn btn-primary btn-sm" onclick="resetFoodForm()">➕ Thêm món</button>
                 </div>
 
+                <div id="menu-waiter-notice" style="display:none; background:#eff6ff; color:#1e40af; padding:8px 12px; border-radius:6px; font-size:12px; margin-bottom:12px; border:1px solid #bfdbfe;">
+                    ℹ️ Bạn đang đăng nhập quyền <strong>Phục vụ</strong>: Chỉ được xem thực đơn & đơn giá để tư vấn khách. Quyền tạo mới / chỉnh sửa món ăn dành cho <strong>Quản lý / Đầu bếp</strong>.
+                </div>
+
                 <!-- FORM THÊM / SỬA MÓN ĂN -->
                 <form id="food-form" onsubmit="saveFood(event)" style="background:#f8fafc; padding:14px; border-radius:var(--radius-sm); border:1px solid var(--border); margin-bottom:16px;">
                     <input type="hidden" id="food-id">
@@ -919,6 +964,14 @@
                         <button type="submit" class="btn btn-primary btn-sm" id="btn-save-food">💾 Lưu món ăn</button>
                     </div>
                 </form>
+
+                <!-- TÌM KIẾM MÓN ĂN TRONG BẢNG THỰC ĐƠN -->
+                <div style="margin-bottom:10px;">
+                    <input type="text" id="menu-table-search" 
+                           placeholder="🔍 Gõ tìm món trong thực đơn (vd: cơm, phở, bún, lẩu, nước...)" 
+                           oninput="renderFoodList(this.value)" 
+                           style="width:100%; padding:8px 12px; font-size:13px; border:1px solid var(--border); border-radius:var(--radius-sm); background:#fff;">
+                </div>
 
                 <!-- BẢNG DANH SÁCH MÓN ĂN -->
                 <div class="table-responsive" style="max-height:480px; overflow-y:auto;">
@@ -1557,6 +1610,88 @@
             userBadge.style.display = 'none';
             authActions.innerHTML = `<button class="btn btn-primary btn-sm" onclick="openLoginModal()">🔐 Đăng nhập</button>`;
         }
+
+        applyRolePermissions();
+    }
+
+    function applyRolePermissions() {
+        const role = currentUser ? (currentUser.vaiTro || '') : '';
+        const navTables = $('nav-btn-tables');
+        const navMenu = $('nav-btn-menu');
+        const navInventory = $('nav-btn-inventory');
+        const navCashier = $('nav-btn-cashier');
+        const hintIcon = $('role-hint-icon');
+        const hintText = $('role-hint-text');
+
+        if (role === 'ADMIN') {
+            if (navTables) navTables.style.display = 'inline-flex';
+            if (navMenu) navMenu.style.display = 'inline-flex';
+            if (navInventory) navInventory.style.display = 'inline-flex';
+            if (navCashier) navCashier.style.display = 'inline-flex';
+            if (hintIcon) hintIcon.textContent = '👑';
+            if (hintText) hintText.innerHTML = '<strong>ADMIN</strong> (Trần Văn Quản) — Toàn quyền truy cập tất cả các phân hệ: Bàn, Thực đơn, Kho, Thu ngân & Doanh thu';
+            setMenuEditingAllowed(true);
+        } else if (role === 'QUAN_LY') {
+            if (navTables) navTables.style.display = 'inline-flex';
+            if (navMenu) navMenu.style.display = 'inline-flex';
+            if (navInventory) navInventory.style.display = 'inline-flex';
+            if (navCashier) navCashier.style.display = 'inline-flex';
+            if (hintIcon) hintIcon.textContent = '👔';
+            if (hintText) hintText.innerHTML = '<strong>QUẢN LÝ</strong> (Lê Thị Lý) — Toàn quyền quản lý Bàn ăn, Thực đơn, Kho hàng, Thu ngân và Báo cáo Doanh thu';
+            setMenuEditingAllowed(true);
+        } else if (role === 'NHAN_VIEN_PHUC_VU') {
+            if (navTables) navTables.style.display = 'inline-flex';
+            if (navMenu) navMenu.style.display = 'inline-flex';
+            if (navInventory) navInventory.style.display = 'none'; // Ẩn Kho đối với Phục vụ
+            if (navCashier) navCashier.style.display = 'none';     // Ẩn Thu ngân & Doanh thu đối với Phục vụ
+            if (hintIcon) hintIcon.textContent = '🛎️';
+            if (hintText) hintText.innerHTML = '<strong>PHỤC VỤ BÀN</strong> (Nguyễn Văn Phục) — Được phép: Sơ đồ bàn, Mở bàn, Gọi món, Hủy món & Xem giá thực đơn. (Ẩn phân hệ Kho & Doanh thu)';
+            setMenuEditingAllowed(false);
+            if (currentTabName === 'inventory' || currentTabName === 'cashier') {
+                switchNav('tables', navTables);
+            }
+        } else if (role === 'DAU_BEP') {
+            if (navTables) navTables.style.display = 'none';       // Ẩn Sơ đồ bàn đối với Đầu bếp
+            if (navMenu) navMenu.style.display = 'inline-flex';
+            if (navInventory) navInventory.style.display = 'inline-flex';
+            if (navCashier) navCashier.style.display = 'none';     // Ẩn Thu ngân & Doanh thu đối với Đầu bếp
+            if (hintIcon) hintIcon.textContent = '🍳';
+            if (hintText) hintText.innerHTML = '<strong>ĐẦU BẾP / KHO</strong> (Phạm Thị Bếp) — Được phép: Thực đơn công thức, Quản lý Kho nguyên liệu & Lập phiếu nhập xuất. (Ẩn phân hệ Bàn & Doanh thu)';
+            setMenuEditingAllowed(true);
+            if (currentTabName === 'tables' || currentTabName === 'cashier') {
+                switchNav('menu', navMenu);
+            }
+        } else {
+            // Khách chưa đăng nhập
+            if (navTables) navTables.style.display = 'inline-flex';
+            if (navMenu) navMenu.style.display = 'inline-flex';
+            if (navInventory) navInventory.style.display = 'none';
+            if (navCashier) navCashier.style.display = 'none';
+            if (hintIcon) hintIcon.textContent = '👤';
+            if (hintText) hintText.innerHTML = '<strong>CHƯA ĐĂNG NHẬP</strong> — Chế độ khách: Xem sơ đồ bàn trống và thực đơn. Bấm Đăng nhập để sử dụng các quyền nghiệp vụ';
+            setMenuEditingAllowed(false);
+            if (currentTabName === 'inventory' || currentTabName === 'cashier') {
+                switchNav('tables', navTables);
+            }
+        }
+    }
+
+    function setMenuEditingAllowed(allowed) {
+        const foodForm = $('food-form');
+        const catForm = $('category-form');
+        const waiterNotice = $('menu-waiter-notice');
+        const btnResetFood = document.querySelector('#tab-menu button[onclick="resetFoodForm()"]');
+        const btnResetCat = document.querySelector('#tab-menu button[onclick="resetCategoryForm()"]');
+
+        if (waiterNotice) waiterNotice.style.display = allowed ? 'none' : 'block';
+        if (foodForm) foodForm.style.display = allowed ? 'block' : 'none';
+        if (catForm) catForm.style.display = allowed ? 'block' : 'none';
+        if (btnResetFood) btnResetFood.style.display = allowed ? 'inline-flex' : 'none';
+        if (btnResetCat) btnResetCat.style.display = allowed ? 'inline-flex' : 'none';
+
+        if (typeof renderFoodList === 'function') {
+            renderFoodList($('menu-table-search') ? $('menu-table-search').value : '');
+        }
     }
 
     function handleLogout() {
@@ -1591,11 +1726,22 @@
     // ─────────────────────────────────────────────────────────────
     let currentTabName = 'tables';
     function switchNav(tabName, btn) {
+        const role = currentUser ? (currentUser.vaiTro || '') : '';
+        if (tabName === 'inventory' && !['ADMIN', 'QUAN_LY', 'DAU_BEP'].includes(role)) {
+            showToast('Chỉ Quản lý và Đầu bếp mới có quyền truy cập Kho & Nguyên liệu!', 'error');
+            return;
+        }
+        if (tabName === 'cashier' && !['ADMIN', 'QUAN_LY'].includes(role)) {
+            showToast('Chỉ Quản lý và Admin mới có quyền xem Báo cáo doanh thu & Quỹ thu ngân!', 'error');
+            return;
+        }
+
         currentTabName = tabName;
         document.querySelectorAll('nav.main-nav button').forEach(b => b.classList.remove('active'));
         document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
 
-        btn.classList.add('active');
+        const targetBtn = btn || $('nav-btn-' + tabName);
+        if (targetBtn) targetBtn.classList.add('active');
         $('tab-' + tabName).classList.add('active');
 
         refreshCurrentTab();
@@ -1775,6 +1921,68 @@
         }
     }
 
+    function removeVietnameseTones(str) {
+        return (str || '')
+            .normalize('NFD')
+            .replace(/[\u0300-\u036f]/g, '')
+            .replace(/đ/g, 'd').replace(/Đ/g, 'D')
+            .toLowerCase();
+    }
+
+    let currentDishCategoryFilter = 0;
+    let currentDishSearchKeyword = '';
+
+    function filterDishByCategory(catId, btn) {
+        currentDishCategoryFilter = catId;
+        document.querySelectorAll('#order-active-state .active-cat-pill').forEach(b => b.classList.remove('active-cat-pill'));
+        if (btn) btn.classList.add('active-cat-pill');
+        populateDishSelect();
+    }
+
+    function filterDishDropdown(keyword) {
+        currentDishSearchKeyword = keyword || '';
+        const btnClear = $('btn-clear-dish-search');
+        if (btnClear) btnClear.style.display = currentDishSearchKeyword ? 'inline' : 'none';
+        populateDishSelect();
+    }
+
+    function clearOrderDishSearch() {
+        const inp = $('order-search-dish');
+        if (inp) inp.value = '';
+        currentDishSearchKeyword = '';
+        const btnClear = $('btn-clear-dish-search');
+        if (btnClear) btnClear.style.display = 'none';
+        populateDishSelect();
+    }
+
+    function populateDishSelect() {
+        const sel = $('select-food-to-order');
+        if (!sel) return;
+        const normalizedKw = removeVietnameseTones(currentDishSearchKeyword.trim());
+
+        const filtered = allDishes.filter(d => {
+            const catId = d.danhMuc ? (d.danhMuc.maDanhmuc || d.danhMuc.maDanhMuc) : (d.maDanhmuc || d.maDanhMuc || 0);
+            const matchCat = (currentDishCategoryFilter === 0) || (catId === currentDishCategoryFilter);
+            if (!matchCat) return false;
+            if (!normalizedKw) return true;
+            const normName = removeVietnameseTones(d.tenMon);
+            return normName.includes(normalizedKw);
+        });
+
+        const countEl = $('dish-filter-count');
+        if (countEl) countEl.textContent = `${filtered.length}/${allDishes.length} món`;
+
+        if (filtered.length === 0) {
+            sel.innerHTML = '<option value="">❌ Không tìm thấy món phù hợp</option>';
+        } else {
+            sel.innerHTML = '<option value="">-- Chọn món ăn (' + filtered.length + ' món) --</option>' +
+                filtered.map(d => `<option value="${d.maMon}">${escHtml(d.tenMon)} (${formatVND(d.gia)})</option>`).join('');
+            if (filtered.length === 1) {
+                sel.value = filtered[0].maMon;
+            }
+        }
+    }
+
     function renderOrderDetails(order) {
         $('order-empty-state').style.display = 'none';
         $('order-active-state').style.display = 'block';
@@ -1783,10 +1991,8 @@
         $('current-order-time').textContent = order.ngayDat ? new Date(order.ngayDat).toLocaleTimeString('vi-VN', {hour:'2-digit', minute:'2-digit'}) : '--:--';
         $('current-order-total').textContent = formatVND(order.tongTien);
 
-        // Fill Food select options
-        const sel = $('select-food-to-order');
-        sel.innerHTML = '<option value="">-- Chọn món ăn --</option>' + 
-            allDishes.map(d => `<option value="${d.maMon}">${escHtml(d.tenMon)} (${formatVND(d.gia)})</option>`).join('');
+        // Nạp danh sách món ăn vào dropdown có lọc tìm kiếm
+        populateDishSelect();
 
         // Render food items in order
         const itemsContainer = $('current-order-items');
@@ -1915,6 +2121,7 @@
             const data = await apiFetch('/api/mon-an');
             allDishes = Array.isArray(data) ? data : [];
             renderFoodList();
+            populateDishSelect();
         } catch (e) {
             allDishes = [];
             tbody.innerHTML = `
@@ -1930,7 +2137,7 @@
         }
     }
 
-    function renderFoodList() {
+    function renderFoodList(filterKw = '') {
         const tbody = $('food-list-tbody');
         if (!Array.isArray(allDishes) || allDishes.length === 0) {
             tbody.innerHTML = `
@@ -1946,7 +2153,22 @@
             return;
         }
 
-        tbody.innerHTML = allDishes.map(d => `
+        const normalizedKw = removeVietnameseTones((filterKw || '').trim());
+        const displayDishes = allDishes.filter(d => {
+            if (!normalizedKw) return true;
+            const normName = removeVietnameseTones(d.tenMon);
+            const normCat = removeVietnameseTones(d.danhMuc ? d.danhMuc.tenDanhmuc : '');
+            return normName.includes(normalizedKw) || normCat.includes(normalizedKw);
+        });
+
+        if (displayDishes.length === 0) {
+            tbody.innerHTML = `<tr><td colspan="4" style="text-align:center; padding:24px; color:var(--text-muted);">❌ Không tìm thấy món ăn nào khớp với từ khóa "${escHtml(filterKw)}"</td></tr>`;
+            return;
+        }
+
+        const isChefOrAdmin = currentUser && ['ADMIN', 'QUAN_LY', 'DAU_BEP'].includes(currentUser.vaiTro);
+
+        tbody.innerHTML = displayDishes.map(d => `
             <tr>
                 <td>
                     <strong>${escHtml(d.tenMon)}</strong>
@@ -1955,8 +2177,10 @@
                 <td><span class="badge badge-info">${escHtml(d.danhMuc ? d.danhMuc.tenDanhmuc : 'Chưa phân loại')}</span></td>
                 <td style="font-weight:700; color:var(--primary);">${formatVND(d.gia)}</td>
                 <td>
-                    <button class="btn btn-secondary btn-sm" onclick="editFood(${d.maMon})">✏️</button>
-                    <button class="btn btn-danger btn-sm" onclick="deleteFood(${d.maMon})">🗑️</button>
+                    ${isChefOrAdmin ? `
+                    <button class="btn btn-secondary btn-sm food-action-btn" onclick="editFood(${d.maMon})">✏️</button>
+                    <button class="btn btn-danger btn-sm food-action-btn" onclick="deleteFood(${d.maMon})">🗑️</button>
+                    ` : '<span style="color:var(--text-muted); font-size:11px;">👁️ Chỉ xem</span>'}
                 </td>
             </tr>
         `).join('');
