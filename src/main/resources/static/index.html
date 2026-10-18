@@ -260,6 +260,111 @@
         .btn-danger { background: var(--danger); color: white; }
         .btn-danger:hover { background: #dc2626; }
         .btn-sm { padding: 4px 8px; font-size: 12px; }
+        .btn:disabled, .btn[disabled] {
+            opacity: 0.65;
+            cursor: not-allowed !important;
+            filter: grayscale(20%);
+        }
+
+        /* ─────────────────────────────────────────────────────────────
+           4 TRẠNG THÁI GIAO DIỆN CHUẨN HITC (SLIDE 9 & SLIDE 14)
+           1. LOADING: Skeleton / Spinner
+           2. EMPTY: Không có dữ liệu + Hướng dẫn hành động tiếp theo
+           3. ERROR: Thông báo + Nút Retry (Thử lại)
+           4. SUCCESS: Hiển thị nội dung chính
+        ───────────────────────────────────────────────────────────── */
+        .spinner {
+            display: inline-block;
+            width: 22px;
+            height: 22px;
+            border: 3px solid rgba(0, 0, 0, 0.08);
+            border-radius: 50%;
+            border-top-color: var(--primary);
+            animation: spin 0.8s linear infinite;
+        }
+        .spinner-sm {
+            width: 14px;
+            height: 14px;
+            border-width: 2px;
+        }
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .ui-loading-box {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 36px 16px;
+            color: var(--text-muted);
+            gap: 12px;
+            font-size: 13px;
+            font-weight: 500;
+        }
+
+        /* 2. EMPTY STATE (SLIDE 9) */
+        .ui-empty-box {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 36px 20px;
+            text-align: center;
+            color: var(--text-muted);
+            background: #f8fafc;
+            border-radius: var(--radius-md);
+            border: 1px dashed var(--border);
+            margin: 8px 0;
+        }
+        .ui-empty-box .empty-icon {
+            font-size: 38px;
+            margin-bottom: 8px;
+            line-height: 1;
+        }
+        .ui-empty-box .empty-title {
+            font-size: 15px;
+            font-weight: 700;
+            color: var(--text-main);
+            margin-bottom: 4px;
+        }
+        .ui-empty-box .empty-desc {
+            font-size: 13px;
+            color: var(--text-muted);
+            margin-bottom: 14px;
+            max-width: 420px;
+        }
+
+        /* 3. ERROR STATE (SLIDE 9: Thông báo + Retry) */
+        .ui-error-box {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 24px 20px;
+            text-align: center;
+            background: #fef2f2;
+            border: 1px solid #fecaca;
+            border-radius: var(--radius-md);
+            margin: 8px 0;
+            color: #991b1b;
+        }
+        .ui-error-box .error-icon {
+            font-size: 32px;
+            margin-bottom: 6px;
+        }
+        .ui-error-box .error-title {
+            font-size: 14px;
+            font-weight: 700;
+            margin-bottom: 4px;
+        }
+        .ui-error-box .error-desc {
+            font-size: 12px;
+            color: #b91c1c;
+            margin-bottom: 12px;
+            max-width: 480px;
+            word-break: break-word;
+        }
 
         input, select, textarea {
             width: 100%;
@@ -364,8 +469,37 @@
             .grid-3 { grid-template-columns: 1fr; }
             .grid-4 { grid-template-columns: repeat(2, 1fr); }
         }
-        @media (max-width: 640px) {
-            .grid-2, .grid-4 { grid-template-columns: 1fr; }
+        @media (max-width: 768px) {
+            header {
+                flex-direction: column;
+                align-items: flex-start;
+                padding: 12px 16px;
+                gap: 12px;
+            }
+            .header-user-bar {
+                width: 100%;
+                justify-content: space-between;
+            }
+            nav.main-nav {
+                padding: 0 12px;
+            }
+            nav.main-nav button {
+                padding: 10px 12px;
+                font-size: 13px;
+            }
+            main {
+                padding: 14px;
+            }
+            .grid-2, .grid-3, .grid-4, .grid-table-order {
+                grid-template-columns: 1fr !important;
+            }
+            .table-grid {
+                grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+            }
+            .modal-dialog {
+                width: 95%;
+                margin: 10px;
+            }
         }
 
         /* MODULE 1: BAN AN & GOI MON */
@@ -1349,9 +1483,16 @@
 
     async function handleManualLogin(e) {
         e.preventDefault();
+        const btn = e.target.querySelector('button[type="submit"]');
+        const oldText = btn ? btn.textContent : '';
+        if (btn) { btn.disabled = true; btn.textContent = '⏳ Đang xác thực...'; }
         const u = $('login-username').value.trim();
         const p = $('login-password').value.trim();
-        await quickLogin(u, p);
+        try {
+            await quickLogin(u, p);
+        } finally {
+            if (btn) { btn.disabled = false; btn.textContent = oldText; }
+        }
     }
 
     function updateUserHeader() {
@@ -1424,17 +1565,25 @@
     let tableFilter = 'ALL';
 
     async function loadTables() {
+        const container = $('tables-container');
+        container.innerHTML = `
+            <div class="ui-loading-box" style="grid-column: 1 / -1;">
+                <div class="spinner"></div>
+                <span>Đang tải sơ đồ bàn ăn...</span>
+            </div>
+        `;
         try {
             const data = await apiFetch('/api/ban-an');
             allTables = Array.isArray(data) ? data : [];
             renderTableGrid();
         } catch (e) {
             allTables = [];
-            $('tables-container').innerHTML = `
-                <div style="background:#fee2e2; border:1px solid #ef4444; border-radius:8px; padding:16px; color:#991b1b; grid-column:1/-1;">
-                    <div style="font-weight:700; margin-bottom:8px;">⚠️ Lỗi tải danh sách bàn: ${escHtml(e.message)}</div>
-                    <p style="font-size:13px; margin-bottom:12px;">Phiên đăng nhập của bạn có thể đã hết hạn. Vui lòng bấm bên dưới để tự động cấp lại Token.</p>
-                    <button class="btn btn-primary btn-sm" onclick="quickLogin('admin', '123456')">🔑 Đăng nhập nhanh với quyền Admin</button>
+            container.innerHTML = `
+                <div class="ui-error-box" style="grid-column: 1 / -1;">
+                    <div class="error-icon">⚠️</div>
+                    <div class="error-title">Lỗi kết nối khi tải sơ đồ bàn</div>
+                    <div class="error-desc">${escHtml(e.message)}</div>
+                    <button class="btn btn-secondary btn-sm" onclick="loadTables()">🔄 Thử lại (Retry)</button>
                 </div>
             `;
         }
@@ -1448,6 +1597,7 @@
     }
 
     function renderTableGrid() {
+        const container = $('tables-container');
         if (!Array.isArray(allTables)) allTables = [];
         const total = allTables.length;
         const emptyCount = allTables.filter(t => t.trangThai === 'TRONG').length;
@@ -1457,6 +1607,18 @@
         $('count-empty-tables').textContent = emptyCount;
         $('count-busy-tables').textContent = busyCount;
 
+        if (total === 0) {
+            container.innerHTML = `
+                <div class="ui-empty-box" style="grid-column: 1 / -1;">
+                    <div class="empty-icon">🪑</div>
+                    <div class="empty-title">Chưa có bàn ăn nào trong sơ đồ</div>
+                    <div class="empty-desc">Nhấn vào nút bên dưới để thêm bàn ăn đầu tiên cho quán.</div>
+                    <button class="btn btn-primary btn-sm" onclick="openAddTableModal()">➕ Thêm bàn mới</button>
+                </div>
+            `;
+            return;
+        }
+
         const filtered = allTables.filter(t => {
             if (tableFilter === 'TRONG') return t.trangThai === 'TRONG';
             if (tableFilter === 'CO_KHACH') return t.trangThai === 'CO_KHACH';
@@ -1464,7 +1626,14 @@
         });
 
         if (filtered.length === 0) {
-            $('tables-container').innerHTML = '<p style="color:var(--text-muted); grid-column:1/-1;">Không có bàn nào phù hợp.</p>';
+            container.innerHTML = `
+                <div class="ui-empty-box" style="grid-column: 1 / -1;">
+                    <div class="empty-icon">🔍</div>
+                    <div class="empty-title">Không tìm thấy bàn nào</div>
+                    <div class="empty-desc">Không có bàn ăn nào ở trạng thái "${tableFilter === 'TRONG' ? 'Trống' : 'Có khách'}".</div>
+                    <button class="btn btn-secondary btn-sm" onclick="filterTables('ALL', document.querySelector('.filter-group button'))">👉 Xem tất cả bàn</button>
+                </div>
+            `;
             return;
         }
 
@@ -1612,6 +1781,10 @@
             return;
         }
 
+        const btn = document.querySelector('#order-active-state button.btn-primary');
+        const oldText = btn ? btn.textContent : '';
+        if (btn) { btn.disabled = true; btn.textContent = '⏳ Thêm...'; }
+
         try {
             await apiFetch('/api/don-hang/them-mon', {
                 method: 'POST',
@@ -1627,6 +1800,8 @@
                 return;
             }
             showToast('Lỗi thêm món: ' + e.message, 'error');
+        } finally {
+            if (btn) { btn.disabled = false; btn.textContent = oldText; }
         }
     }
 
@@ -1698,6 +1873,10 @@
             openLoginModal();
             return;
         }
+        const btn = e.target.querySelector('button[type="submit"]');
+        const oldText = btn ? btn.textContent : '';
+        if (btn) { btn.disabled = true; btn.textContent = '⏳ Đang lưu bàn...'; }
+
         const tenBan = $('new-table-name').value.trim();
         const sucChua = Number($('new-table-capacity').value) || 4;
 
@@ -1712,6 +1891,8 @@
             await loadTables();
         } catch (e) {
             showToast('Lỗi thêm bàn: ' + e.message, 'error');
+        } finally {
+            if (btn) { btn.disabled = false; btn.textContent = oldText; }
         }
     }
 
@@ -1719,20 +1900,40 @@
     // TAB 2: THỰC ĐƠN & DANH MỤC (NGUYỄN XUÂN QUÝ)
     // ─────────────────────────────────────────────────────────────
     async function loadDishes() {
+        const tbody = $('food-list-tbody');
+        tbody.innerHTML = `<tr><td colspan="4"><div class="ui-loading-box"><div class="spinner"></div><span>Đang tải danh sách món ăn...</span></div></td></tr>`;
         try {
             const data = await apiFetch('/api/mon-an');
             allDishes = Array.isArray(data) ? data : [];
             renderFoodList();
         } catch (e) {
             allDishes = [];
-            $('food-list-tbody').innerHTML = `<tr><td colspan="4" class="err">${escHtml(e.message)}</td></tr>`;
+            tbody.innerHTML = `
+                <tr><td colspan="4">
+                    <div class="ui-error-box">
+                        <div class="error-icon">⚠️</div>
+                        <div class="error-title">Lỗi tải danh sách món ăn</div>
+                        <div class="error-desc">${escHtml(e.message)}</div>
+                        <button class="btn btn-secondary btn-sm" onclick="loadDishes()">🔄 Thử lại (Retry)</button>
+                    </div>
+                </td></tr>
+            `;
         }
     }
 
     function renderFoodList() {
         const tbody = $('food-list-tbody');
         if (!Array.isArray(allDishes) || allDishes.length === 0) {
-            tbody.innerHTML = '<tr><td colspan="4" style="text-align:center; color:var(--text-muted);">Chưa có món ăn nào.</td></tr>';
+            tbody.innerHTML = `
+                <tr><td colspan="4">
+                    <div class="ui-empty-box">
+                        <div class="empty-icon">🍽️</div>
+                        <div class="empty-title">Thực đơn chưa có món ăn nào</div>
+                        <div class="empty-desc">Sử dụng form bên trái để thêm món ăn đầu tiên vào thực đơn.</div>
+                        <button class="btn btn-primary btn-sm" onclick="$('food-name').focus()">➕ Nhập món ngay</button>
+                    </div>
+                </td></tr>
+            `;
             return;
         }
 
@@ -1759,6 +1960,10 @@
             openLoginModal();
             return;
         }
+        const btn = $('btn-save-food');
+        const oldText = btn ? btn.textContent : '';
+        if (btn) { btn.disabled = true; btn.textContent = '⏳ Đang lưu món...'; }
+
         const id = $('food-id').value;
         const body = {
             tenMon: $('food-name').value.trim(),
@@ -1777,6 +1982,8 @@
             await loadDishes();
         } catch (e) {
             showToast('Lỗi lưu món: ' + e.message, 'error');
+        } finally {
+            if (btn) { btn.disabled = false; btn.textContent = oldText; }
         }
     }
 
@@ -1815,6 +2022,8 @@
 
     // CATEGORY CRUD
     async function loadCategories() {
+        const tbody = $('category-list-tbody');
+        tbody.innerHTML = `<tr><td colspan="4"><div class="ui-loading-box"><div class="spinner"></div><span>Đang tải danh mục...</span></div></td></tr>`;
         try {
             const data = await apiFetch('/api/danh-muc-mon-an');
             allCategories = Array.isArray(data) ? data : [];
@@ -1822,7 +2031,16 @@
             renderCategoryDropdown();
         } catch (e) {
             allCategories = [];
-            $('category-list-tbody').innerHTML = `<tr><td colspan="4" class="err">${escHtml(e.message)}</td></tr>`;
+            tbody.innerHTML = `
+                <tr><td colspan="4">
+                    <div class="ui-error-box">
+                        <div class="error-icon">⚠️</div>
+                        <div class="error-title">Lỗi tải danh mục món</div>
+                        <div class="error-desc">${escHtml(e.message)}</div>
+                        <button class="btn btn-secondary btn-sm" onclick="loadCategories()">🔄 Thử lại (Retry)</button>
+                    </div>
+                </td></tr>
+            `;
         }
     }
 
@@ -1835,7 +2053,16 @@
     function renderCategoryList() {
         const tbody = $('category-list-tbody');
         if (!Array.isArray(allCategories) || allCategories.length === 0) {
-            tbody.innerHTML = '<tr><td colspan="4" style="text-align:center; color:var(--text-muted);">Chưa có danh mục nào.</td></tr>';
+            tbody.innerHTML = `
+                <tr><td colspan="4">
+                    <div class="ui-empty-box">
+                        <div class="empty-icon">📂</div>
+                        <div class="empty-title">Chưa có danh mục nào</div>
+                        <div class="empty-desc">Điền thông tin vào form bên dưới để tạo danh mục phân loại món ăn.</div>
+                        <button class="btn btn-primary btn-sm" onclick="$('cat-name-input').focus()">➕ Thêm danh mục</button>
+                    </div>
+                </td></tr>
+            `;
             return;
         }
 
@@ -1859,6 +2086,10 @@
             openLoginModal();
             return;
         }
+        const btn = $('btn-save-cat');
+        const oldText = btn ? btn.textContent : '';
+        if (btn) { btn.disabled = true; btn.textContent = '⏳ Đang lưu...'; }
+
         const id = $('cat-id').value;
         const body = {
             tenDanhmuc: $('cat-name-input').value.trim(),
@@ -1875,6 +2106,8 @@
             await loadCategories();
         } catch (e) {
             showToast('Lỗi lưu danh mục: ' + e.message, 'error');
+        } finally {
+            if (btn) { btn.disabled = false; btn.textContent = oldText; }
         }
     }
 
@@ -1913,6 +2146,8 @@
     // TAB 3: QUẢN LÝ KHO & NGUYÊN LIỆU (NGUYỄN NGỌC MINH THƯ)
     // ─────────────────────────────────────────────────────────────
     async function loadInventoryReport() {
+        const tbody = $('inventory-tbody');
+        tbody.innerHTML = `<tr><td colspan="7"><div class="ui-loading-box"><div class="spinner"></div><span>Đang kiểm kê dữ liệu tồn kho...</span></div></td></tr>`;
         try {
             const data = await apiFetch('/api/nguyen-lieu/bao-cao-ton-kho');
             allIngredients = Array.isArray(data) ? data : [];
@@ -1920,7 +2155,16 @@
             await loadInventoryStats();
         } catch (e) {
             allIngredients = [];
-            $('inventory-tbody').innerHTML = `<tr><td colspan="7" class="err">${escHtml(e.message)}</td></tr>`;
+            tbody.innerHTML = `
+                <tr><td colspan="7">
+                    <div class="ui-error-box">
+                        <div class="error-icon">⚠️</div>
+                        <div class="error-title">Lỗi tải dữ liệu tồn kho</div>
+                        <div class="error-desc">${escHtml(e.message)}</div>
+                        <button class="btn btn-secondary btn-sm" onclick="loadInventoryReport()">🔄 Thử lại (Retry)</button>
+                    </div>
+                </td></tr>
+            `;
         }
     }
 
@@ -1945,7 +2189,16 @@
         $('kpi-out-of-stock').textContent = outCount;
 
         if (total === 0) {
-            tbody.innerHTML = '<tr><td colspan="7" style="text-align:center; color:var(--text-muted);">Chưa có nguyên liệu nào trong kho.</td></tr>';
+            tbody.innerHTML = `
+                <tr><td colspan="7">
+                    <div class="ui-empty-box">
+                        <div class="empty-icon">📦</div>
+                        <div class="empty-title">Kho chưa có nguyên liệu nào</div>
+                        <div class="empty-desc">Lập phiếu nhập kho ở form bên trái để đưa nguyên liệu vào hệ thống.</div>
+                        <button class="btn btn-primary btn-sm" onclick="$('movement-ingredient').focus()">➕ Nhập kho ngay</button>
+                    </div>
+                </td></tr>
+            `;
             return;
         }
 
@@ -2012,6 +2265,10 @@
             openLoginModal();
             return;
         }
+        const btn = e.target.querySelector('button[type="submit"]');
+        const oldText = btn ? btn.textContent : '';
+        if (btn) { btn.disabled = true; btn.textContent = '⏳ Đang lập phiếu...'; }
+
         const type = $('stock-movement-form')['movement-type'].value;
         const nlId = Number($('movement-ingredient').value);
         const qty = Number($('movement-qty').value);
@@ -2021,6 +2278,7 @@
 
         if (!nlId || !qty) {
             showToast('Vui lòng chọn nguyên liệu và số lượng hợp lệ!', 'error');
+            if (btn) { btn.disabled = false; btn.textContent = oldText; }
             return;
         }
 
@@ -2046,6 +2304,8 @@
             await loadInventoryReport();
         } catch (e) {
             showToast('Lỗi lập phiếu: ' + e.message, 'error');
+        } finally {
+            if (btn) { btn.disabled = false; btn.textContent = oldText; }
         }
     }
 
@@ -2055,13 +2315,23 @@
     let pendingOrdersList = [];
 
     async function loadPendingOrders() {
+        const tbody = $('pending-orders-tbody');
+        tbody.innerHTML = `<tr><td colspan="5"><div class="ui-loading-box"><div class="spinner"></div><span>Đang tìm đơn hàng chờ thanh toán...</span></div></td></tr>`;
         try {
             const data = await apiFetch('/api/don-hang/trang-thai/CHUA_THANH_TOAN');
             pendingOrdersList = Array.isArray(data) ? data : [];
-            const tbody = $('pending-orders-tbody');
 
             if (pendingOrdersList.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="5" style="text-align:center; color:var(--text-muted);">Không có đơn hàng nào chờ thanh toán.</td></tr>';
+                tbody.innerHTML = `
+                    <tr><td colspan="5">
+                        <div class="ui-empty-box">
+                            <div class="empty-icon">🧾</div>
+                            <div class="empty-title">Không có đơn hàng nào chờ thanh toán</div>
+                            <div class="empty-desc">Tất cả bàn ăn đã hoàn tất thanh toán hoặc chưa có khách gọi món.</div>
+                            <button class="btn btn-secondary btn-sm" onclick="switchTab('tables', document.querySelectorAll('nav.main-nav button')[0])">👉 Xem sơ đồ bàn ăn</button>
+                        </div>
+                    </td></tr>
+                `;
                 return;
             }
 
@@ -2078,18 +2348,36 @@
             `).join('');
         } catch (e) {
             pendingOrdersList = [];
-            $('pending-orders-tbody').innerHTML = `<tr><td colspan="5" class="err">${escHtml(e.message)}</td></tr>`;
+            tbody.innerHTML = `
+                <tr><td colspan="5">
+                    <div class="ui-error-box">
+                        <div class="error-icon">⚠️</div>
+                        <div class="error-title">Lỗi tải danh sách đơn chờ thanh toán</div>
+                        <div class="error-desc">${escHtml(e.message)}</div>
+                        <button class="btn btn-secondary btn-sm" onclick="loadPendingOrders()">🔄 Thử lại (Retry)</button>
+                    </div>
+                </td></tr>
+            `;
         }
     }
 
     async function loadRecentPayments() {
+        const tbody = $('recent-payments-tbody');
+        tbody.innerHTML = `<tr><td colspan="5"><div class="ui-loading-box"><div class="spinner"></div><span>Đang tải lịch sử giao dịch...</span></div></td></tr>`;
         try {
             const res = await apiFetch('/api/thanh-toan');
             const list = Array.isArray(res) ? res : [];
-            const tbody = $('recent-payments-tbody');
 
             if (list.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="5" style="text-align:center; color:var(--text-muted);">Chưa có giao dịch thanh toán nào.</td></tr>';
+                tbody.innerHTML = `
+                    <tr><td colspan="5">
+                        <div class="ui-empty-box">
+                            <div class="empty-icon">💳</div>
+                            <div class="empty-title">Chưa có giao dịch thanh toán nào</div>
+                            <div class="empty-desc">Các giao dịch thanh toán thành công sẽ được ghi nhận và hiển thị tại đây.</div>
+                        </div>
+                    </td></tr>
+                `;
                 return;
             }
 
@@ -2112,7 +2400,16 @@
                 `;
             }).join('');
         } catch (e) {
-            $('recent-payments-tbody').innerHTML = `<tr><td colspan="5" class="err">${escHtml(e.message)}</td></tr>`;
+            tbody.innerHTML = `
+                <tr><td colspan="5">
+                    <div class="ui-error-box">
+                        <div class="error-icon">⚠️</div>
+                        <div class="error-title">Lỗi tải lịch sử giao dịch</div>
+                        <div class="error-desc">${escHtml(e.message)}</div>
+                        <button class="btn btn-secondary btn-sm" onclick="loadRecentPayments()">🔄 Thử lại (Retry)</button>
+                    </div>
+                </td></tr>
+            `;
         }
     }
 
@@ -2193,6 +2490,10 @@
         if (!currentPayingOrder) return;
         const maDon = currentPayingOrder.maDon;
 
+        const btn = document.querySelector('#payment-modal .modal-footer .btn-success');
+        const oldText = btn ? btn.textContent : '';
+        if (btn) { btn.disabled = true; btn.textContent = '⏳ Đang thanh toán...'; }
+
         try {
             const payResult = await apiFetch('/api/thanh-toan/thuc-hien', {
                 method: 'POST',
@@ -2218,6 +2519,8 @@
             await loadDailyRevenue();
         } catch (e) {
             showToast('Lỗi thanh toán: ' + e.message, 'error');
+        } finally {
+            if (btn) { btn.disabled = false; btn.textContent = oldText; }
         }
     }
 
