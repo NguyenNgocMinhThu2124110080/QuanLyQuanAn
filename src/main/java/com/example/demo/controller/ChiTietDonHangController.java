@@ -2,7 +2,6 @@ package com.example.demo.controller;
 
 import com.example.demo.entity.ChiTietDonHang;
 import com.example.demo.repository.ChiTietDonHangRepository;
-import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -12,10 +11,13 @@ import java.util.List;
 // Buổi 3: Quản lý Chi tiết Đơn hàng
 @RestController
 @RequestMapping("/api/chi-tiet-don-hang")
-@RequiredArgsConstructor
 public class ChiTietDonHangController {
 
     private final ChiTietDonHangRepository repository;
+
+    public ChiTietDonHangController(ChiTietDonHangRepository repository) {
+        this.repository = repository;
+    }
 
     @GetMapping("/don-hang/{maDon}")
     public List<ChiTietDonHang> layTheoDonHang(@PathVariable Integer maDon) {

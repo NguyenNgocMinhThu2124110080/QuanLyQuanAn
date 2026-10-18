@@ -10,7 +10,6 @@ import com.example.demo.repository.BanAnRepository;
 import com.example.demo.repository.DonHangRepository;
 import com.example.demo.repository.NhanVienRepository;
 import com.example.demo.repository.ThanhToanRepository;
-import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -23,13 +22,22 @@ import java.util.List;
 // PHẦN CỦA: ĐẶNG VŨ THANH PHÁT
 // Buổi 4: Nghiệp vụ Thanh toán Hoá đơn, Giải phóng Bàn & Thống kê Doanh thu
 @Service
-@RequiredArgsConstructor
 public class ThanhToanService {
 
     private final ThanhToanRepository thanhToanRepository;
     private final DonHangRepository donHangRepository;
     private final NhanVienRepository nhanVienRepository;
     private final BanAnRepository banAnRepository;
+
+    public ThanhToanService(ThanhToanRepository thanhToanRepository,
+                            DonHangRepository donHangRepository,
+                            NhanVienRepository nhanVienRepository,
+                            BanAnRepository banAnRepository) {
+        this.thanhToanRepository = thanhToanRepository;
+        this.donHangRepository = donHangRepository;
+        this.nhanVienRepository = nhanVienRepository;
+        this.banAnRepository = banAnRepository;
+    }
 
     /**
      * Thực hiện thanh toán đơn hàng:

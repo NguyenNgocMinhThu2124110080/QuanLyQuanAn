@@ -4,7 +4,6 @@ import com.example.demo.dto.ThanhToanRequest;
 import com.example.demo.entity.ThanhToan;
 import com.example.demo.repository.ThanhToanRepository;
 import com.example.demo.service.ThanhToanService;
-import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -14,11 +13,15 @@ import java.util.List;
 // Buổi 3: API Quy trình Thanh toán Hoá đơn & Thu tiền
 @RestController
 @RequestMapping("/api/thanh-toan")
-@RequiredArgsConstructor
 public class ThanhToanController {
 
     private final ThanhToanRepository thanhToanRepository;
     private final ThanhToanService thanhToanService;
+
+    public ThanhToanController(ThanhToanRepository thanhToanRepository, ThanhToanService thanhToanService) {
+        this.thanhToanRepository = thanhToanRepository;
+        this.thanhToanService = thanhToanService;
+    }
 
     @PostMapping("/thuc-hien")
     public ResponseEntity<?> thucHienThanhToan(@RequestBody ThanhToanRequest request) {

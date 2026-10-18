@@ -4,7 +4,6 @@ import com.example.demo.dto.TaoNhanVienRequest;
 import com.example.demo.entity.NhanVien;
 import com.example.demo.repository.NhanVienRepository;
 import com.example.demo.service.NhanVienService;
-import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -15,11 +14,15 @@ import java.util.List;
 // Buổi 3: API Quản lý Nhân sự & Tạo nhân viên trọn gói
 @RestController
 @RequestMapping("/api/nhan-vien")
-@RequiredArgsConstructor
 public class NhanVienController {
 
     private final NhanVienRepository nhanVienRepository;
     private final NhanVienService nhanVienService;
+
+    public NhanVienController(NhanVienRepository nhanVienRepository, NhanVienService nhanVienService) {
+        this.nhanVienRepository = nhanVienRepository;
+        this.nhanVienService = nhanVienService;
+    }
 
     @PostMapping("/tao-tron-goi")
     public ResponseEntity<?> taoTronGoi(@RequestBody TaoNhanVienRequest request) {

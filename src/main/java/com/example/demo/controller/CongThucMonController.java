@@ -3,7 +3,6 @@ package com.example.demo.controller;
 import com.example.demo.entity.CongThucMon;
 import com.example.demo.entity.CongThucMonId;
 import com.example.demo.repository.CongThucMonRepository;
-import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -13,10 +12,13 @@ import java.util.List;
 // Buổi 3: Quản lý Công thức & Định lượng nguyên liệu cho từng Món ăn
 @RestController
 @RequestMapping("/api/cong-thuc-mon")
-@RequiredArgsConstructor
 public class CongThucMonController {
 
     private final CongThucMonRepository repository;
+
+    public CongThucMonController(CongThucMonRepository repository) {
+        this.repository = repository;
+    }
 
     @GetMapping
     public List<CongThucMon> getAll() {

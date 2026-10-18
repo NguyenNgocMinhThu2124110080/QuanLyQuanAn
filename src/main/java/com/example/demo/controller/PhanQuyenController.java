@@ -2,7 +2,6 @@ package com.example.demo.controller;
 
 import com.example.demo.entity.PhanQuyen;
 import com.example.demo.repository.PhanQuyenRepository;
-import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -12,10 +11,13 @@ import java.util.List;
 // Buổi 3: Quản lý Phân quyền hệ thống
 @RestController
 @RequestMapping("/api/phan-quyen")
-@RequiredArgsConstructor
 public class PhanQuyenController {
 
     private final PhanQuyenRepository repository;
+
+    public PhanQuyenController(PhanQuyenRepository repository) {
+        this.repository = repository;
+    }
 
     @GetMapping
     public List<PhanQuyen> getAll() {

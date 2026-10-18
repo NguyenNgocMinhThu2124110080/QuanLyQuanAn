@@ -2,7 +2,6 @@ package com.example.demo.security;
 
 import com.example.demo.entity.TaiKhoan;
 import com.example.demo.repository.TaiKhoanRepository;
-import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -15,10 +14,13 @@ import java.util.Collections;
 // PHẦN CỦA: ĐẶNG VŨ THANH PHÁT
 // Buổi 4: Load thông tin người dùng và quyền hạn từ Database cho Spring Security
 @Service
-@RequiredArgsConstructor
 public class CustomUserDetailsService implements UserDetailsService {
 
     private final TaiKhoanRepository taiKhoanRepository;
+
+    public CustomUserDetailsService(TaiKhoanRepository taiKhoanRepository) {
+        this.taiKhoanRepository = taiKhoanRepository;
+    }
 
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {

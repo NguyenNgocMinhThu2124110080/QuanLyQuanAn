@@ -4,7 +4,6 @@ import com.example.demo.dto.NguyenLieuTonKhoResponse;
 import com.example.demo.entity.NguyenLieu;
 import com.example.demo.repository.NguyenLieuRepository;
 import com.example.demo.service.KhoService;
-import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -14,11 +13,15 @@ import java.util.List;
 // Buổi 3: API Quản lý Nguyên liệu & Báo cáo Tồn kho cảnh báo
 @RestController
 @RequestMapping("/api/nguyen-lieu")
-@RequiredArgsConstructor
 public class NguyenLieuController {
 
     private final NguyenLieuRepository nguyenLieuRepository;
     private final KhoService khoService;
+
+    public NguyenLieuController(NguyenLieuRepository nguyenLieuRepository, KhoService khoService) {
+        this.nguyenLieuRepository = nguyenLieuRepository;
+        this.khoService = khoService;
+    }
 
     @GetMapping("/bao-cao-ton-kho")
     public List<NguyenLieuTonKhoResponse> layBaoCaoTonKho() {

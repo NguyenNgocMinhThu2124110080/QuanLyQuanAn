@@ -2,7 +2,6 @@ package com.example.demo.controller;
 
 import com.example.demo.entity.NguoiDung;
 import com.example.demo.repository.NguoiDungRepository;
-import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -12,10 +11,13 @@ import java.util.List;
 // Buổi 3: Quản lý Thông tin Người dùng
 @RestController
 @RequestMapping("/api/nguoi-dung")
-@RequiredArgsConstructor
 public class NguoiDungController {
 
     private final NguoiDungRepository repository;
+
+    public NguoiDungController(NguoiDungRepository repository) {
+        this.repository = repository;
+    }
 
     @GetMapping
     public List<NguoiDung> getAll() {

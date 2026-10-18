@@ -9,7 +9,6 @@ import com.example.demo.repository.NguoiDungRepository;
 import com.example.demo.repository.NhanVienRepository;
 import com.example.demo.repository.PhanQuyenRepository;
 import com.example.demo.repository.TaiKhoanRepository;
-import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -21,7 +20,6 @@ import java.util.Optional;
 // PHẦN CỦA: ĐẶNG VŨ THANH PHÁT
 // Buổi 3: Nghiệp vụ Quản lý Hồ sơ Nhân sự & Phân quyền
 @Service
-@RequiredArgsConstructor
 public class NhanVienService {
 
     private final NhanVienRepository nhanVienRepository;
@@ -29,6 +27,18 @@ public class NhanVienService {
     private final TaiKhoanRepository taiKhoanRepository;
     private final PhanQuyenRepository phanQuyenRepository;
     private final org.springframework.security.crypto.password.PasswordEncoder passwordEncoder;
+
+    public NhanVienService(NhanVienRepository nhanVienRepository,
+                           NguoiDungRepository nguoiDungRepository,
+                           TaiKhoanRepository taiKhoanRepository,
+                           PhanQuyenRepository phanQuyenRepository,
+                           org.springframework.security.crypto.password.PasswordEncoder passwordEncoder) {
+        this.nhanVienRepository = nhanVienRepository;
+        this.nguoiDungRepository = nguoiDungRepository;
+        this.taiKhoanRepository = taiKhoanRepository;
+        this.phanQuyenRepository = phanQuyenRepository;
+        this.passwordEncoder = passwordEncoder;
+    }
 
     /**
      * Tạo mới một nhân viên trọn gói (gồm Tài khoản -> Người dùng -> Hồ sơ nhân viên)

@@ -2,7 +2,6 @@ package com.example.demo.controller;
 
 import com.example.demo.entity.NhaCungCap;
 import com.example.demo.repository.NhaCungCapRepository;
-import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -12,10 +11,13 @@ import java.util.List;
 // Buổi 3: Quản lý Danh mục Nhà Cung Cấp
 @RestController
 @RequestMapping("/api/nha-cung-cap")
-@RequiredArgsConstructor
 public class NhaCungCapController {
 
     private final NhaCungCapRepository repository;
+
+    public NhaCungCapController(NhaCungCapRepository repository) {
+        this.repository = repository;
+    }
 
     @GetMapping
     public List<NhaCungCap> getAll() {

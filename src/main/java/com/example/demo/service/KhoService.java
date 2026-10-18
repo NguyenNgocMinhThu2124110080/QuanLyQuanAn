@@ -5,7 +5,6 @@ import com.example.demo.dto.NhapXuatKhoRequest;
 import com.example.demo.dto.ThongKeKhoResponse;
 import com.example.demo.entity.*;
 import com.example.demo.repository.*;
-import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -19,7 +18,6 @@ import java.util.List;
 // PHẦN CỦA: NGUYỄN NGỌC MINH THƯ
 // Buổi 4: Nghiệp vụ Quản lý Kho, Tự động trừ kho theo công thức món ăn & Thống kê Kho
 @Service
-@RequiredArgsConstructor
 public class KhoService {
 
     private final KhoRepository khoRepository;
@@ -29,6 +27,22 @@ public class KhoService {
     private final NhanVienRepository nhanVienRepository;
     private final CongThucMonRepository congThucMonRepository;
     private final MonAnRepository monAnRepository;
+
+    public KhoService(KhoRepository khoRepository,
+                      NguyenLieuRepository nguyenLieuRepository,
+                      PhieuNhapXuatRepository phieuNhapXuatRepository,
+                      NhaCungCapRepository nhaCungCapRepository,
+                      NhanVienRepository nhanVienRepository,
+                      CongThucMonRepository congThucMonRepository,
+                      MonAnRepository monAnRepository) {
+        this.khoRepository = khoRepository;
+        this.nguyenLieuRepository = nguyenLieuRepository;
+        this.phieuNhapXuatRepository = phieuNhapXuatRepository;
+        this.nhaCungCapRepository = nhaCungCapRepository;
+        this.nhanVienRepository = nhanVienRepository;
+        this.congThucMonRepository = congThucMonRepository;
+        this.monAnRepository = monAnRepository;
+    }
 
     /**
      * Xử lý tạo phiếu Nhập kho hoặc Xuất kho nguyên liệu:

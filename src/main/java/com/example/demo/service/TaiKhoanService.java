@@ -10,7 +10,6 @@ import com.example.demo.repository.NguoiDungRepository;
 import com.example.demo.repository.NhanVienRepository;
 import com.example.demo.repository.TaiKhoanRepository;
 import com.example.demo.security.JwtTokenProvider;
-import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -19,7 +18,6 @@ import java.util.Optional;
 // PHẦN CỦA: ĐẶNG VŨ THANH PHÁT
 // Buổi 4: Nghiệp vụ Quản lý Tài khoản, Xác thực Đăng nhập JWT & Mã hóa BCrypt
 @Service
-@RequiredArgsConstructor
 public class TaiKhoanService {
 
     private final TaiKhoanRepository taiKhoanRepository;
@@ -27,6 +25,18 @@ public class TaiKhoanService {
     private final NhanVienRepository nhanVienRepository;
     private final PasswordEncoder passwordEncoder;
     private final JwtTokenProvider jwtTokenProvider;
+
+    public TaiKhoanService(TaiKhoanRepository taiKhoanRepository,
+                           NguoiDungRepository nguoiDungRepository,
+                           NhanVienRepository nhanVienRepository,
+                           PasswordEncoder passwordEncoder,
+                           JwtTokenProvider jwtTokenProvider) {
+        this.taiKhoanRepository = taiKhoanRepository;
+        this.nguoiDungRepository = nguoiDungRepository;
+        this.nhanVienRepository = nhanVienRepository;
+        this.passwordEncoder = passwordEncoder;
+        this.jwtTokenProvider = jwtTokenProvider;
+    }
 
     /**
      * Xác thực thông tin đăng nhập và sinh mã JWT Token

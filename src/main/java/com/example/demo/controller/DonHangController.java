@@ -7,7 +7,6 @@ import com.example.demo.entity.ChiTietDonHang;
 import com.example.demo.entity.DonHang;
 import com.example.demo.repository.DonHangRepository;
 import com.example.demo.service.DonHangService;
-import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -17,11 +16,15 @@ import java.util.List;
 // Buổi 4: API Quản lý Vòng đời Đơn hàng, Đặt món, Tự trừ kho & Chặn sửa/xóa đơn đã thanh toán
 @RestController
 @RequestMapping("/api/don-hang")
-@RequiredArgsConstructor
 public class DonHangController {
 
     private final DonHangRepository donHangRepository;
     private final DonHangService donHangService;
+
+    public DonHangController(DonHangRepository donHangRepository, DonHangService donHangService) {
+        this.donHangRepository = donHangRepository;
+        this.donHangService = donHangService;
+    }
 
     @PostMapping("/mo-ban-tao-don")
     public ResponseEntity<?> moBanVaTaoDon(@RequestBody TaoDonHangRequest request) {

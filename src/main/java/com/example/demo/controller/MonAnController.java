@@ -2,7 +2,6 @@ package com.example.demo.controller;
 
 import com.example.demo.entity.MonAn;
 import com.example.demo.repository.MonAnRepository;
-import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -12,10 +11,13 @@ import java.util.List;
 // Buổi 3: Quản lý Danh mục Món ăn, Tìm kiếm & Lọc món
 @RestController
 @RequestMapping("/api/mon-an")
-@RequiredArgsConstructor
 public class MonAnController {
 
     private final MonAnRepository monAnRepository;
+
+    public MonAnController(MonAnRepository monAnRepository) {
+        this.monAnRepository = monAnRepository;
+    }
 
     @GetMapping("/tim-kiem")
     public List<MonAn> timKiemTheoTen(@RequestParam String ten) {

@@ -6,7 +6,6 @@ import com.example.demo.dto.LoginResponse;
 import com.example.demo.entity.TaiKhoan;
 import com.example.demo.repository.TaiKhoanRepository;
 import com.example.demo.service.TaiKhoanService;
-import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -16,11 +15,15 @@ import java.util.List;
 // Buổi 3: API Quản lý Tài khoản, Đăng nhập & Đổi mật khẩu
 @RestController
 @RequestMapping("/api/tai-khoan")
-@RequiredArgsConstructor
 public class TaiKhoanController {
 
     private final TaiKhoanRepository taiKhoanRepository;
     private final TaiKhoanService taiKhoanService;
+
+    public TaiKhoanController(TaiKhoanRepository taiKhoanRepository, TaiKhoanService taiKhoanService) {
+        this.taiKhoanRepository = taiKhoanRepository;
+        this.taiKhoanService = taiKhoanService;
+    }
 
     @PostMapping("/dang-nhap")
     public ResponseEntity<LoginResponse> dangNhap(@RequestBody LoginRequest request) {

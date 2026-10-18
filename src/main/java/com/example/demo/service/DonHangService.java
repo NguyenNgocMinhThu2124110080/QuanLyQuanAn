@@ -5,7 +5,6 @@ import com.example.demo.dto.TaoDonHangRequest;
 import com.example.demo.dto.ThemMonVaoDonRequest;
 import com.example.demo.entity.*;
 import com.example.demo.repository.*;
-import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -17,7 +16,6 @@ import java.util.List;
 // PHẦN CỦA: NGUYỄN XUÂN QUÝ
 // Buổi 4: Nghiệp vụ Quy trình Đơn hàng, Vòng đời trạng thái, Chặn sửa/xóa đơn đã thanh toán & Tự trừ kho
 @Service
-@RequiredArgsConstructor
 public class DonHangService {
 
     private final DonHangRepository donHangRepository;
@@ -26,6 +24,20 @@ public class DonHangService {
     private final MonAnRepository monAnRepository;
     private final NhanVienRepository nhanVienRepository;
     private final KhoService khoService;
+
+    public DonHangService(DonHangRepository donHangRepository,
+                          ChiTietDonHangRepository chiTietDonHangRepository,
+                          BanAnRepository banAnRepository,
+                          MonAnRepository monAnRepository,
+                          NhanVienRepository nhanVienRepository,
+                          KhoService khoService) {
+        this.donHangRepository = donHangRepository;
+        this.chiTietDonHangRepository = chiTietDonHangRepository;
+        this.banAnRepository = banAnRepository;
+        this.monAnRepository = monAnRepository;
+        this.nhanVienRepository = nhanVienRepository;
+        this.khoService = khoService;
+    }
 
     /**
      * Mở bàn và tạo đơn hàng mới

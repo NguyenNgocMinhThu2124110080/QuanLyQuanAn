@@ -4,7 +4,6 @@ import com.example.demo.dto.NhapXuatKhoRequest;
 import com.example.demo.entity.PhieuNhapXuat;
 import com.example.demo.repository.PhieuNhapXuatRepository;
 import com.example.demo.service.KhoService;
-import lombok.RequiredArgsConstructor;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -16,11 +15,15 @@ import java.util.List;
 // Buổi 4: API Lập phiếu Nhập/Xuất kho, Tự trừ kho theo món & Thống kê Kho
 @RestController
 @RequestMapping("/api/phieu-nhap-xuat")
-@RequiredArgsConstructor
 public class PhieuNhapXuatController {
 
     private final PhieuNhapXuatRepository phieuNhapXuatRepository;
     private final KhoService khoService;
+
+    public PhieuNhapXuatController(PhieuNhapXuatRepository phieuNhapXuatRepository, KhoService khoService) {
+        this.phieuNhapXuatRepository = phieuNhapXuatRepository;
+        this.khoService = khoService;
+    }
 
     @PostMapping("/lap-phieu")
     public ResponseEntity<?> lapPhieuNhapXuat(@RequestBody NhapXuatKhoRequest request) {

@@ -2,7 +2,6 @@ package com.example.demo.controller;
 
 import com.example.demo.entity.BanAn;
 import com.example.demo.repository.BanAnRepository;
-import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -12,10 +11,13 @@ import java.util.List;
 // Buổi 3: Quản lý Danh mục Bàn ăn & Trạng thái Bàn
 @RestController
 @RequestMapping("/api/ban-an")
-@RequiredArgsConstructor
 public class BanAnController {
 
     private final BanAnRepository repository;
+
+    public BanAnController(BanAnRepository repository) {
+        this.repository = repository;
+    }
 
     @GetMapping("/ban-trong")
     public List<BanAn> layDanhSachBanTrong() {

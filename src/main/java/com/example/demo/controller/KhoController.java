@@ -2,7 +2,6 @@ package com.example.demo.controller;
 
 import com.example.demo.entity.Kho;
 import com.example.demo.repository.KhoRepository;
-import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -12,10 +11,13 @@ import java.util.List;
 // Buổi 3: Quản lý Danh mục Kho bãi
 @RestController
 @RequestMapping("/api/kho")
-@RequiredArgsConstructor
 public class KhoController {
 
     private final KhoRepository repository;
+
+    public KhoController(KhoRepository repository) {
+        this.repository = repository;
+    }
 
     @GetMapping
     public List<Kho> getAll() {
