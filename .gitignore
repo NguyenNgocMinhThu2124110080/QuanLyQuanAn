@@ -35,3 +35,6 @@ build/
 ### Python / Virtualenv ###
 .venv/
 *.py
+
+hs_err_pid*.log
+replay_pid*.log
