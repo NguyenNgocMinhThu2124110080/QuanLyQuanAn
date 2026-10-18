@@ -1062,11 +1062,18 @@
                     <div class="kpi-value" id="kpi-out-of-stock" style="color:#dc2626;">0</div>
                 </div>
             </div>
-            <div class="kpi-card">
+            <div class="kpi-card" id="kpi-card-total-import">
                 <div class="kpi-icon" style="background:#d1fae5; color:#059669;">📊</div>
                 <div>
                     <div class="kpi-title">Tổng tiền nhập kho</div>
                     <div class="kpi-value" id="kpi-total-import-val" style="font-size:16px;">0 ₫</div>
+                </div>
+            </div>
+            <div class="kpi-card" id="kpi-card-chef-safe" style="display:none;">
+                <div class="kpi-icon" style="background:#d1fae5; color:#059669;">🟢</div>
+                <div>
+                    <div class="kpi-title">Nguyên liệu an toàn</div>
+                    <div class="kpi-value" id="kpi-safe-ingredients" style="color:#059669;">0</div>
                 </div>
             </div>
         </div>
@@ -1086,7 +1093,7 @@
                                 <th>Tên nguyên liệu</th>
                                 <th>ĐVT</th>
                                 <th>Tồn kho</th>
-                                <th>Giá nhập</th>
+                                <th class="inv-price-col">Giá nhập</th>
                                 <th>Nhà cung cấp</th>
                                 <th>Trạng thái</th>
                             </tr>
@@ -1101,7 +1108,10 @@
             <!-- FORM LẬP PHIẾU NHẬP / XUẤT KHO -->
             <div class="card">
                 <div class="card-header">
-                    <div class="card-title">📝 Lập phiếu Nhập / Xuất kho</div>
+                    <div class="card-title" id="stock-form-title">📝 Lập phiếu Nhập / Xuất kho</div>
+                </div>
+                <div id="chef-inventory-notice" style="display:none; background:#eff6ff; color:#1e40af; padding:8px 12px; border-radius:6px; font-size:12px; margin-bottom:12px; border:1px solid #bfdbfe;">
+                    👨‍🍳 <strong>Quyền Đầu bếp:</strong> Chỉ lập phiếu Xuất kho lấy nguyên liệu chế biến. Quyền nhập hàng mới & xem giá vốn nhà cung cấp dành riêng cho Quản lý.
                 </div>
                 <form id="stock-movement-form" onsubmit="submitStockMovement(event)">
                     <label>Loại phiếu <span style="color:red">*</span></label>
@@ -1129,13 +1139,15 @@
                         <select id="movement-supplier"></select>
                     </div>
 
-                    <label>Đơn giá (VNĐ)</label>
-                    <input type="number" id="movement-price" step="500" placeholder="Đơn giá nhập...">
+                    <div id="movement-price-box">
+                        <label>Đơn giá (VNĐ)</label>
+                        <input type="number" id="movement-price" step="500" placeholder="Đơn giá nhập...">
+                    </div>
 
                     <label>Ghi chú</label>
-                    <input type="text" id="movement-note" placeholder="VD: Nhập thêm cuối tuần / Xuất hủy...">
+                    <input type="text" id="movement-note" placeholder="VD: Xuất chế biến tiệc / Xuất nấu bữa trưa...">
 
-                    <button type="submit" class="btn btn-primary" style="width:100%; margin-top:16px;">💾 Xác nhận lập phiếu</button>
+                    <button type="submit" class="btn btn-primary" id="btn-submit-stock" style="width:100%; margin-top:16px;">💾 Xác nhận lập phiếu</button>
                 </form>
             </div>
         </div>
@@ -1726,11 +1738,11 @@
         } else if (role === 'DAU_BEP') {
             if (navTables) navTables.style.display = 'none';       // Ẩn Sơ đồ bàn đối với Đầu bếp
             if (navMenu) navMenu.style.display = 'none';           // Ẩn Quản lý giá thực đơn đối với Đầu bếp
-            if (navInventory) navInventory.style.display = 'inline-flex'; // Đầu bếp cần xem kho nguyên liệu
+            if (navInventory) navInventory.style.display = 'inline-flex'; // Đầu bếp xem tồn kho nguyên liệu
             if (navKitchen) navKitchen.style.display = 'inline-flex';   // Màn hình Bếp nấu KDS
             if (navCashier) navCashier.style.display = 'none';     // Ẩn Thu ngân & Doanh thu đối với Đầu bếp
             if (hintIcon) hintIcon.textContent = '🍳';
-            if (hintText) hintText.innerHTML = '<strong>ĐẦU BẾP / BẾP TRƯỞNG</strong> (Phạm Thị Bếp) — Được phép: Màn hình Bếp chế biến (KDS), Báo nấu xong (Lên món), Xem công thức định lượng & Kho nguyên liệu';
+            if (hintText) hintText.innerHTML = '<strong>ĐẦU BẾP / BẾP TRƯỞNG</strong> (Phạm Thị Bếp) — Được phép: Màn hình Bếp chế biến (KDS), Báo nấu xong (Lên món), Xem tồn kho & Xuất kho bếp. (Đã ẩn Giá nhập & Nhập hàng)';
             setMenuEditingAllowed(false);
             if (currentTabName === 'tables' || currentTabName === 'menu' || currentTabName === 'cashier') {
                 switchNav('kitchen', navKitchen);
@@ -1748,6 +1760,50 @@
             if (currentTabName === 'inventory' || currentTabName === 'kitchen' || currentTabName === 'cashier') {
                 switchNav('tables', navTables);
             }
+        }
+
+        applyInventoryRoleRestrictions(role);
+    }
+
+    function applyInventoryRoleRestrictions(role) {
+        const isChef = (role === 'DAU_BEP');
+        const cardImport = $('kpi-card-total-import');
+        const cardChefSafe = $('kpi-card-chef-safe');
+        const notice = $('chef-inventory-notice');
+        const formTitle = $('stock-form-title');
+        const priceBox = $('movement-price-box');
+        const supplierBox = $('supplier-field-box');
+        const movementTypeSel = $('movement-type');
+        const btnSubmit = $('btn-submit-stock');
+
+        if (isChef) {
+            if (cardImport) cardImport.style.display = 'none';
+            if (cardChefSafe) cardChefSafe.style.display = 'flex';
+            if (notice) notice.style.display = 'block';
+            if (formTitle) formTitle.textContent = '📝 Lập phiếu Xuất kho nguyên liệu bếp';
+            if (priceBox) priceBox.style.display = 'none';
+            if (supplierBox) supplierBox.style.display = 'none';
+            if (btnSubmit) btnSubmit.textContent = '💾 Xác nhận xuất kho';
+            if (movementTypeSel) {
+                movementTypeSel.innerHTML = '<option value="XUAT">🔴 XUẤT KHO (Lấy nguyên liệu chế biến)</option>';
+                movementTypeSel.value = 'XUAT';
+            }
+            document.querySelectorAll('.inv-price-col').forEach(el => el.style.display = 'none');
+        } else {
+            if (cardImport) cardImport.style.display = 'flex';
+            if (cardChefSafe) cardChefSafe.style.display = 'none';
+            if (notice) notice.style.display = 'none';
+            if (formTitle) formTitle.textContent = '📝 Lập phiếu Nhập / Xuất kho';
+            if (priceBox) priceBox.style.display = 'block';
+            if (btnSubmit) btnSubmit.textContent = '💾 Xác nhận lập phiếu';
+            if (movementTypeSel && movementTypeSel.options.length < 2) {
+                movementTypeSel.innerHTML = `
+                    <option value="NHAP">🟢 NHẬP KHO (Tăng tồn kho)</option>
+                    <option value="XUAT">🔴 XUẤT KHO (Giảm tồn kho)</option>
+                `;
+            }
+            document.querySelectorAll('.inv-price-col').forEach(el => el.style.display = '');
+            toggleMovementFields();
         }
     }
 
@@ -2494,13 +2550,17 @@
     function renderInventoryTable() {
         const tbody = $('inventory-tbody');
         if (!Array.isArray(allIngredients)) allIngredients = [];
+        const isChef = currentUser && currentUser.vaiTro === 'DAU_BEP';
+        const priceStyle = isChef ? 'style="display:none;"' : '';
         const total = allIngredients.length;
         const warningCount = allIngredients.filter(i => i.mucDoCanhBao === 'SAP_HET').length;
         const outCount = allIngredients.filter(i => i.mucDoCanhBao === 'HET_HANG').length;
+        const safeCount = allIngredients.filter(i => i.mucDoCanhBao !== 'SAP_HET' && i.mucDoCanhBao !== 'HET_HANG').length;
 
         $('kpi-total-ingredients').textContent = total;
         $('kpi-warning-ingredients').textContent = warningCount;
         $('kpi-out-of-stock').textContent = outCount;
+        if ($('kpi-safe-ingredients')) $('kpi-safe-ingredients').textContent = safeCount;
 
         if (total === 0) {
             tbody.innerHTML = `
@@ -2508,8 +2568,7 @@
                     <div class="ui-empty-box">
                         <div class="empty-icon">📦</div>
                         <div class="empty-title">Kho chưa có nguyên liệu nào</div>
-                        <div class="empty-desc">Lập phiếu nhập kho ở form bên trái để đưa nguyên liệu vào hệ thống.</div>
-                        <button class="btn btn-primary btn-sm" onclick="$('movement-ingredient').focus()">➕ Nhập kho ngay</button>
+                        <div class="empty-desc">Chưa có dữ liệu nguyên liệu trong hệ thống.</div>
                     </div>
                 </td></tr>
             `;
@@ -2530,12 +2589,14 @@
                 <td><strong>${escHtml(i.tenNguyenLieu)}</strong></td>
                 <td>${escHtml(i.donViTinh)}</td>
                 <td style="font-weight:700;">${i.soLuongTon}</td>
-                <td>${formatVND(i.giaNhap)}</td>
+                <td class="inv-price-col" ${priceStyle}>${formatVND(i.giaNhap)}</td>
                 <td style="color:var(--text-muted); font-size:12px;">${escHtml(i.tenNhaCungCap)}</td>
                 <td>${badgeHtml}</td>
             </tr>
             `;
         }).join('');
+
+        applyInventoryRoleRestrictions(currentUser ? (currentUser.vaiTro || '') : '');
     }
 
     async function loadInventoryDropdowns() {
@@ -2558,18 +2619,27 @@
     function onIngredientSelectChange() {
         const sel = $('movement-ingredient');
         const opt = sel.options[sel.selectedIndex];
+        const isChef = currentUser && currentUser.vaiTro === 'DAU_BEP';
         if (opt) {
             $('movement-unit').value = opt.getAttribute('data-unit') || '';
-            $('movement-price').value = opt.getAttribute('data-price') || '';
+            $('movement-price').value = isChef ? 0 : (opt.getAttribute('data-price') || '');
             const ncc = opt.getAttribute('data-ncc');
-            if (ncc) $('movement-supplier').value = ncc;
+            if (ncc && !isChef) $('movement-supplier').value = ncc;
         }
     }
 
     function toggleMovementFields() {
+        const isChef = currentUser && currentUser.vaiTro === 'DAU_BEP';
         const type = $('movement-type').value;
         const box = $('supplier-field-box');
-        box.style.display = type === 'NHAP' ? 'block' : 'none';
+        const priceBox = $('movement-price-box');
+        if (isChef) {
+            if (box) box.style.display = 'none';
+            if (priceBox) priceBox.style.display = 'none';
+        } else {
+            if (box) box.style.display = type === 'NHAP' ? 'block' : 'none';
+            if (priceBox) priceBox.style.display = 'block';
+        }
     }
 
     async function submitStockMovement(e) {
@@ -2583,11 +2653,12 @@
         const oldText = btn ? btn.textContent : '';
         if (btn) { btn.disabled = true; btn.textContent = '⏳ Đang lập phiếu...'; }
 
-        const type = $('stock-movement-form')['movement-type'].value;
+        const isChef = currentUser && currentUser.vaiTro === 'DAU_BEP';
+        const type = isChef ? 'XUAT' : $('stock-movement-form')['movement-type'].value;
         const nlId = Number($('movement-ingredient').value);
         const qty = Number($('movement-qty').value);
-        const price = Number($('movement-price').value) || 0;
-        const nccId = $('movement-supplier').value ? Number($('movement-supplier').value) : null;
+        const price = isChef ? 0 : (Number($('movement-price').value) || 0);
+        const nccId = isChef ? null : ($('movement-supplier').value ? Number($('movement-supplier').value) : null);
         const note = $('movement-note').value.trim();
 
         if (!nlId || !qty) {
@@ -2603,8 +2674,8 @@
             donGia: price,
             khoId: 1, // Default primary warehouse
             nccId: type === 'NHAP' ? (nccId || 1) : null,
-            nvId: currentUser.nvId || 1,
-            ghiChu: note || (type === 'NHAP' ? 'Nhập kho bổ sung' : 'Xuất kho sử dụng')
+            nvId: (currentUser && currentUser.nvId) ? currentUser.nvId : 1,
+            ghiChu: note || (isChef ? 'Đầu bếp xuất nguyên liệu chế biến' : (type === 'NHAP' ? 'Nhập kho bổ sung' : 'Xuất kho sử dụng'))
         };
 
         try {
