@@ -16,7 +16,7 @@ import org.springframework.stereotype.Service;
 import java.util.Optional;
 
 // PHẦN CỦA: ĐẶNG VŨ THANH PHÁT
-// Buổi 4: Nghiệp vụ Quản lý Tài khoản, Xác thực Đăng nhập JWT & Mã hóa BCrypt
+// Buổi 4: Nghiệp vụ Quản lý Tài khoản, Xác thực Đăng nhập JWT & Mã hóa BCrypt (Đã chuẩn hóa)
 @Service
 public class TaiKhoanService {
 
@@ -45,20 +45,14 @@ public class TaiKhoanService {
         Optional<TaiKhoan> optTk = taiKhoanRepository.findByUsername(request.getUsername());
 
         if (optTk.isEmpty()) {
-            return LoginResponse.builder()
-                    .success(false)
-                    .message("Tài khoản không tồn tại!")
-                    .build();
+            return LoginResponse.failure("Tài khoản không tồn tại!");
         }
 
         TaiKhoan tk = optTk.get();
 
         // Kiểm tra trạng thái tài khoản
         if (tk.getTrangThai() != null && tk.getTrangThai() == 0) {
-            return LoginResponse.builder()
-                    .success(false)
-                    .message("Tài khoản đã bị khoá, vui lòng liên hệ Admin!")
-                    .build();
+            return LoginResponse.failure("Tài khoản đã bị khoá, vui lòng liên hệ Admin!");
         }
 
         // Kiểm tra mật khẩu (hỗ trợ cả chuẩn mã hóa BCrypt và mật khẩu khởi tạo ban đầu)
@@ -66,10 +60,7 @@ public class TaiKhoanService {
                        || request.getPassword().equals(tk.getPassword());
 
         if (!isMatch) {
-            return LoginResponse.builder()
-                    .success(false)
-                    .message("Mật khẩu không chính xác!")
-                    .build();
+            return LoginResponse.failure("Mật khẩu không chính xác!");
         }
 
         // Tự động nâng cấp mật khẩu sang mã hóa BCrypt nếu chưa mã hóa
@@ -94,16 +85,7 @@ public class TaiKhoanService {
         // Sinh mã Token JWT chứa thông tin tài khoản và phân quyền
         String token = jwtTokenProvider.generateToken(tk.getUsername(), vaiTro);
 
-        return LoginResponse.builder()
-                .success(true)
-                .message("Đăng nhập thành công!")
-                .username(tk.getUsername())
-                .vaiTro(vaiTro)
-                .hoTen(hoTen)
-                .userId(userId)
-                .nvId(nvId)
-                .token(token)
-                .build();
+        return LoginResponse.success(tk.getUsername(), vaiTro, hoTen, userId, nvId, token);
     }
 
     /**
