@@ -1,0 +1,493 @@
+{
+	"info": {
+		"_postman_id": "quan-ly-quan-an-buoi-4-collection",
+		"name": "QUẢN LÝ QUÁN ĂN - BUỔI 4 (KIỂM THỬ ĐƠN THỂ & TÍCH HỢP)",
+		"description": "Bộ kịch bản kiểm thử Postman phục vụ báo cáo Buổi 4: Kiểm thử từng module (Phát, Thư, Quý) và Quy trình tích hợp liên thông End-to-End.",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"variable": [
+		{
+			"key": "baseUrl",
+			"value": "http://localhost:9090",
+			"type": "string"
+		},
+		{
+			"key": "token",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "maDonTaoMoi",
+			"value": "1",
+			"type": "string"
+		}
+	],
+	"item": [
+		{
+			"name": "1. ĐẶNG VŨ THANH PHÁT (Bảo mật, Quyền 401/403 & Doanh thu)",
+			"item": [
+				{
+					"name": "1.1. Đăng nhập thành công (Lấy JWT Token)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"var jsonData = pm.response.json();",
+									"pm.test('Status code is 200', function () { pm.response.to.have.status(200); });",
+									"pm.test('Dang nhap thanh cong va co Token', function () {",
+									"    pm.expect(jsonData.success).to.eql(true);",
+									"    pm.expect(jsonData.token).to.not.be.empty;",
+									"    pm.collectionVariables.set('token', jsonData.token);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"username\": \"admin\",\n    \"password\": \"123456\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/tai-khoan/dang-nhap",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "tai-khoan", "dang-nhap"]
+						}
+					}
+				},
+				{
+					"name": "1.2. Đăng nhập thất bại (Sai mật khẩu - Bắt lỗi 400)",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"username\": \"admin\",\n    \"password\": \"sai_mat_khau_123\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/tai-khoan/dang-nhap",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "tai-khoan", "dang-nhap"]
+						}
+					}
+				},
+				{
+					"name": "1.3. Test bảo mật không có Token (Bắt lỗi 401 Unauthorized)",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/mon-an",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "mon-an"]
+						}
+					}
+				},
+				{
+					"name": "1.4. Thống kê doanh thu theo ngày",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/thanh-toan/doanh-thu-theo-ngay",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "thanh-toan", "doanh-thu-theo-ngay"]
+						}
+					}
+				}
+			]
+		},
+		{
+			"name": "2. NGUYỄN NGỌC MINH THƯ (Kho, Tự trừ kho & Cảnh báo)",
+			"item": [
+				{
+					"name": "2.1. Báo cáo tồn kho & Cảnh báo sắp hết",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/nguyen-lieu/bao-cao-ton-kho",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "nguyen-lieu", "bao-cao-ton-kho"]
+						}
+					}
+				},
+				{
+					"name": "2.2. Lập phiếu Nhập kho (Cộng dồn tồn kho)",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"loaiPhieu\": \"NHAP\",\n    \"nlId\": 1,\n    \"soLuong\": 10.0,\n    \"donGia\": 65000,\n    \"khoId\": 1,\n    \"nccId\": 1,\n    \"nvId\": 1,\n    \"ghiChu\": \"Nhập bổ sung thịt gà\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/phieu-nhap-xuat/lap-phieu",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "phieu-nhap-xuat", "lap-phieu"]
+						}
+					}
+				},
+				{
+					"name": "2.3. Lập phiếu Xuất kho quá số lượng tồn (Bắt lỗi thiếu hàng 400)",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"loaiPhieu\": \"XUAT\",\n    \"nlId\": 1,\n    \"soLuong\": 999999.0,\n    \"khoId\": 1,\n    \"nvId\": 1,\n    \"ghiChu\": \"Xuất quá lố\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/phieu-nhap-xuat/lap-phieu",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "phieu-nhap-xuat", "lap-phieu"]
+						}
+					}
+				},
+				{
+					"name": "2.4. Thống kê tổng hợp Nhập / Xuất kho",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/phieu-nhap-xuat/thong-ke",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "phieu-nhap-xuat", "thong-ke"]
+						}
+					}
+				}
+			]
+		},
+		{
+			"name": "3. NGUYỄN XUÂN QUÝ (Bàn ăn, Đơn hàng & Xử lý mã lỗi)",
+			"item": [
+				{
+					"name": "3.1. Lấy danh sách bàn đang trống",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/ban-an/ban-trong",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "ban-an", "ban-trong"]
+						}
+					}
+				},
+				{
+					"name": "3.2. Mở bàn và tạo đơn hàng mới",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"var data = pm.response.json();",
+									"if(data.maDon) { pm.collectionVariables.set('maDonTaoMoi', data.maDon); }"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"maBan\": 1,\n    \"maNv\": 1\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/don-hang/mo-ban-tao-don",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "don-hang", "mo-ban-tao-don"]
+						}
+					}
+				},
+				{
+					"name": "3.3. Thêm món vào đơn (Tự tính tiền & Tự trừ kho)",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"maDon\": {{maDonTaoMoi}},\n    \"maMon\": 1,\n    \"soLuong\": 2\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/don-hang/them-mon",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "don-hang", "them-mon"]
+						}
+					}
+				},
+				{
+					"name": "3.4. Xem hoá đơn chi tiết của đơn",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/don-hang/{{maDonTaoMoi}}/chi-tiet-hoa-don",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "don-hang", "{{maDonTaoMoi}}", "chi-tiet-hoa-don"]
+						}
+					}
+				},
+				{
+					"name": "3.5. Bắt lỗi sai ID món ăn (Mã lỗi 400/404)",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"maDon\": {{maDonTaoMoi}},\n    \"maMon\": 9999,\n    \"soLuong\": 1\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/don-hang/them-mon",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "don-hang", "them-mon"]
+						}
+					}
+				}
+			]
+		},
+		{
+			"name": "4. TEST TÍCH HỢP LIÊN THÔNG TOÀN BỘ NHÓM (E2E)",
+			"item": [
+				{
+					"name": "Bước 1: Đăng nhập nhân viên lấy Token",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"username\": \"admin\",\n    \"password\": \"123456\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/tai-khoan/dang-nhap",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "tai-khoan", "dang-nhap"]
+						}
+					}
+				},
+				{
+					"name": "Bước 2: Mở bàn 2 cho khách ngồi (Đổi trạng thái sang CO_KHACH)",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"maBan\": 2,\n    \"maNv\": 1\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/don-hang/mo-ban-tao-don",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "don-hang", "mo-ban-tao-don"]
+						}
+					}
+				},
+				{
+					"name": "Bước 3: Gọi món (Tự tính tiền + Tự trừ nguyên liệu trong kho)",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"maDon\": {{maDonTaoMoi}},\n    \"maMon\": 1,\n    \"soLuong\": 1\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/don-hang/them-mon",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "don-hang", "them-mon"]
+						}
+					}
+				},
+				{
+					"name": "Bước 4: Bếp chuyển trạng thái đơn sang HOAN_THANH",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/don-hang/{{maDonTaoMoi}}/trang-thai?trangThai=HOAN_THANH",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "don-hang", "{{maDonTaoMoi}}", "trang-thai"],
+							"query": [
+								{
+									"key": "trangThai",
+									"value": "HOAN_THANH"
+								}
+							]
+						}
+					}
+				},
+				{
+					"name": "Bước 5: Thu ngân Thanh toán hoá đơn (Tự động giải phóng bàn về TRONG)",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"maDon\": {{maDonTaoMoi}},\n    \"phuongThuc\": \"TIEN_MAT\",\n    \"maNv\": 1\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/thanh-toan/thuc-hien",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "thanh-toan", "thuc-hien"]
+						}
+					}
+				},
+				{
+					"name": "Bước 6: Kiểm tra chốt chặn (Cố tình xóa đơn đã thanh toán -> Bị chặn 400)",
+					"request": {
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/don-hang/{{maDonTaoMoi}}",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "don-hang", "{{maDonTaoMoi}}"]
+						}
+					}
+				},
+				{
+					"name": "Bước 7: Xem báo cáo doanh thu đã được cộng dồn",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/thanh-toan/doanh-thu-theo-ngay",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "thanh-toan", "doanh-thu-theo-ngay"]
+						}
+					}
+				}
+			]
+		}
+	]
+}
