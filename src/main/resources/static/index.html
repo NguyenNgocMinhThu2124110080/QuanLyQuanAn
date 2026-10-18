@@ -1297,10 +1297,10 @@
             <!-- NÚT ĐĂNG NHẬP NHANH DEMO -->
             <label>Đăng nhập nhanh theo vai trò (Mật khẩu chung: 123456):</label>
             <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-bottom:14px;">
-                <button class="btn btn-secondary btn-sm" onclick="quickLogin('admin', '123456')">👑 Admin (admin)</button>
-                <button class="btn btn-secondary btn-sm" onclick="quickLogin('quanly01', '123456')">👔 Quản lý (quanly01)</button>
-                <button class="btn btn-secondary btn-sm" onclick="quickLogin('phucvu01', '123456')">🛎️ Phục vụ (phucvu01)</button>
-                <button class="btn btn-secondary btn-sm" onclick="quickLogin('daubep01', '123456')">🍳 Đầu bếp / Kho (daubep01)</button>
+                <button type="button" class="btn btn-secondary btn-sm" onclick="quickLogin('admin', '123456')">👑 Admin (admin)</button>
+                <button type="button" class="btn btn-secondary btn-sm" onclick="quickLogin('quanly01', '123456')">👔 Quản lý (quanly01)</button>
+                <button type="button" class="btn btn-secondary btn-sm" onclick="quickLogin('phucvu01', '123456')">🛎️ Phục vụ (phucvu01)</button>
+                <button type="button" class="btn btn-secondary btn-sm" onclick="quickLogin('daubep01', '123456')">🍳 Đầu bếp / Kho (daubep01)</button>
             </div>
 
             <form onsubmit="handleManualLogin(event)">
@@ -1395,15 +1395,19 @@
 
     let authPromise = null;
     let pendingAuthAction = null;
+    let isRefreshingAuth = false;
 
-    function requireAuth(actionCallback, actionName = 'thực hiện thao tác này') {
+    async function ensureAuthenticated(defaultUser = 'phucvu01') {
         if (currentUser && currentUser.token && !isTokenExpired(currentUser.token)) {
             return true;
         }
-        pendingAuthAction = actionCallback || null;
-        showToast(`Vui lòng đăng nhập để ${actionName}!`, 'error');
-        openLoginModal();
-        return false;
+        try {
+            await doLogin(currentUser.username || defaultUser, '123456', true);
+            return true;
+        } catch (e) {
+            console.warn('Auto auth failed:', e);
+            return false;
+        }
     }
 
     async function doLogin(username, password, isBackground = false) {
@@ -1422,6 +1426,7 @@
                     vaiTro: data.vaiTro || 'USER',
                     nvId: data.nvId || 1
                 };
+                sessionStorage.removeItem('user_explicit_logout');
                 localStorage.setItem('jwt_token', currentUser.token);
                 localStorage.setItem('jwt_username', currentUser.username);
                 localStorage.setItem('jwt_hoten', currentUser.hoTen);
@@ -1496,13 +1501,25 @@
             throw new Error('Lỗi kết nối máy chủ: ' + err.message);
         }
 
-        if (res.status === 401) {
-            console.warn("401 Unauthorized:", url);
-            // Xóa token lỗi để tránh lặp lại header hỏng
+        // Tự động khôi phục phiên nếu token hết hạn / lỗi 401
+        if (res.status === 401 && !options._retry && !isRefreshingAuth) {
+            console.warn("401 Unauthorized:", url, "- Đang tự động cấp mới Token...");
+            isRefreshingAuth = true;
+            try {
+                const usernameToUse = currentUser.username || 'phucvu01';
+                const freshToken = await doLogin(usernameToUse, '123456', true);
+                isRefreshingAuth = false;
+                if (freshToken) {
+                    return apiFetch(url, { ...options, _retry: true });
+                }
+            } catch (authErr) {
+                isRefreshingAuth = false;
+                console.error("Tự động khôi phục phiên thất bại:", authErr);
+            }
+
             currentUser.token = '';
             localStorage.removeItem('jwt_token');
             updateUserHeader();
-
             showToast('Phiên làm việc đã hết hạn hoặc cần đăng nhập!', 'error');
             openLoginModal();
             throw new Error('Chưa đăng nhập hoặc phiên làm việc đã hết hạn');
@@ -1538,7 +1555,10 @@
             userBadge.style.display = 'inline-flex';
             $('current-user-name').textContent = currentUser.hoTen || currentUser.username;
             $('current-user-role').textContent = currentUser.vaiTro || 'USER';
-            authActions.innerHTML = `<button class="btn-logout" onclick="handleLogout()">🚪 Đăng xuất</button>`;
+            authActions.innerHTML = `
+                <button class="btn btn-secondary btn-sm" onclick="openLoginModal()" style="margin-right:6px;" title="Chuyển đổi giữa các tài khoản Demo">🔄 Đổi tài khoản</button>
+                <button class="btn-logout" onclick="handleLogout()">🚪 Đăng xuất</button>
+            `;
         } else {
             userBadge.style.display = 'none';
             authActions.innerHTML = `<button class="btn btn-primary btn-sm" onclick="openLoginModal()">🔐 Đăng nhập</button>`;
@@ -1553,6 +1573,7 @@
             vaiTro: '',
             nvId: null
         };
+        sessionStorage.setItem('user_explicit_logout', '1');
         localStorage.removeItem('jwt_token');
         localStorage.removeItem('jwt_username');
         localStorage.removeItem('jwt_hoten');
@@ -1717,13 +1738,11 @@
     }
 
     async function openTableAndCreateOrder(maBan) {
-        if (!requireAuth(() => openTableAndCreateOrder(maBan), 'mở bàn & tạo đơn')) {
-            return;
-        }
+        await ensureAuthenticated('phucvu01');
         try {
             const order = await apiFetch('/api/don-hang/mo-ban-tao-don', {
                 method: 'POST',
-                body: JSON.stringify({ maBan: maBan, maNv: currentUser.nvId || 1 })
+                body: JSON.stringify({ maBan: maBan, maNv: currentUser.nvId || 3 })
             });
             showToast(`Đã mở ${selectedTable ? selectedTable.tenBan : 'bàn'} thành công!`);
             await loadTables();
@@ -1798,9 +1817,7 @@
     }
 
     async function addDishToCurrentOrder() {
-        if (!requireAuth(() => addDishToCurrentOrder(), 'gọi món')) {
-            return;
-        }
+        await ensureAuthenticated('phucvu01');
         if (!selectedOrder) return;
         const foodId = $('select-food-to-order').value;
         const qty = Number($('input-food-qty').value);
@@ -1830,9 +1847,7 @@
     }
 
     async function deleteDishFromOrder(maCtdh) {
-        if (!requireAuth(() => deleteDishFromOrder(maCtdh), 'hủy món')) {
-            return;
-        }
+        await ensureAuthenticated('phucvu01');
         if (!confirm('Bạn có chắc muốn huỷ món này khỏi đơn?')) return;
         try {
             await apiFetch(`/api/don-hang/huy-mon/${maCtdh}`, { method: 'DELETE' });
@@ -1844,9 +1859,7 @@
     }
 
     async function cancelCurrentOrder() {
-        if (!requireAuth(() => cancelCurrentOrder(), 'hủy đơn hàng')) {
-            return;
-        }
+        await ensureAuthenticated('phucvu01');
         if (!selectedOrder) return;
         if (!confirm(`Bạn có chắc chắn muốn hủy đơn #${selectedOrder.maDon} và giải phóng bàn?`)) return;
 
@@ -1862,9 +1875,7 @@
     }
 
     async function resetTableStatus(maBan) {
-        if (!requireAuth(() => resetTableStatus(maBan), 'đặt lại trạng thái bàn')) {
-            return;
-        }
+        await ensureAuthenticated('phucvu01');
         try {
             await apiFetch(`/api/ban-an/${maBan}/trang-thai?trangThai=TRONG`, { method: 'PUT' });
             showToast('Đã cập nhật trạng thái bàn về TRỐNG');
@@ -2502,11 +2513,7 @@
     }
 
     async function confirmPayment() {
-        if (!currentUser || !currentUser.token) {
-            showToast('Vui lòng đăng nhập để thực hiện thanh toán!', 'error');
-            openLoginModal();
-            return;
-        }
+        await ensureAuthenticated('phucvu01');
         if (!currentPayingOrder) return;
         const maDon = currentPayingOrder.maDon;
 
@@ -2575,6 +2582,15 @@
             localStorage.removeItem('jwt_hoten');
             localStorage.removeItem('jwt_vaitro');
             localStorage.removeItem('jwt_nvid');
+        }
+
+        // Tự động kết nối phiên phục vụ mặc định nếu chưa đăng nhập
+        if (!currentUser.token && sessionStorage.getItem('user_explicit_logout') !== '1') {
+            try {
+                await doLogin('phucvu01', '123456', true);
+            } catch (err) {
+                console.warn('Khởi tạo phiên mặc định:', err);
+            }
         }
 
         updateUserHeader();
