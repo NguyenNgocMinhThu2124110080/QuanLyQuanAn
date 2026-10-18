@@ -32,4 +32,63 @@ public class NguyenLieu {
     @ManyToOne
     @JoinColumn(name = "ncc_id")
     private NhaCungCap nhaCungCap;
+
+    public NguyenLieu() {
+    }
+
+    public Integer getNlId() {
+        return nlId;
+    }
+
+    public void setNlId(Integer nlId) {
+        this.nlId = nlId;
+    }
+
+    public String getTenNguyenLieu() {
+        return tenNguyenLieu;
+    }
+
+    public void setTenNguyenLieu(String tenNguyenLieu) {
+        this.tenNguyenLieu = tenNguyenLieu;
+    }
+
+    public String getDonViTinh() {
+        return donViTinh;
+    }
+
+    public void setDonViTinh(String donViTinh) {
+        this.donViTinh = donViTinh;
+    }
+
+    public BigDecimal getGiaNhap() {
+        return giaNhap;
+    }
+
+    public void setGiaNhap(BigDecimal giaNhap) {
+        this.giaNhap = giaNhap;
+    }
+
+    public BigDecimal getSoLuongTon() {
+        return soLuongTon;
+    }
+
+    public void setSoLuongTon(BigDecimal soLuongTon) {
+        this.soLuongTon = soLuongTon;
+    }
+
+    public Integer getTrangThai() {
+        return trangThai;
+    }
+
+    public void setTrangThai(Integer trangThai) {
+        this.trangThai = trangThai;
+    }
+
+    public NhaCungCap getNhaCungCap() {
+        return nhaCungCap;
+    }
+
+    public void setNhaCungCap(NhaCungCap nhaCungCap) {
+        this.nhaCungCap = nhaCungCap;
+    }
 }

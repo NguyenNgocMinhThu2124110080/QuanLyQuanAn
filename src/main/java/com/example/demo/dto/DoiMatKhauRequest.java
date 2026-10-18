@@ -1,18 +1,20 @@
 package com.example.demo.dto;
 
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
-
 // PHẦN CỦA: ĐẶNG VŨ THANH PHÁT
 // DTO đổi mật khẩu tài khoản
-@Data
-@AllArgsConstructor
-@NoArgsConstructor
 public class DoiMatKhauRequest {
     private String username;
     private String matKhauCu;
     private String matKhauMoi;
+
+    public DoiMatKhauRequest() {
+    }
+
+    public DoiMatKhauRequest(String username, String matKhauCu, String matKhauMoi) {
+        this.username = username;
+        this.matKhauCu = matKhauCu;
+        this.matKhauMoi = matKhauMoi;
+    }
 
     public String getUsername() {
         return username;

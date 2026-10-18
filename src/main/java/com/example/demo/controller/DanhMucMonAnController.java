@@ -8,8 +8,11 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/danh-muc-mon-an")
 public class DanhMucMonAnController {
-    @Autowired
-    private DanhMucMonAnRepository repository;
+    private final DanhMucMonAnRepository repository;
+
+    public DanhMucMonAnController(DanhMucMonAnRepository repository) {
+        this.repository = repository;
+    }
 
     @GetMapping
     public List<DanhMucMonAn> getAll() {

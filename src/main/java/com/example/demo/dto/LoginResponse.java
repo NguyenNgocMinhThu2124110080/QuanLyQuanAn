@@ -1,16 +1,7 @@
 package com.example.demo.dto;
 
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
-
 // PHẦN CỦA: ĐẶNG VŨ THANH PHÁT
 // DTO phản hồi kết quả đăng nhập và quyền hạn
-@Data
-@AllArgsConstructor
-@NoArgsConstructor
-@Builder
 public class LoginResponse {
     private boolean success;
     private String message;
@@ -20,6 +11,49 @@ public class LoginResponse {
     private Integer userId;
     private Integer nvId;
     private String token; // Chuỗi JWT Token để xác thực các request sau
+
+    public LoginResponse() {
+    }
+
+    public LoginResponse(boolean success, String message, String username, String vaiTro,
+                         String hoTen, Integer userId, Integer nvId, String token) {
+        this.success = success;
+        this.message = message;
+        this.username = username;
+        this.vaiTro = vaiTro;
+        this.hoTen = hoTen;
+        this.userId = userId;
+        this.nvId = nvId;
+        this.token = token;
+    }
+
+    public static Builder builder() {
+        return new Builder();
+    }
+
+    public static class Builder {
+        private boolean success;
+        private String message;
+        private String username;
+        private String vaiTro;
+        private String hoTen;
+        private Integer userId;
+        private Integer nvId;
+        private String token;
+
+        public Builder success(boolean val) { this.success = val; return this; }
+        public Builder message(String val) { this.message = val; return this; }
+        public Builder username(String val) { this.username = val; return this; }
+        public Builder vaiTro(String val) { this.vaiTro = val; return this; }
+        public Builder hoTen(String val) { this.hoTen = val; return this; }
+        public Builder userId(Integer val) { this.userId = val; return this; }
+        public Builder nvId(Integer val) { this.nvId = val; return this; }
+        public Builder token(String val) { this.token = val; return this; }
+
+        public LoginResponse build() {
+            return new LoginResponse(success, message, username, vaiTro, hoTen, userId, nvId, token);
+        }
+    }
 
     public static LoginResponse failure(String message) {
         LoginResponse res = new LoginResponse();

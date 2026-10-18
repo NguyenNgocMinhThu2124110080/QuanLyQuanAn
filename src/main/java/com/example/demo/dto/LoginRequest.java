@@ -1,17 +1,18 @@
 package com.example.demo.dto;
 
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
-
 // PHẦN CỦA: ĐẶNG VŨ THANH PHÁT
 // DTO yêu cầu đăng nhập hệ thống
-@Data
-@AllArgsConstructor
-@NoArgsConstructor
 public class LoginRequest {
     private String username;
     private String password;
+
+    public LoginRequest() {
+    }
+
+    public LoginRequest(String username, String password) {
+        this.username = username;
+        this.password = password;
+    }
 
     public String getUsername() {
         return username;

@@ -31,4 +31,63 @@ public class MonAn {
     @ManyToOne
     @JoinColumn(name = "ma_danhmuc")
     private DanhMucMonAn danhMuc;
+
+    public MonAn() {
+    }
+
+    public Integer getMaMon() {
+        return maMon;
+    }
+
+    public void setMaMon(Integer maMon) {
+        this.maMon = maMon;
+    }
+
+    public String getTenMon() {
+        return tenMon;
+    }
+
+    public void setTenMon(String tenMon) {
+        this.tenMon = tenMon;
+    }
+
+    public BigDecimal getGia() {
+        return gia;
+    }
+
+    public void setGia(BigDecimal gia) {
+        this.gia = gia;
+    }
+
+    public String getHinhAnh() {
+        return hinhAnh;
+    }
+
+    public void setHinhAnh(String hinhAnh) {
+        this.hinhAnh = hinhAnh;
+    }
+
+    public String getMoTa() {
+        return moTa;
+    }
+
+    public void setMoTa(String moTa) {
+        this.moTa = moTa;
+    }
+
+    public Integer getTrangThai() {
+        return trangThai;
+    }
+
+    public void setTrangThai(Integer trangThai) {
+        this.trangThai = trangThai;
+    }
+
+    public DanhMucMonAn getDanhMuc() {
+        return danhMuc;
+    }
+
+    public void setDanhMuc(DanhMucMonAn danhMuc) {
+        this.danhMuc = danhMuc;
+    }
 }
