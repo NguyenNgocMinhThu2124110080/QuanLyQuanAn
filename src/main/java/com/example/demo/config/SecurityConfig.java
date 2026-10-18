@@ -86,6 +86,7 @@ public class SecurityConfig {
                     "/api/don-hang/**",
                     "/api/mon-an/**",
                     "/api/danh-muc-mon-an/**",
+                    "/api/cong-thuc-mon/**",
                     "/api/nguyen-lieu/**",
                     "/api/nha-cung-cap/**",
                     "/api/phieu-nhap-xuat/**",
