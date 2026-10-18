@@ -71,29 +71,28 @@ public class SecurityConfig {
                     "/error"
                 ).permitAll()
 
-                // Cho phép xem thực đơn, danh mục, bàn ăn, kho hàng và báo cáo công khai (GET requests)
-                .requestMatchers(HttpMethod.GET,
+                // 2. Phân quyền chỉ dành riêng cho ADMIN
+                .requestMatchers("/api/phan-quyen/**").hasAuthority("ADMIN")
+
+                // 3. Phân quyền dành cho ADMIN và QUAN_LY (Quản lý nhân sự, xem báo cáo doanh thu)
+                .requestMatchers(
+                    "/api/nhan-vien/**",
+                    "/api/thanh-toan/doanh-thu-theo-ngay"
+                ).hasAnyAuthority("ADMIN", "QUAN_LY")
+
+                // 4. Cho phép các nghiệp vụ bàn ăn, thực đơn, gọi món, kho hàng và thanh toán hoạt động thông suốt
+                .requestMatchers(
                     "/api/ban-an/**",
+                    "/api/don-hang/**",
                     "/api/mon-an/**",
                     "/api/danh-muc-mon-an/**",
                     "/api/nguyen-lieu/**",
                     "/api/nha-cung-cap/**",
                     "/api/phieu-nhap-xuat/**",
-                    "/api/don-hang/**",
                     "/api/thanh-toan/**"
                 ).permitAll()
 
-                // 2. Phân quyền chỉ dành riêng cho ADMIN
-                .requestMatchers("/api/phan-quyen/**").hasAuthority("ADMIN")
-
-                // 3. Phân quyền dành cho ADMIN và QUAN_LY (Quản lý nhân sự, xem doanh thu)
-                .requestMatchers(
-                    "/api/nhan-vien/tao-tron-goi",
-                    "/api/nhan-vien/*/luong-chuc-vu",
-                    "/api/thanh-toan/doanh-thu-theo-ngay"
-                ).hasAnyAuthority("ADMIN", "QUAN_LY")
-
-                // 4. Các API nghiệp vụ khác chỉ cần đăng nhập có Bearer Token hợp lệ
+                // 5. Các API tài khoản khác yêu cầu phải đăng nhập hợp lệ
                 .requestMatchers("/api/**").authenticated()
 
                 // Mọi tài nguyên khác cho phép truy cập
