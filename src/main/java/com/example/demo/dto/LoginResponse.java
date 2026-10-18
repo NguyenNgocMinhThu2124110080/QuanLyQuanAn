@@ -19,4 +19,5 @@ public class LoginResponse {
     private String hoTen;       // Tên người dùng thực tế
     private Integer userId;
     private Integer nvId;
+    private String token; // Chuỗi JWT Token để xác thực các request sau
 }

@@ -28,6 +28,7 @@ public class NhanVienService {
     private final NguoiDungRepository nguoiDungRepository;
     private final TaiKhoanRepository taiKhoanRepository;
     private final PhanQuyenRepository phanQuyenRepository;
+    private final org.springframework.security.crypto.password.PasswordEncoder passwordEncoder;
 
     /**
      * Tạo mới một nhân viên trọn gói (gồm Tài khoản -> Người dùng -> Hồ sơ nhân viên)
@@ -46,10 +47,10 @@ public class NhanVienService {
         PhanQuyen phanQuyen = phanQuyenRepository.findById(req.getPqId())
                 .orElseThrow(() -> new IllegalArgumentException("Mã phân quyền không tồn tại: " + req.getPqId()));
 
-        // 3. Tạo tài khoản
+        // 3. Tạo tài khoản với mật khẩu mã hóa BCrypt
         TaiKhoan tk = new TaiKhoan();
         tk.setUsername(req.getUsername());
-        tk.setPassword(req.getPassword());
+        tk.setPassword(passwordEncoder.encode(req.getPassword()));
         tk.setEmail(req.getEmail());
         tk.setPhanQuyen(phanQuyen);
         tk.setTrangThai(1);

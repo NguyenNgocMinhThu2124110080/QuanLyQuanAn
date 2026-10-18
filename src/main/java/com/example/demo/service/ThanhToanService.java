@@ -1,5 +1,6 @@
 package com.example.demo.service;
 
+import com.example.demo.dto.DoanhThuResponse;
 import com.example.demo.dto.ThanhToanRequest;
 import com.example.demo.entity.BanAn;
 import com.example.demo.entity.DonHang;
@@ -13,10 +14,14 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
+import java.util.List;
 
 // PHẦN CỦA: ĐẶNG VŨ THANH PHÁT
-// Buổi 3: Nghiệp vụ Quy trình Thanh toán Hoá đơn & Giải phóng Bàn ăn
+// Buổi 4: Nghiệp vụ Thanh toán Hoá đơn, Giải phóng Bàn & Thống kê Doanh thu
 @Service
 @RequiredArgsConstructor
 public class ThanhToanService {
@@ -52,7 +57,7 @@ public class ThanhToanService {
         tt.setDonHang(donHang);
         tt.setNhanVien(nv);
         tt.setPhuongThuc(req.getPhuongThuc() != null ? req.getPhuongThuc() : "TIEN_MAT");
-        tt.setSoTien(donHang.getTongTien());
+        tt.setSoTien(donHang.getTongTien() != null ? donHang.getTongTien() : BigDecimal.ZERO);
         tt.setThoiGian(LocalDateTime.now());
         tt.setTrangThai("THANH_CONG");
 
@@ -70,5 +75,46 @@ public class ThanhToanService {
         }
 
         return ttSaved;
+    }
+
+    /**
+     * Thống kê tổng doanh thu theo ngày cụ thể và phân loại theo phương thức thanh toán
+     */
+    public DoanhThuResponse thongKeDoanhThuTheoNgay(LocalDate ngay) {
+        if (ngay == null) ngay = LocalDate.now();
+
+        LocalDateTime batDau = ngay.atStartOfDay();
+        LocalDateTime ketThuc = ngay.atTime(LocalTime.MAX);
+
+        List<ThanhToan> danhSach = thanhToanRepository.findByThoiGianBetween(batDau, ketThuc);
+
+        BigDecimal tongDoanhThu = BigDecimal.ZERO;
+        BigDecimal tienMat = BigDecimal.ZERO;
+        BigDecimal chuyenKhoan = BigDecimal.ZERO;
+        BigDecimal the = BigDecimal.ZERO;
+
+        for (ThanhToan tt : danhSach) {
+            if ("THANH_CONG".equalsIgnoreCase(tt.getTrangThai())) {
+                BigDecimal soTien = tt.getSoTien() != null ? tt.getSoTien() : BigDecimal.ZERO;
+                tongDoanhThu = tongDoanhThu.add(soTien);
+
+                if ("TIEN_MAT".equalsIgnoreCase(tt.getPhuongThuc())) {
+                    tienMat = tienMat.add(soTien);
+                } else if ("CHUYEN_KHOAN".equalsIgnoreCase(tt.getPhuongThuc())) {
+                    chuyenKhoan = chuyenKhoan.add(soTien);
+                } else if ("THE".equalsIgnoreCase(tt.getPhuongThuc())) {
+                    the = the.add(soTien);
+                }
+            }
+        }
+
+        return DoanhThuResponse.builder()
+                .ngay(ngay)
+                .tongSoDonThanhToan((long) danhSach.size())
+                .tongDoanhThu(tongDoanhThu)
+                .tienMat(tienMat)
+                .chuyenKhoan(chuyenKhoan)
+                .the(the)
+                .build();
     }
 }

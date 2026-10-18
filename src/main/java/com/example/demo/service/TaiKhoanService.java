@@ -9,13 +9,15 @@ import com.example.demo.entity.TaiKhoan;
 import com.example.demo.repository.NguoiDungRepository;
 import com.example.demo.repository.NhanVienRepository;
 import com.example.demo.repository.TaiKhoanRepository;
+import com.example.demo.security.JwtTokenProvider;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.Optional;
 
 // PHẦN CỦA: ĐẶNG VŨ THANH PHÁT
-// Buổi 3: Nghiệp vụ Quản lý Tài khoản & Xác thực Đăng nhập
+// Buổi 4: Nghiệp vụ Quản lý Tài khoản, Xác thực Đăng nhập JWT & Mã hóa BCrypt
 @Service
 @RequiredArgsConstructor
 public class TaiKhoanService {
@@ -23,9 +25,11 @@ public class TaiKhoanService {
     private final TaiKhoanRepository taiKhoanRepository;
     private final NguoiDungRepository nguoiDungRepository;
     private final NhanVienRepository nhanVienRepository;
+    private final PasswordEncoder passwordEncoder;
+    private final JwtTokenProvider jwtTokenProvider;
 
     /**
-     * Xác thực thông tin đăng nhập
+     * Xác thực thông tin đăng nhập và sinh mã JWT Token
      */
     public LoginResponse dangNhap(LoginRequest request) {
         Optional<TaiKhoan> optTk = taiKhoanRepository.findByUsername(request.getUsername());
@@ -47,12 +51,21 @@ public class TaiKhoanService {
                     .build();
         }
 
-        // Kiểm tra mật khẩu
-        if (!tk.getPassword().equals(request.getPassword())) {
+        // Kiểm tra mật khẩu (hỗ trợ cả chuẩn mã hóa BCrypt và mật khẩu khởi tạo ban đầu)
+        boolean isMatch = passwordEncoder.matches(request.getPassword(), tk.getPassword()) 
+                       || request.getPassword().equals(tk.getPassword());
+
+        if (!isMatch) {
             return LoginResponse.builder()
                     .success(false)
                     .message("Mật khẩu không chính xác!")
                     .build();
+        }
+
+        // Tự động nâng cấp mật khẩu sang mã hóa BCrypt nếu chưa mã hóa
+        if (request.getPassword().equals(tk.getPassword()) && !tk.getPassword().startsWith("$2a$")) {
+            tk.setPassword(passwordEncoder.encode(request.getPassword()));
+            taiKhoanRepository.save(tk);
         }
 
         // Tìm thông tin người dùng và nhân viên liên kết
@@ -66,7 +79,10 @@ public class TaiKhoanService {
             nvId = optNv.map(NhanVien::getNvId).orElse(null);
         }
 
-        String vaiTro = tk.getPhanQuyen() != null ? tk.getPhanQuyen().getTenPq() : "CHUA_PHAN_QUYEN";
+        String vaiTro = tk.getPhanQuyen() != null ? tk.getPhanQuyen().getTenPq() : "USER";
+
+        // Sinh mã Token JWT chứa thông tin tài khoản và phân quyền
+        String token = jwtTokenProvider.generateToken(tk.getUsername(), vaiTro);
 
         return LoginResponse.builder()
                 .success(true)
@@ -76,22 +92,26 @@ public class TaiKhoanService {
                 .hoTen(hoTen)
                 .userId(userId)
                 .nvId(nvId)
+                .token(token)
                 .build();
     }
 
     /**
-     * Đổi mật khẩu tài khoản
+     * Đổi mật khẩu tài khoản có mã hóa BCrypt
      */
     public boolean doiMatKhau(DoiMatKhauRequest request) {
         Optional<TaiKhoan> optTk = taiKhoanRepository.findByUsername(request.getUsername());
         if (optTk.isEmpty()) return false;
 
         TaiKhoan tk = optTk.get();
-        if (!tk.getPassword().equals(request.getMatKhauCu())) {
+        boolean isMatch = passwordEncoder.matches(request.getMatKhauCu(), tk.getPassword()) 
+                       || request.getMatKhauCu().equals(tk.getPassword());
+        if (!isMatch) {
             return false;
         }
 
-        tk.setPassword(request.getMatKhauMoi());
+        // Mã hóa mật khẩu mới bằng BCrypt trước khi lưu
+        tk.setPassword(passwordEncoder.encode(request.getMatKhauMoi()));
         taiKhoanRepository.save(tk);
         return true;
     }

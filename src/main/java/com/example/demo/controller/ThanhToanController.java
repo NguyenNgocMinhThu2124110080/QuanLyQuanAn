@@ -30,6 +30,12 @@ public class ThanhToanController {
         }
     }
 
+    @GetMapping("/doanh-thu-theo-ngay")
+    public ResponseEntity<?> getDoanhThuTheoNgay(
+            @RequestParam(required = false) @org.springframework.format.annotation.DateTimeFormat(iso = org.springframework.format.annotation.DateTimeFormat.ISO.DATE) java.time.LocalDate ngay) {
+        return ResponseEntity.ok(thanhToanService.thongKeDoanhThuTheoNgay(ngay));
+    }
+
     @GetMapping("/don-hang/{maDon}")
     public ResponseEntity<ThanhToan> timTheoDonHang(@PathVariable Integer maDon) {
         return thanhToanRepository.findByDonHang_MaDon(maDon)
