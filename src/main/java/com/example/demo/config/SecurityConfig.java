@@ -5,6 +5,7 @@ import com.example.demo.security.JwtAuthenticationEntryPoint;
 import com.example.demo.security.JwtAuthenticationFilter;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
@@ -68,6 +69,13 @@ public class SecurityConfig {
                     "/index.html",
                     "/static/**",
                     "/error"
+                ).permitAll()
+
+                // Cho phép xem thực đơn, danh mục và bàn ăn công khai (GET requests)
+                .requestMatchers(HttpMethod.GET,
+                    "/api/ban-an/**",
+                    "/api/mon-an/**",
+                    "/api/danh-muc-mon-an/**"
                 ).permitAll()
 
                 // 2. Phân quyền chỉ dành riêng cho ADMIN
