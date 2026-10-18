@@ -1237,44 +1237,17 @@
         setTimeout(() => { t.className = ''; }, 4000);
     }
 
-    async function apiFetch(url, options = {}) {
-        const headers = {
-            'Content-Type': 'application/json',
-            ...(currentUser.token ? { 'Authorization': `Bearer ${currentUser.token}` } : {}),
-            ...(options.headers || {})
-        };
+    let authPromise = null;
 
-        const res = await fetch(url, { ...options, headers });
-
-        if (res.status === 401) {
-            // Token expired or invalid, auto login with admin
-            console.warn("401 Unauthorized - Attempting auto re-login as admin...");
-            await quickLogin('admin', '123456');
-            // Retry request with new token
-            headers['Authorization'] = `Bearer ${currentUser.token}`;
-            return (await fetch(url, { ...options, headers })).json();
-        }
-
-        const data = await res.json().catch(() => null);
-        if (!res.ok) {
-            const errMsg = data?.message || (typeof data === 'string' ? data : `HTTP ${res.status}`);
-            throw new Error(errMsg);
-        }
-        return data;
-    }
-
-    // ─────────────────────────────────────────────────────────────
-    // AUTHENTICATION & USER MANAGEMENT (ĐẶNG VŨ THANH PHÁT)
-    // ─────────────────────────────────────────────────────────────
-    async function quickLogin(username, password) {
+    async function doLogin(username, password, isBackground = false) {
         try {
             const res = await fetch('/api/tai-khoan/dang-nhap', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ username, password })
             });
-            const data = await res.json();
-            if (data && data.success) {
+            const data = await res.json().catch(() => null);
+            if (res.ok && data && data.success && data.token) {
                 currentUser = {
                     token: data.token,
                     username: data.username,
@@ -1290,14 +1263,71 @@
 
                 updateUserHeader();
                 closeModal('login-modal');
-                showToast(`Đăng nhập thành công với tài khoản: ${currentUser.username}`);
-                refreshCurrentTab();
+                if (!isBackground) {
+                    showToast(`Đăng nhập thành công với tài khoản: ${currentUser.username}`);
+                    refreshCurrentTab();
+                }
+                return currentUser.token;
             } else {
-                throw new Error(data?.message || 'Đăng nhập không thành công');
+                const msg = data?.message || 'Đăng nhập không thành công';
+                if (!isBackground) showToast('Lỗi đăng nhập: ' + msg, 'error');
+                throw new Error(msg);
             }
         } catch (e) {
-            showToast('Lỗi đăng nhập: ' + e.message, 'error');
+            if (!isBackground) showToast('Lỗi đăng nhập: ' + e.message, 'error');
+            throw e;
         }
+    }
+
+    async function quickLogin(username, password) {
+        return doLogin(username, password, false);
+    }
+
+    async function ensureAuth() {
+        if (!authPromise) {
+            authPromise = doLogin('admin', '123456', true).finally(() => {
+                authPromise = null;
+            });
+        }
+        return authPromise;
+    }
+
+    async function apiFetch(url, options = {}) {
+        if (!currentUser.token) {
+            try {
+                await ensureAuth();
+            } catch (err) {
+                console.warn('Chưa có token và auto-login lỗi:', err);
+            }
+        }
+
+        let headers = {
+            'Content-Type': 'application/json',
+            ...(currentUser.token ? { 'Authorization': `Bearer ${currentUser.token}` } : {}),
+            ...(options.headers || {})
+        };
+
+        let res = await fetch(url, { ...options, headers });
+
+        if (res.status === 401) {
+            console.warn("401 Unauthorized - Token hết hạn, đang tự động đăng nhập lại...");
+            try {
+                const newToken = await ensureAuth();
+                if (newToken) {
+                    headers['Authorization'] = `Bearer ${newToken}`;
+                    res = await fetch(url, { ...options, headers });
+                }
+            } catch (err) {
+                console.error("Không thể làm mới token:", err);
+            }
+        }
+
+        const data = await res.json().catch(() => null);
+        if (!res.ok) {
+            const errMsg = data?.message || (typeof data === 'string' ? data : `HTTP ${res.status}`);
+            throw new Error(errMsg);
+        }
+        return data;
     }
 
     async function handleManualLogin(e) {
@@ -1349,9 +1379,11 @@
 
     async function loadTables() {
         try {
-            allTables = await apiFetch('/api/ban-an');
+            const data = await apiFetch('/api/ban-an');
+            allTables = Array.isArray(data) ? data : [];
             renderTableGrid();
         } catch (e) {
+            allTables = [];
             $('tables-container').innerHTML = `<p style="color:var(--danger)">Lỗi tải danh sách bàn: ${escHtml(e.message)}</p>`;
         }
     }
@@ -1364,6 +1396,7 @@
     }
 
     function renderTableGrid() {
+        if (!Array.isArray(allTables)) allTables = [];
         const total = allTables.length;
         const emptyCount = allTables.filter(t => t.trangThai === 'TRONG').length;
         const busyCount = allTables.filter(t => t.trangThai === 'CO_KHACH').length;
@@ -1590,16 +1623,18 @@
     // ─────────────────────────────────────────────────────────────
     async function loadDishes() {
         try {
-            allDishes = await apiFetch('/api/mon-an');
+            const data = await apiFetch('/api/mon-an');
+            allDishes = Array.isArray(data) ? data : [];
             renderFoodList();
         } catch (e) {
+            allDishes = [];
             $('food-list-tbody').innerHTML = `<tr><td colspan="4" class="err">${escHtml(e.message)}</td></tr>`;
         }
     }
 
     function renderFoodList() {
         const tbody = $('food-list-tbody');
-        if (allDishes.length === 0) {
+        if (!Array.isArray(allDishes) || allDishes.length === 0) {
             tbody.innerHTML = '<tr><td colspan="4" style="text-align:center; color:var(--text-muted);">Chưa có món ăn nào.</td></tr>';
             return;
         }
@@ -1674,22 +1709,25 @@
     // CATEGORY CRUD
     async function loadCategories() {
         try {
-            allCategories = await apiFetch('/api/danh-muc-mon-an');
+            const data = await apiFetch('/api/danh-muc-mon-an');
+            allCategories = Array.isArray(data) ? data : [];
             renderCategoryList();
             renderCategoryDropdown();
         } catch (e) {
+            allCategories = [];
             $('category-list-tbody').innerHTML = `<tr><td colspan="4" class="err">${escHtml(e.message)}</td></tr>`;
         }
     }
 
     function renderCategoryDropdown() {
         const sel = $('food-category');
+        if (!Array.isArray(allCategories)) allCategories = [];
         sel.innerHTML = allCategories.map(c => `<option value="${c.maDanhmuc}">${escHtml(c.tenDanhmuc)}</option>`).join('');
     }
 
     function renderCategoryList() {
         const tbody = $('category-list-tbody');
-        if (allCategories.length === 0) {
+        if (!Array.isArray(allCategories) || allCategories.length === 0) {
             tbody.innerHTML = '<tr><td colspan="4" style="text-align:center; color:var(--text-muted);">Chưa có danh mục nào.</td></tr>';
             return;
         }
@@ -1759,10 +1797,12 @@
     // ─────────────────────────────────────────────────────────────
     async function loadInventoryReport() {
         try {
-            allIngredients = await apiFetch('/api/nguyen-lieu/bao-cao-ton-kho');
+            const data = await apiFetch('/api/nguyen-lieu/bao-cao-ton-kho');
+            allIngredients = Array.isArray(data) ? data : [];
             renderInventoryTable();
             await loadInventoryStats();
         } catch (e) {
+            allIngredients = [];
             $('inventory-tbody').innerHTML = `<tr><td colspan="7" class="err">${escHtml(e.message)}</td></tr>`;
         }
     }
@@ -1770,7 +1810,7 @@
     async function loadInventoryStats() {
         try {
             const stats = await apiFetch('/api/phieu-nhap-xuat/thong-ke');
-            $('kpi-total-import-val').textContent = formatVND(stats.tongTienNhap);
+            $('kpi-total-import-val').textContent = formatVND(stats ? stats.tongTienNhap : 0);
         } catch (e) {
             console.warn(e);
         }
@@ -1778,6 +1818,7 @@
 
     function renderInventoryTable() {
         const tbody = $('inventory-tbody');
+        if (!Array.isArray(allIngredients)) allIngredients = [];
         const total = allIngredients.length;
         const warningCount = allIngredients.filter(i => i.mucDoCanhBao === 'SAP_HET').length;
         const outCount = allIngredients.filter(i => i.mucDoCanhBao === 'HET_HANG').length;
@@ -1816,10 +1857,12 @@
     async function loadInventoryDropdowns() {
         try {
             const rawIngredients = await apiFetch('/api/nguyen-lieu');
-            allSuppliers = await apiFetch('/api/nha-cung-cap');
+            const suppliers = await apiFetch('/api/nha-cung-cap');
+            const ingList = Array.isArray(rawIngredients) ? rawIngredients : [];
+            allSuppliers = Array.isArray(suppliers) ? suppliers : [];
 
             $('movement-ingredient').innerHTML = '<option value="">-- Chọn nguyên liệu --</option>' +
-                rawIngredients.map(i => `<option value="${i.nlId}" data-unit="${escHtml(i.donViTinh)}" data-price="${i.giaNhap || 0}" data-ncc="${i.nhaCungCap ? i.nhaCungCap.nccId : ''}">${escHtml(i.tenNguyenLieu)} (${escHtml(i.donViTinh)})</option>`).join('');
+                ingList.map(i => `<option value="${i.nlId}" data-unit="${escHtml(i.donViTinh)}" data-price="${i.giaNhap || 0}" data-ncc="${i.nhaCungCap ? i.nhaCungCap.nccId : ''}">${escHtml(i.tenNguyenLieu)} (${escHtml(i.donViTinh)})</option>`).join('');
 
             $('movement-supplier').innerHTML = '<option value="">-- Chọn nhà cung cấp --</option>' +
                 allSuppliers.map(s => `<option value="${s.nccId}">${escHtml(s.tenNcc)}</option>`).join('');
@@ -1891,7 +1934,8 @@
 
     async function loadPendingOrders() {
         try {
-            pendingOrdersList = await apiFetch('/api/don-hang/trang-thai/CHUA_THANH_TOAN');
+            const data = await apiFetch('/api/don-hang/trang-thai/CHUA_THANH_TOAN');
+            pendingOrdersList = Array.isArray(data) ? data : [];
             const tbody = $('pending-orders-tbody');
 
             if (pendingOrdersList.length === 0) {
@@ -1911,13 +1955,15 @@
                 </tr>
             `).join('');
         } catch (e) {
+            pendingOrdersList = [];
             $('pending-orders-tbody').innerHTML = `<tr><td colspan="5" class="err">${escHtml(e.message)}</td></tr>`;
         }
     }
 
     async function loadRecentPayments() {
         try {
-            const list = await apiFetch('/api/thanh-toan');
+            const res = await apiFetch('/api/thanh-toan');
+            const list = Array.isArray(res) ? res : [];
             const tbody = $('recent-payments-tbody');
 
             if (list.length === 0) {
@@ -2074,18 +2120,20 @@
     async function initApp() {
         updateUserHeader();
 
-        // Nếu chưa có token, thử tự động đăng nhập admin để người dùng trải nghiệm ngay
+        // Đảm bảo có token trước khi nạp dữ liệu
         if (!currentUser.token) {
-            await quickLogin('admin', '123456');
+            try {
+                await ensureAuth();
+            } catch (e) {
+                console.warn("Auto login error:", e);
+            }
         }
 
-        // Tải các tài nguyên khởi tạo
-        await Promise.all([
-            loadTables(),
-            loadDishes(),
-            loadCategories(),
-            loadInventoryReport()
-        ]);
+        // Tải các tài nguyên khởi tạo tuần tự
+        await loadTables();
+        await loadDishes();
+        await loadCategories();
+        await loadInventoryReport();
     }
 
     window.addEventListener('DOMContentLoaded', initApp);
