@@ -1394,6 +1394,17 @@
     }
 
     let authPromise = null;
+    let pendingAuthAction = null;
+
+    function requireAuth(actionCallback, actionName = 'thực hiện thao tác này') {
+        if (currentUser && currentUser.token && !isTokenExpired(currentUser.token)) {
+            return true;
+        }
+        pendingAuthAction = actionCallback || null;
+        showToast(`Vui lòng đăng nhập để ${actionName}!`, 'error');
+        openLoginModal();
+        return false;
+    }
 
     async function doLogin(username, password, isBackground = false) {
         try {
@@ -1420,7 +1431,17 @@
                 updateUserHeader();
                 closeModal('login-modal');
                 if (!isBackground) {
-                    showToast(`Đăng nhập thành công với tài khoản: ${currentUser.username}`);
+                    showToast(`Đăng nhập thành công với tài khoản: ${currentUser.username} (${currentUser.vaiTro})`);
+                }
+
+                // Nếu có hành động đang chờ trước đó, thực thi ngay
+                if (pendingAuthAction) {
+                    const act = pendingAuthAction;
+                    pendingAuthAction = null;
+                    await act();
+                } else if (selectedTable) {
+                    await selectTable(selectedTable.maBan);
+                } else {
                     refreshCurrentTab();
                 }
                 return currentUser.token;
@@ -1436,15 +1457,23 @@
     }
 
     function isTokenExpired(token) {
-        if (!token) return true;
+        if (!token || typeof token !== 'string') return true;
         try {
             const parts = token.split('.');
             if (parts.length !== 3) return true;
-            const payload = JSON.parse(atob(parts[1].replace(/-/g, '+').replace(/_/g, '/')));
-            if (!payload.exp) return false;
-            return (Date.now() / 1000) >= (payload.exp - 60);
+            let b64 = parts[1].replace(/-/g, '+').replace(/_/g, '/');
+            while (b64.length % 4 !== 0) {
+                b64 += '=';
+            }
+            const jsonPayload = decodeURIComponent(atob(b64).split('').map(function(c) {
+                return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
+            }).join(''));
+            const payload = JSON.parse(jsonPayload);
+            if (!payload || !payload.exp) return false;
+            return (Date.now() / 1000) >= (payload.exp - 30);
         } catch (e) {
-            return true;
+            console.warn("Lỗi kiểm tra token (bỏ qua):", e);
+            return false;
         }
     }
 
@@ -1459,17 +1488,23 @@
             ...(options.headers || {})
         };
 
-        let res = await fetch(url, { ...options, headers });
+        let res;
+        try {
+            res = await fetch(url, { ...options, headers });
+        } catch (err) {
+            console.error("Lỗi fetch:", err);
+            throw new Error('Lỗi kết nối máy chủ: ' + err.message);
+        }
 
         if (res.status === 401) {
-            console.warn("401 Unauthorized");
-            if (currentUser && currentUser.token) {
-                handleLogout();
-                showToast('Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại!', 'error');
-            } else {
-                showToast('Vui lòng đăng nhập để thực hiện chức năng này!', 'error');
-                openLoginModal();
-            }
+            console.warn("401 Unauthorized:", url);
+            // Xóa token lỗi để tránh lặp lại header hỏng
+            currentUser.token = '';
+            localStorage.removeItem('jwt_token');
+            updateUserHeader();
+
+            showToast('Phiên làm việc đã hết hạn hoặc cần đăng nhập!', 'error');
+            openLoginModal();
             throw new Error('Chưa đăng nhập hoặc phiên làm việc đã hết hạn');
         }
 
@@ -1526,7 +1561,6 @@
 
         updateUserHeader();
         showToast('Đã đăng xuất thành công!');
-        openLoginModal();
     }
 
     function openLoginModal() {
@@ -1683,9 +1717,7 @@
     }
 
     async function openTableAndCreateOrder(maBan) {
-        if (!currentUser || !currentUser.token) {
-            showToast('Vui lòng đăng nhập để mở bàn & tạo đơn!', 'error');
-            openLoginModal();
+        if (!requireAuth(() => openTableAndCreateOrder(maBan), 'mở bàn & tạo đơn')) {
             return;
         }
         try {
@@ -1697,33 +1729,32 @@
             await loadTables();
             await selectTable(maBan);
         } catch (e) {
-            if (e.message && (e.message.includes('Token') || e.message.includes('đăng nhập') || e.message.includes('401'))) {
-                showToast('Phiên đăng nhập đã hết hạn, vui lòng đăng nhập lại!', 'error');
-                handleLogout();
-                return;
-            }
             showToast('Lỗi mở bàn: ' + e.message, 'error');
         }
     }
 
     async function loadOrderForTable(maBan) {
         try {
-            // Find order with status CHUA_THANH_TOAN for this table
-            const orders = await apiFetch('/api/don-hang/trang-thai/CHUA_THANH_TOAN');
-            const tableOrder = orders.find(o => o.ban && o.ban.maBan === maBan);
+            // Lấy danh sách đơn hàng và lọc đơn đang phục vụ của bàn này (chưa thanh toán / chưa hủy)
+            const orders = await apiFetch('/api/don-hang');
+            const activeOrders = (Array.isArray(orders) ? orders : []).filter(o => 
+                o.ban && o.ban.maBan === maBan && o.trangThai !== 'DA_THANH_TOAN' && o.trangThai !== 'HUY'
+            );
+            const tableOrder = activeOrders.sort((a, b) => b.maDon - a.maDon)[0];
 
             if (!tableOrder) {
-                // If table is marked CO_KHACH but no active order found, allow resetting table status
+                // Nếu bàn ghi nhận CO_KHACH nhưng chưa có đơn hoạt động
                 $('order-empty-state').style.display = 'block';
                 $('order-active-state').style.display = 'none';
-                $('empty-state-text').textContent = 'Không tìm thấy đơn hàng đang hoạt động của bàn này.';
+                $('empty-state-text').textContent = 'Bàn đang ghi nhận có khách nhưng chưa có đơn hàng hoạt động.';
                 $('empty-state-actions').innerHTML = `
-                    <button class="btn btn-secondary btn-sm" onclick="resetTableStatus(${maBan})">Đặt lại bàn trống</button>
+                    <button class="btn btn-primary btn-sm" onclick="openTableAndCreateOrder(${maBan})">🛎️ Tạo đơn mới cho bàn</button>
+                    <button class="btn btn-secondary btn-sm" style="margin-left:8px;" onclick="resetTableStatus(${maBan})">🔄 Đặt lại bàn trống</button>
                 `;
                 return;
             }
 
-            // Fetch order details
+            // Lấy chi tiết đơn hàng (các món đã gọi)
             selectedOrder = await apiFetch(`/api/don-hang/${tableOrder.maDon}/chi-tiet-hoa-don`);
             renderOrderDetails(selectedOrder);
         } catch (e) {
@@ -1767,9 +1798,7 @@
     }
 
     async function addDishToCurrentOrder() {
-        if (!currentUser || !currentUser.token) {
-            showToast('Vui lòng đăng nhập trước khi gọi món!', 'error');
-            openLoginModal();
+        if (!requireAuth(() => addDishToCurrentOrder(), 'gọi món')) {
             return;
         }
         if (!selectedOrder) return;
@@ -1794,11 +1823,6 @@
             await loadOrderForTable(selectedTable.maBan);
             $('input-food-qty').value = 1;
         } catch (e) {
-            if (e.message && (e.message.includes('Token') || e.message.includes('đăng nhập') || e.message.includes('401'))) {
-                showToast('Phiên đăng nhập đã hết hạn, vui lòng đăng nhập lại!', 'error');
-                handleLogout();
-                return;
-            }
             showToast('Lỗi thêm món: ' + e.message, 'error');
         } finally {
             if (btn) { btn.disabled = false; btn.textContent = oldText; }
@@ -1806,9 +1830,7 @@
     }
 
     async function deleteDishFromOrder(maCtdh) {
-        if (!currentUser || !currentUser.token) {
-            showToast('Vui lòng đăng nhập để hủy món!', 'error');
-            openLoginModal();
+        if (!requireAuth(() => deleteDishFromOrder(maCtdh), 'hủy món')) {
             return;
         }
         if (!confirm('Bạn có chắc muốn huỷ món này khỏi đơn?')) return;
@@ -1822,9 +1844,7 @@
     }
 
     async function cancelCurrentOrder() {
-        if (!currentUser || !currentUser.token) {
-            showToast('Vui lòng đăng nhập để hủy đơn hàng!', 'error');
-            openLoginModal();
+        if (!requireAuth(() => cancelCurrentOrder(), 'hủy đơn hàng')) {
             return;
         }
         if (!selectedOrder) return;
@@ -1842,9 +1862,7 @@
     }
 
     async function resetTableStatus(maBan) {
-        if (!currentUser || !currentUser.token) {
-            showToast('Vui lòng đăng nhập để đổi trạng thái bàn!', 'error');
-            openLoginModal();
+        if (!requireAuth(() => resetTableStatus(maBan), 'đặt lại trạng thái bàn')) {
             return;
         }
         try {
@@ -2318,8 +2336,10 @@
         const tbody = $('pending-orders-tbody');
         tbody.innerHTML = `<tr><td colspan="5"><div class="ui-loading-box"><div class="spinner"></div><span>Đang tìm đơn hàng chờ thanh toán...</span></div></td></tr>`;
         try {
-            const data = await apiFetch('/api/don-hang/trang-thai/CHUA_THANH_TOAN');
-            pendingOrdersList = Array.isArray(data) ? data : [];
+            const data = await apiFetch('/api/don-hang');
+            pendingOrdersList = (Array.isArray(data) ? data : []).filter(o => 
+                o.trangThai !== 'DA_THANH_TOAN' && o.trangThai !== 'HUY'
+            );
 
             if (pendingOrdersList.length === 0) {
                 tbody.innerHTML = `
@@ -2328,7 +2348,7 @@
                             <div class="empty-icon">🧾</div>
                             <div class="empty-title">Không có đơn hàng nào chờ thanh toán</div>
                             <div class="empty-desc">Tất cả bàn ăn đã hoàn tất thanh toán hoặc chưa có khách gọi món.</div>
-                            <button class="btn btn-secondary btn-sm" onclick="switchTab('tables', document.querySelectorAll('nav.main-nav button')[0])">👉 Xem sơ đồ bàn ăn</button>
+                            <button class="btn btn-secondary btn-sm" onclick="switchNav('tables', document.querySelectorAll('nav.main-nav button')[0])">👉 Xem sơ đồ bàn ăn</button>
                         </div>
                     </td></tr>
                 `;
