@@ -126,6 +126,22 @@
             background: rgba(255,255,255,0.15);
             color: white;
         }
+        .btn-logout {
+            background: rgba(239, 68, 68, 0.2);
+            color: #fca5a5;
+            border: 1px solid rgba(239, 68, 68, 0.4);
+            padding: 4px 12px;
+            border-radius: 16px;
+            font-size: 11px;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-weight: 600;
+        }
+        .btn-logout:hover {
+            background: var(--danger);
+            color: white;
+            border-color: var(--danger);
+        }
 
         /* NAVIGATION TABS */
         nav.main-nav {
@@ -615,12 +631,13 @@
         </div>
     </div>
     <div class="header-user-bar">
-        <div class="user-badge">
-            <span id="current-user-name">Đang tải...</span>
-            <span class="role-pill" id="current-user-role">ADMIN</span>
+        <div class="user-badge" id="user-badge-container" style="display:none;">
+            <span id="current-user-name"></span>
+            <span class="role-pill" id="current-user-role"></span>
         </div>
-        <button class="btn-switch-user" onclick="openLoginModal()">Đổi tài khoản</button>
-        <a href="/swagger-ui/index.html" target="_blank" class="btn-switch-user" style="text-decoration:none">📖 Swagger</a>
+        <div id="header-auth-actions">
+            <button class="btn btn-primary btn-sm" onclick="openLoginModal()">🔐 Đăng nhập</button>
+        </div>
     </div>
 </header>
 
@@ -1301,49 +1318,25 @@
         return doLogin(username, password, false);
     }
 
-    async function ensureAuth() {
-        if (!authPromise) {
-            const validUsers = ['admin', 'quanly01', 'phucvu01', 'daubep01'];
-            const u = validUsers.includes(currentUser.username) ? currentUser.username : 'admin';
-            authPromise = doLogin(u, '123456', true).finally(() => {
-                authPromise = null;
-            });
-        }
-        return authPromise;
-    }
-
     async function apiFetch(url, options = {}) {
-        if (!currentUser.token || isTokenExpired(currentUser.token)) {
-            try {
-                await ensureAuth();
-            } catch (err) {
-                console.warn('Chưa có token hoặc token hết hạn, auto-login lỗi:', err);
-            }
-        }
-
         let headers = {
             'Content-Type': 'application/json',
-            ...(currentUser.token ? { 'Authorization': `Bearer ${currentUser.token}` } : {}),
+            ...(currentUser && currentUser.token ? { 'Authorization': `Bearer ${currentUser.token}` } : {}),
             ...(options.headers || {})
         };
 
         let res = await fetch(url, { ...options, headers });
 
         if (res.status === 401) {
-            console.warn("401 Unauthorized - Token hết hạn, đang tự động đăng nhập lại...");
-            try {
-                currentUser.token = '';
-                localStorage.removeItem('jwt_token');
-                const validUsers = ['admin', 'quanly01', 'phucvu01', 'daubep01'];
-                const u = validUsers.includes(currentUser.username) ? currentUser.username : 'admin';
-                const newToken = await doLogin(u, '123456', true);
-                if (newToken) {
-                    headers['Authorization'] = `Bearer ${newToken}`;
-                    res = await fetch(url, { ...options, headers });
-                }
-            } catch (err) {
-                console.error("Không thể làm mới token:", err);
+            console.warn("401 Unauthorized");
+            if (currentUser && currentUser.token) {
+                handleLogout();
+                showToast('Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại!', 'error');
+            } else {
+                showToast('Vui lòng đăng nhập để thực hiện chức năng này!', 'error');
+                openLoginModal();
             }
+            throw new Error('Chưa đăng nhập hoặc phiên làm việc đã hết hạn');
         }
 
         const data = await res.json().catch(() => null);
@@ -1362,8 +1355,37 @@
     }
 
     function updateUserHeader() {
-        $('current-user-name').textContent = currentUser.hoTen || currentUser.username || 'Khách';
-        $('current-user-role').textContent = currentUser.vaiTro || 'ADMIN';
+        const userBadge = $('user-badge-container');
+        const authActions = $('header-auth-actions');
+
+        if (currentUser && currentUser.token) {
+            userBadge.style.display = 'inline-flex';
+            $('current-user-name').textContent = currentUser.hoTen || currentUser.username;
+            $('current-user-role').textContent = currentUser.vaiTro || 'USER';
+            authActions.innerHTML = `<button class="btn-logout" onclick="handleLogout()">🚪 Đăng xuất</button>`;
+        } else {
+            userBadge.style.display = 'none';
+            authActions.innerHTML = `<button class="btn btn-primary btn-sm" onclick="openLoginModal()">🔐 Đăng nhập</button>`;
+        }
+    }
+
+    function handleLogout() {
+        currentUser = {
+            token: '',
+            username: '',
+            hoTen: '',
+            vaiTro: '',
+            nvId: null
+        };
+        localStorage.removeItem('jwt_token');
+        localStorage.removeItem('jwt_username');
+        localStorage.removeItem('jwt_hoten');
+        localStorage.removeItem('jwt_vaitro');
+        localStorage.removeItem('jwt_nvid');
+
+        updateUserHeader();
+        showToast('Đã đăng xuất thành công!');
+        openLoginModal();
     }
 
     function openLoginModal() {
@@ -1492,6 +1514,11 @@
     }
 
     async function openTableAndCreateOrder(maBan) {
+        if (!currentUser || !currentUser.token) {
+            showToast('Vui lòng đăng nhập để mở bàn & tạo đơn!', 'error');
+            openLoginModal();
+            return;
+        }
         try {
             const order = await apiFetch('/api/don-hang/mo-ban-tao-don', {
                 method: 'POST',
@@ -1502,22 +1529,9 @@
             await selectTable(maBan);
         } catch (e) {
             if (e.message && (e.message.includes('Token') || e.message.includes('đăng nhập') || e.message.includes('401'))) {
-                try {
-                    currentUser.token = '';
-                    localStorage.removeItem('jwt_token');
-                    await ensureAuth();
-                    const order = await apiFetch('/api/don-hang/mo-ban-tao-don', {
-                        method: 'POST',
-                        body: JSON.stringify({ maBan: maBan, maNv: currentUser.nvId || 1 })
-                    });
-                    showToast(`Đã mở ${selectedTable ? selectedTable.tenBan : 'bàn'} thành công!`);
-                    await loadTables();
-                    await selectTable(maBan);
-                    return;
-                } catch (retryErr) {
-                    showToast('Lỗi mở bàn: ' + retryErr.message, 'error');
-                    return;
-                }
+                showToast('Phiên đăng nhập đã hết hạn, vui lòng đăng nhập lại!', 'error');
+                handleLogout();
+                return;
             }
             showToast('Lỗi mở bàn: ' + e.message, 'error');
         }
@@ -1584,6 +1598,11 @@
     }
 
     async function addDishToCurrentOrder() {
+        if (!currentUser || !currentUser.token) {
+            showToast('Vui lòng đăng nhập trước khi gọi món!', 'error');
+            openLoginModal();
+            return;
+        }
         if (!selectedOrder) return;
         const foodId = $('select-food-to-order').value;
         const qty = Number($('input-food-qty').value);
@@ -1602,11 +1621,21 @@
             await loadOrderForTable(selectedTable.maBan);
             $('input-food-qty').value = 1;
         } catch (e) {
+            if (e.message && (e.message.includes('Token') || e.message.includes('đăng nhập') || e.message.includes('401'))) {
+                showToast('Phiên đăng nhập đã hết hạn, vui lòng đăng nhập lại!', 'error');
+                handleLogout();
+                return;
+            }
             showToast('Lỗi thêm món: ' + e.message, 'error');
         }
     }
 
     async function deleteDishFromOrder(maCtdh) {
+        if (!currentUser || !currentUser.token) {
+            showToast('Vui lòng đăng nhập để hủy món!', 'error');
+            openLoginModal();
+            return;
+        }
         if (!confirm('Bạn có chắc muốn huỷ món này khỏi đơn?')) return;
         try {
             await apiFetch(`/api/don-hang/huy-mon/${maCtdh}`, { method: 'DELETE' });
@@ -1618,6 +1647,11 @@
     }
 
     async function cancelCurrentOrder() {
+        if (!currentUser || !currentUser.token) {
+            showToast('Vui lòng đăng nhập để hủy đơn hàng!', 'error');
+            openLoginModal();
+            return;
+        }
         if (!selectedOrder) return;
         if (!confirm(`Bạn có chắc chắn muốn hủy đơn #${selectedOrder.maDon} và giải phóng bàn?`)) return;
 
@@ -1633,6 +1667,11 @@
     }
 
     async function resetTableStatus(maBan) {
+        if (!currentUser || !currentUser.token) {
+            showToast('Vui lòng đăng nhập để đổi trạng thái bàn!', 'error');
+            openLoginModal();
+            return;
+        }
         try {
             await apiFetch(`/api/ban-an/${maBan}/trang-thai?trangThai=TRONG`, { method: 'PUT' });
             showToast('Đã cập nhật trạng thái bàn về TRỐNG');
@@ -1644,11 +1683,21 @@
     }
 
     function openAddTableModal() {
+        if (!currentUser || !currentUser.token) {
+            showToast('Vui lòng đăng nhập để thêm bàn mới!', 'error');
+            openLoginModal();
+            return;
+        }
         $('add-table-modal').classList.add('active');
     }
 
     async function submitAddTable(e) {
         e.preventDefault();
+        if (!currentUser || !currentUser.token) {
+            showToast('Vui lòng đăng nhập để thêm bàn mới!', 'error');
+            openLoginModal();
+            return;
+        }
         const tenBan = $('new-table-name').value.trim();
         const sucChua = Number($('new-table-capacity').value) || 4;
 
@@ -1705,6 +1754,11 @@
 
     async function saveFood(e) {
         e.preventDefault();
+        if (!currentUser || !currentUser.token) {
+            showToast('Vui lòng đăng nhập để lưu món ăn!', 'error');
+            openLoginModal();
+            return;
+        }
         const id = $('food-id').value;
         const body = {
             tenMon: $('food-name').value.trim(),
@@ -1738,6 +1792,11 @@
     }
 
     async function deleteFood(id) {
+        if (!currentUser || !currentUser.token) {
+            showToast('Vui lòng đăng nhập để xóa món ăn!', 'error');
+            openLoginModal();
+            return;
+        }
         if (!confirm('Xóa món ăn này khỏi thực đơn?')) return;
         try {
             await apiFetch(`/api/mon-an/${id}`, { method: 'DELETE' });
@@ -1795,6 +1854,11 @@
 
     async function saveCategory(e) {
         e.preventDefault();
+        if (!currentUser || !currentUser.token) {
+            showToast('Vui lòng đăng nhập để lưu danh mục!', 'error');
+            openLoginModal();
+            return;
+        }
         const id = $('cat-id').value;
         const body = {
             tenDanhmuc: $('cat-name-input').value.trim(),
@@ -1824,6 +1888,11 @@
     }
 
     async function deleteCategory(id) {
+        if (!currentUser || !currentUser.token) {
+            showToast('Vui lòng đăng nhập để xóa danh mục!', 'error');
+            openLoginModal();
+            return;
+        }
         if (!confirm('Xoá danh mục này? Lưu ý: Không thể xóa nếu danh mục đang chứa món ăn.')) return;
         try {
             await apiFetch(`/api/danh-muc-mon-an/${id}`, { method: 'DELETE' });
@@ -1938,6 +2007,11 @@
 
     async function submitStockMovement(e) {
         e.preventDefault();
+        if (!currentUser || !currentUser.token) {
+            showToast('Vui lòng đăng nhập để lập phiếu kho!', 'error');
+            openLoginModal();
+            return;
+        }
         const type = $('stock-movement-form')['movement-type'].value;
         const nlId = Number($('movement-ingredient').value);
         const qty = Number($('movement-qty').value);
@@ -1957,7 +2031,7 @@
             donGia: price,
             khoId: 1, // Default primary warehouse
             nccId: type === 'NHAP' ? (nccId || 1) : null,
-            nvId: currentUser.nvId,
+            nvId: currentUser.nvId || 1,
             ghiChu: note || (type === 'NHAP' ? 'Nhập kho bổ sung' : 'Xuất kho sử dụng')
         };
 
@@ -2111,6 +2185,11 @@
     }
 
     async function confirmPayment() {
+        if (!currentUser || !currentUser.token) {
+            showToast('Vui lòng đăng nhập để thực hiện thanh toán!', 'error');
+            openLoginModal();
+            return;
+        }
         if (!currentPayingOrder) return;
         const maDon = currentPayingOrder.maDon;
 
@@ -2120,7 +2199,7 @@
                 body: JSON.stringify({
                     maDon: maDon,
                     phuongThuc: selectedPayMethod,
-                    maNv: currentUser.nvId
+                    maNv: currentUser.nvId || 1
                 })
             });
 
@@ -2166,16 +2245,16 @@
     // INITIALIZATION
     // ─────────────────────────────────────────────────────────────
     async function initApp() {
-        updateUserHeader();
-
-        // Đảm bảo có token trước khi nạp dữ liệu
-        if (!currentUser.token || isTokenExpired(currentUser.token)) {
-            try {
-                await ensureAuth();
-            } catch (e) {
-                console.warn("Auto login error:", e);
-            }
+        if (currentUser.token && isTokenExpired(currentUser.token)) {
+            currentUser = { token: '', username: '', hoTen: '', vaiTro: '', nvId: null };
+            localStorage.removeItem('jwt_token');
+            localStorage.removeItem('jwt_username');
+            localStorage.removeItem('jwt_hoten');
+            localStorage.removeItem('jwt_vaitro');
+            localStorage.removeItem('jwt_nvid');
         }
+
+        updateUserHeader();
 
         // Tải các tài nguyên khởi tạo tuần tự
         await loadTables();
