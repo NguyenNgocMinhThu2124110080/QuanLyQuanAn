@@ -1311,7 +1311,7 @@
                                 <rect x="8" y="2" width="8" height="4" rx="1" ry="1"/>
                             </svg>
                         </div>
-                        <p id="empty-state-text" style="font-size:13px;">Chọn một bàn trên sơ đồ để quản lý gọi món.</p>
+                        <p id="empty-state-text" style="font-size:13px;">Chọn bàn để gọi món</p>
                         <div style="margin-top: 16px;" id="empty-state-actions"></div>
                     </div>
 
@@ -1403,8 +1403,8 @@
                     <button class="btn btn-primary btn-sm" onclick="resetFoodForm()">+ Thêm món</button>
                 </div>
 
-                <div id="menu-waiter-notice" style="display:none; background:#eff6ff; color:#1e40af; padding:8px 12px; border-radius:6px; font-size:12px; margin-bottom:12px; border:1px solid #bfdbfe;">
-                    Bạn đang đăng nhập quyền <strong>Phục vụ</strong>: Chỉ được xem thực đơn & đơn giá để tư vấn khách. Quyền tạo mới / chỉnh sửa món ăn dành cho <strong>Quản lý / Đầu bếp</strong>.
+                <div id="menu-waiter-notice" style="display:none; background:#eff6ff; color:#1e40af; padding:6px 10px; border-radius:6px; font-size:12px; margin-bottom:10px; border:1px solid #bfdbfe;">
+                    Quyền <strong>Phục vụ</strong>: Chỉ xem thực đơn.
                 </div>
 
                 <!-- FORM THÊM / SỬA MÓN ĂN -->
@@ -1591,8 +1591,8 @@
                 <div class="card-header">
                     <div class="card-title" id="stock-form-title">Lập phiếu nhập / xuất kho</div>
                 </div>
-                <div id="chef-inventory-notice" style="display:none; background:#eff6ff; color:#1e40af; padding:8px 12px; border-radius:6px; font-size:12px; margin-bottom:12px; border:1px solid #bfdbfe;">
-                    <strong>Quyền Đầu bếp:</strong> Chỉ lập phiếu Xuất kho lấy nguyên liệu chế biến. Quyền nhập hàng mới & xem giá vốn nhà cung cấp dành riêng cho Quản lý.
+                <div id="chef-inventory-notice" style="display:none; background:#eff6ff; color:#1e40af; padding:6px 10px; border-radius:6px; font-size:12px; margin-bottom:10px; border:1px solid #bfdbfe;">
+                    <strong>Quyền Đầu bếp:</strong> Chỉ lập phiếu Xuất kho.
                 </div>
                 <form id="stock-movement-form" onsubmit="submitStockMovement(event)">
                     <label>Loại phiếu <span style="color:red">*</span></label>
@@ -2299,9 +2299,7 @@
                 </div>
                 <label>Chọn bàn trống muốn chuyển đến <span style="color:red">*</span></label>
                 <select id="transfer-to-table-select" required></select>
-                <div style="background:#eff6ff; color:#1e40af; padding:8px 12px; border-radius:6px; font-size:12px; margin-top:12px; border:1px solid #bfdbfe;">
-                    Toàn bộ các món đã gọi và trạng thái nấu sẽ được dời sang bàn mới, đồng thời bàn cũ được trả về trạng thái <strong>Trống</strong>.
-                </div>
+
                 <div style="display:flex; justify-content:flex-end; gap:8px; margin-top:16px;">
                     <button type="button" class="btn btn-secondary" onclick="closeModal('transfer-table-modal')">Hủy</button>
                     <button type="submit" class="btn btn-primary" id="btn-submit-transfer">Xác nhận đổi bàn</button>
@@ -2415,9 +2413,7 @@
                     </div>
                 </div>
 
-                <div style="background:#eff6ff; color:#1e40af; padding:8px 12px; border-radius:6px; font-size:12px; margin-top:12px; border:1px solid #bfdbfe;">
-                    <strong>Quy tắc trừ kho:</strong> Khi món ăn này được nhân viên bán ra, hệ thống sẽ tự động trừ kho số lượng tương ứng với định lượng cài đặt.
-                </div>
+
 
                 <div style="display:flex; justify-content:flex-end; gap:8px; margin-top:16px;">
                     <button type="button" class="btn btn-secondary" onclick="closeModal('recipe-modal')">Hủy</button>
@@ -3315,8 +3311,7 @@
         if (notificationsStore.length === 0) {
             listEl.innerHTML = `
                 <div class="notification-empty">
-                    <div style="font-weight:700; margin-bottom:4px; color:var(--text-main);">Không có thông báo mới</div>
-                    <div style="font-size:11px; color:var(--text-muted);">Khi đầu bếp báo nấu xong hoặc nguyên liệu sắp hết hàng, chuông sẽ hiển thị danh sách tại đây.</div>
+                    <div style="font-weight:600; color:var(--text-muted);">Không có thông báo mới</div>
                 </div>
             `;
             return;
@@ -3446,8 +3441,8 @@
                         maDon: o.maDon,
                         maBan: o.ban ? o.ban.maBan : null,
                         tenBan: tableName,
-                        title: `${tableName} — Món đã nấu xong!`,
-                        message: `Đơn #${o.maDon} đã được bếp chế biến xong. Sẵn sàng lên món phục vụ khách.`,
+                        title: `${tableName} — Đã nấu xong`,
+                        message: `Đơn #${o.maDon} sẵn sàng lên món.`, 
                         time: timeStr,
                         unread: true
                     });
@@ -3542,9 +3537,8 @@
         if (total === 0) {
             container.innerHTML = `
                 <div class="ui-empty-box" style="grid-column: 1 / -1;">
-                    <div class="empty-title">Chưa có bàn ăn nào trong sơ đồ</div>
-                    <div class="empty-desc">Nhấn vào nút bên dưới để thêm bàn ăn đầu tiên cho quán.</div>
-                    <button class="btn btn-primary btn-sm" onclick="openAddTableModal()">+ Thêm bàn mới</button>
+                    <div class="empty-title">Chưa có bàn ăn</div>
+                    <button class="btn btn-primary btn-sm" onclick="openAddTableModal()">+ Thêm bàn</button>
                 </div>
             `;
             return;
@@ -3559,9 +3553,8 @@
         if (filtered.length === 0) {
             container.innerHTML = `
                 <div class="ui-empty-box" style="grid-column: 1 / -1;">
-                    <div class="empty-title">Không tìm thấy bàn nào</div>
-                    <div class="empty-desc">Không có bàn ăn nào ở trạng thái "${tableFilter === 'TRONG' ? 'Trống' : 'Đang dùng'}".</div>
-                    <button class="btn btn-secondary btn-sm" onclick="filterTables('ALL', document.querySelector('.filter-group button'))">Xem tất cả bàn</button>
+                    <div class="empty-title">Không có bàn ${tableFilter === 'TRONG' ? 'trống' : 'đang dùng'}</div>
+                    <button class="btn btn-secondary btn-sm" onclick="filterTables('ALL', document.querySelector('.filter-group button'))">Xem tất cả</button>
                 </div>
             `;
             return;
@@ -3626,7 +3619,7 @@
         if (selectedTable.trangThai === 'TRONG') {
             $('order-empty-state').style.display = 'block';
             $('order-active-state').style.display = 'none';
-            $('empty-state-text').textContent = 'Bàn này hiện đang trống. Hãy mở bàn để bắt đầu phục vụ!';
+            $('empty-state-text').textContent = 'Bàn đang trống';
             $('empty-state-actions').innerHTML = `
                 <button class="btn btn-primary" onclick="openTableAndCreateOrder(${selectedTable.maBan})">
                     Mở bàn phục vụ
@@ -3666,7 +3659,7 @@
                 // Nếu bàn ghi nhận CO_KHACH nhưng chưa có đơn hoạt động
                 $('order-empty-state').style.display = 'block';
                 $('order-active-state').style.display = 'none';
-                $('empty-state-text').textContent = 'Bàn đang ghi nhận có khách nhưng chưa có đơn hàng hoạt động.';
+                $('empty-state-text').textContent = 'Chưa có đơn hàng';
                 $('empty-state-actions').innerHTML = `
                     <button class="btn btn-primary btn-sm" onclick="openTableAndCreateOrder(${maBan})">Tạo đơn mới cho bàn</button>
                     <button class="btn btn-secondary btn-sm" style="margin-left:8px;" onclick="resetTableStatus(${maBan})">Đặt lại bàn trống</button>
@@ -3859,11 +3852,8 @@
                 statusBox.style.background = '#ecfdf5';
                 statusBox.style.borderColor = '#a7f3d0';
                 statusBox.innerHTML = `
-                    <div style="flex:1;">
-                        <div style="color:#065f46; font-weight:700; font-size:13px;">Bếp đã nấu xong toàn bộ món!</div>
-                        <div style="color:#047857; font-size:11px;">Nhân viên nhận món tại bếp và lên bàn phục vụ khách.</div>
-                    </div>
-                    <span class="badge" style="background:#10b981; color:#fff; font-size:11px; font-weight:700;">Đã nấu xong</span>
+                    <div style="flex:1; color:#065f46; font-weight:700; font-size:13px;">Bếp đã nấu xong!</div>
+                    <span class="badge" style="background:#10b981; color:#fff; font-size:11px; font-weight:700;">Sẵn sàng lên món</span>
                 `;
             } else if (order.trangThai === 'DANG_CHE_BIEN') {
                 statusBox.style.display = 'flex';
@@ -3871,18 +3861,12 @@
                 statusBox.style.borderColor = '#fde68a';
                 if (hasPreviousCooked && newlyAddedCount > 0) {
                     statusBox.innerHTML = `
-                        <div style="flex:1;">
-                            <div style="color:#92400e; font-weight:700; font-size:13px;">Bếp đang nấu ${newlyAddedCount} món gọi thêm...</div>
-                            <div style="color:#b45309; font-size:11px;">Các món đợt trước đã lên bàn, bếp đang chế biến món mới gọi bổ sung.</div>
-                        </div>
+                        <div style="flex:1; color:#92400e; font-weight:700; font-size:13px;">Đang nấu ${newlyAddedCount} món gọi thêm</div>
                         <span class="badge" style="background:#ea580c; color:#fff; font-size:11px; font-weight:700;">Đang nấu thêm</span>
                     `;
                 } else {
                     statusBox.innerHTML = `
-                        <div style="flex:1;">
-                            <div style="color:#92400e; font-weight:700; font-size:13px;">Bếp đang nấu món...</div>
-                            <div style="color:#b45309; font-size:11px;">Đơn hàng đã tiếp nhận và đang chế biến trong bếp.</div>
-                        </div>
+                        <div style="flex:1; color:#92400e; font-weight:700; font-size:13px;">Bếp đang chế biến</div>
                         <span class="badge" style="background:#f59e0b; color:#fff; font-size:11px; font-weight:700;">Đang nấu</span>
                     `;
                 }
@@ -3897,7 +3881,7 @@
         // Render food items in order
         const itemsContainer = $('current-order-items');
         if (!order.danhSachMon || order.danhSachMon.length === 0) {
-            itemsContainer.innerHTML = '<p style="color:var(--text-muted); font-size:12px; text-align:center; padding:12px;">Chưa gọi món nào. Hãy chọn món ở trên!</p>';
+            itemsContainer.innerHTML = '<p style="color:var(--text-muted); font-size:12px; text-align:center; padding:12px;">Chưa có món nào</p>';
         } else {
             itemsContainer.innerHTML = order.danhSachMon.map(item => {
                 let itemTag = '';
@@ -6314,11 +6298,8 @@
 
             if (activeOrders.length === 0) {
                 container.innerHTML = `
-                    <div style="grid-column: 1 / -1; text-align:center; padding:50px 20px; background:#fff; border-radius:var(--radius-md); border:1px dashed var(--border);">
-                        <h4 style="font-size:16px; font-weight:700; color:var(--text-main); margin-bottom:6px;">Hiện không có đơn món nào đang chờ chế biến</h4>
-                        <p style="font-size:13px; color:var(--text-muted); max-width:480px; margin:0 auto;">
-                            Khi nhân viên phục vụ gọi món tại bàn ăn, các món cần nấu sẽ tự động hiển thị tại đây theo thời gian thực.
-                        </p>
+                    <div style="grid-column: 1 / -1; text-align:center; padding:28px 16px; background:#fff; border-radius:var(--radius-md); border:1px dashed var(--border); color:var(--text-muted); font-size:13px; font-weight:600;">
+                        Chưa có đơn chờ chế biến
                     </div>
                 `;
                 return;
@@ -6453,11 +6434,7 @@
                                         x${item.soLuong}
                                     </div>
                                 </div>
-                                <div style="margin-top:6px; background:#f8fafc; border:1px solid #edf2f7; border-radius:6px; padding:6px 10px;">
-                                    <div style="font-size:10px; font-weight:700; color:#64748b; text-transform:uppercase; letter-spacing:0.4px; margin-bottom:3px; display:flex; align-items:center; gap:4px;">
-                                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/></svg>
-                                        Định lượng nguyên liệu trừ kho:
-                                    </div>
+                                <div style="margin-top:4px; background:#f8fafc; border:1px solid #edf2f7; border-radius:6px; padding:4px 8px;">
                                     ${recipeBreakdown}
                                 </div>
                             </div>
