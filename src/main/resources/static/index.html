@@ -1326,35 +1326,43 @@
                         <div style="background:#f8fafc; padding:12px; border-radius:var(--radius-sm); border:1px solid var(--border); margin-bottom:14px;">
                             <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
                                 <label style="margin:0; font-weight:700;">Thêm món vào bàn:</label>
-                                <span id="dish-filter-count" style="font-size:11px; color:var(--text-muted);">19 món</span>
+                                <span id="dish-filter-count" style="font-size:11px; color:var(--text-muted);"></span>
                             </div>
 
                             <!-- Ô TÌM KIẾM MÓN ĂN NHANH -->
-                            <div style="position:relative; margin-bottom:6px;">
+                            <div style="position:relative; margin-bottom:8px;">
                                 <input type="text" id="order-search-dish" 
-                                       placeholder="Tìm kiếm món ăn..." 
+                                       placeholder="Gõ tên món cần tìm (VD: cơm, phở, trà...)" 
                                        oninput="filterDishDropdown(this.value)" 
-                                       style="width:100%; padding:6px 28px 6px 10px; font-size:12px; border:1px solid #cbd5e1; border-radius:6px; background:#fff;">
-                                <span onclick="clearOrderDishSearch()" style="position:absolute; right:8px; top:6px; cursor:pointer; color:#94a3b8; font-size:12px; display:none;" id="btn-clear-dish-search">&times;</span>
+                                       style="width:100%; padding:7px 28px 7px 10px; font-size:13px; border:1px solid #cbd5e1; border-radius:6px; background:#fff;">
+                                <span onclick="clearOrderDishSearch()" style="position:absolute; right:9px; top:6px; cursor:pointer; color:#64748b; font-size:15px; font-weight:700; display:none;" id="btn-clear-dish-search">&times;</span>
                             </div>
 
                             <!-- DANH MỤC LỌC NHANH DẠNG PILLS -->
-                            <div style="display:flex; gap:4px; margin-bottom:8px; flex-wrap:wrap;">
-                                <button type="button" class="btn btn-secondary btn-sm active-cat-pill" id="cat-pill-0" style="font-size:10px; padding:2px 8px; border-radius:10px;" onclick="filterDishByCategory(0, this)">Tất cả</button>
-                                <button type="button" class="btn btn-secondary btn-sm" id="cat-pill-1" style="font-size:10px; padding:2px 8px; border-radius:10px;" onclick="filterDishByCategory(1, this)">Món chính</button>
-                                <button type="button" class="btn btn-secondary btn-sm" id="cat-pill-2" style="font-size:10px; padding:2px 8px; border-radius:10px;" onclick="filterDishByCategory(2, this)">Ăn vặt</button>
-                                <button type="button" class="btn btn-secondary btn-sm" id="cat-pill-3" style="font-size:10px; padding:2px 8px; border-radius:10px;" onclick="filterDishByCategory(3, this)">Nước uống</button>
-                                <button type="button" class="btn btn-secondary btn-sm" id="cat-pill-4" style="font-size:10px; padding:2px 8px; border-radius:10px;" onclick="filterDishByCategory(4, this)">Tráng miệng</button>
+                            <div id="order-category-pills" style="display:flex; gap:5px; margin-bottom:8px; flex-wrap:wrap;">
+                                <button type="button" class="btn btn-secondary btn-sm active-cat-pill" id="cat-pill-0" style="font-size:11px; padding:3px 9px; border-radius:12px;" onclick="filterDishByCategory(0, this)">Tất cả</button>
+                                <button type="button" class="btn btn-secondary btn-sm" id="cat-pill-1" style="font-size:11px; padding:3px 9px; border-radius:12px;" onclick="filterDishByCategory(1, this)">Món chính</button>
+                                <button type="button" class="btn btn-secondary btn-sm" id="cat-pill-2" style="font-size:11px; padding:3px 9px; border-radius:12px;" onclick="filterDishByCategory(2, this)">Ăn vặt</button>
+                                <button type="button" class="btn btn-secondary btn-sm" id="cat-pill-3" style="font-size:11px; padding:3px 9px; border-radius:12px;" onclick="filterDishByCategory(3, this)">Nước uống</button>
+                                <button type="button" class="btn btn-secondary btn-sm" id="cat-pill-4" style="font-size:11px; padding:3px 9px; border-radius:12px;" onclick="filterDishByCategory(4, this)">Tráng miệng</button>
                             </div>
 
-                            <div style="display:flex; gap:6px;">
-                                <select id="select-food-to-order" style="flex:1;">
+                            <!-- GỢI Ý NHANH KHI GÕ TÌM KIẾM -->
+                            <div id="quick-search-dish-list" style="display:none; max-height:150px; overflow-y:auto; background:#ffffff; border:1px solid #cbd5e1; border-radius:6px; margin-bottom:8px;"></div>
+
+                            <!-- CHỌN MÓN TRải RỘNG 100% KHÔNG BỊ CẮT CHỮ -->
+                            <div style="margin-bottom:8px;">
+                                <select id="select-food-to-order" style="width:100%; font-weight:600; padding:8px 10px;">
                                     <option value="">-- Chọn món ăn --</option>
                                 </select>
-                                <input type="number" id="input-food-qty" value="1" min="1" max="50" style="width:65px;">
-                                <button class="btn btn-primary" onclick="addDishToCurrentOrder()">Thêm</button>
                             </div>
-
+                            <div style="display:flex; gap:8px; align-items:center;">
+                                <div style="display:flex; align-items:center; gap:6px; background:#fff; border:1px solid #cbd5e1; border-radius:6px; padding:2px 8px;">
+                                    <span style="font-size:12px; color:#64748b; font-weight:600; white-space:nowrap;">Số lượng:</span>
+                                    <input type="number" id="input-food-qty" value="1" min="1" max="50" style="width:52px; border:none; padding:5px 2px; text-align:center; font-weight:700;">
+                                </div>
+                                <button class="btn btn-primary" onclick="addDishToCurrentOrder()" style="flex:1; padding:8px 14px; font-weight:700;">+ Thêm vào bàn</button>
+                            </div>
                         </div>
                         <!-- TRẠNG THÁI TIẾN ĐỘ BẾP NẤU (KDS ALERT CHO PHỤC VỤ) -->
                         <div id="order-kitchen-status-box" style="display:none; border:1px solid #e2e8f0; border-radius:var(--radius-sm); padding:8px 12px; margin-bottom:10px; align-items:center; gap:8px;"></div>
@@ -3685,8 +3693,37 @@
     let currentDishCategoryFilter = 0;
     let currentDishSearchKeyword = '';
 
+    function renderOrderCategoryPills() {
+        const box = $('order-category-pills');
+        if (!box) return;
+        const cats = (Array.isArray(allCategories) && allCategories.length > 0)
+            ? allCategories
+            : [
+                { maDanhmuc: 1, tenDanhmuc: 'Món chính' },
+                { maDanhmuc: 2, tenDanhmuc: 'Ăn vặt' },
+                { maDanhmuc: 3, tenDanhmuc: 'Nước uống' },
+                { maDanhmuc: 4, tenDanhmuc: 'Tráng miệng' }
+            ];
+        const allBtn = `<button type="button" class="btn btn-secondary btn-sm ${currentDishCategoryFilter === 0 ? 'active-cat-pill' : ''}" id="cat-pill-0" style="font-size:11px; padding:3px 9px; border-radius:12px;" onclick="filterDishByCategory(0, this)">Tất cả</button>`;
+        const catBtns = cats.map(c => {
+            const cid = Number(c.maDanhmuc || c.maDanhMuc || 0);
+            const cname = c.tenDanhmuc || c.tenDanhMuc || `Danh mục #${cid}`;
+            const isAct = currentDishCategoryFilter === cid ? 'active-cat-pill' : '';
+            return `<button type="button" class="btn btn-secondary btn-sm ${isAct}" id="cat-pill-${cid}" style="font-size:11px; padding:3px 9px; border-radius:12px;" onclick="filterDishByCategory(${cid}, this)">${escHtml(cname)}</button>`;
+        }).join('');
+        box.innerHTML = allBtn + catBtns;
+    }
+
     function filterDishByCategory(catId, btn) {
-        currentDishCategoryFilter = catId;
+        currentDishCategoryFilter = Number(catId || 0);
+        // Khi bấm chọn danh mục, tự động xoá từ khóa tìm kiếm cũ để luôn hiển thị đầy đủ các món trong danh mục đó
+        if (currentDishSearchKeyword) {
+            currentDishSearchKeyword = '';
+            const inp = $('order-search-dish');
+            if (inp) inp.value = '';
+            const btnClear = $('btn-clear-dish-search');
+            if (btnClear) btnClear.style.display = 'none';
+        }
         document.querySelectorAll('#order-active-state .active-cat-pill').forEach(b => b.classList.remove('active-cat-pill'));
         if (btn) btn.classList.add('active-cat-pill');
         populateDishSelect();
@@ -3696,6 +3733,20 @@
         currentDishSearchKeyword = keyword || '';
         const btnClear = $('btn-clear-dish-search');
         if (btnClear) btnClear.style.display = currentDishSearchKeyword ? 'inline' : 'none';
+
+        // Khi người dùng gõ tìm kiếm, nếu danh mục đang chọn không có món khớp thì tự động tìm trên Tất cả danh mục
+        if (currentDishSearchKeyword.trim() && currentDishCategoryFilter !== 0) {
+            const normKw = removeVietnameseTones(currentDishSearchKeyword.trim());
+            const hasInCurrentCat = allDishes.some(d => {
+                const cid = Number(d.danhMuc ? (d.danhMuc.maDanhmuc || d.danhMuc.maDanhMuc) : (d.maDanhmuc || d.maDanhMuc || 0));
+                return cid === currentDishCategoryFilter && removeVietnameseTones(d.tenMon).includes(normKw);
+            });
+            if (!hasInCurrentCat) {
+                currentDishCategoryFilter = 0;
+                document.querySelectorAll('#order-active-state .active-cat-pill').forEach(b => b.classList.remove('active-cat-pill'));
+                if ($('cat-pill-0')) $('cat-pill-0').classList.add('active-cat-pill');
+            }
+        }
         populateDishSelect();
     }
 
@@ -3708,13 +3759,20 @@
         populateDishSelect();
     }
 
+    function quickPickSearchedDish(maMon) {
+        const sel = $('select-food-to-order');
+        if (sel) sel.value = String(maMon);
+        const quickBox = $('quick-search-dish-list');
+        if (quickBox) quickBox.style.display = 'none';
+    }
+
     function populateDishSelect() {
         const sel = $('select-food-to-order');
         if (!sel) return;
         const normalizedKw = removeVietnameseTones(currentDishSearchKeyword.trim());
 
         const filtered = allDishes.filter(d => {
-            const catId = d.danhMuc ? (d.danhMuc.maDanhmuc || d.danhMuc.maDanhMuc) : (d.maDanhmuc || d.maDanhMuc || 0);
+            const catId = Number(d.danhMuc ? (d.danhMuc.maDanhmuc || d.danhMuc.maDanhMuc) : (d.maDanhmuc || d.maDanhMuc || 0));
             const matchCat = (currentDishCategoryFilter === 0) || (catId === currentDishCategoryFilter);
             if (!matchCat) return false;
             if (!normalizedKw) return true;
@@ -3723,15 +3781,35 @@
         });
 
         const countEl = $('dish-filter-count');
-        if (countEl) countEl.textContent = `${filtered.length}/${allDishes.length} món`;
+        if (countEl) countEl.textContent = `${filtered.length} món`;
+
+        const quickBox = $('quick-search-dish-list');
+        if (quickBox) {
+            if (normalizedKw && filtered.length > 0) {
+                quickBox.style.display = 'block';
+                quickBox.innerHTML = filtered.map(d => `
+                    <div onclick="quickPickSearchedDish(${d.maMon})" style="display:flex; justify-content:space-between; align-items:center; padding:7px 10px; border-bottom:1px solid #f1f5f9; cursor:pointer; font-size:12px;">
+                        <strong style="color:#0f172a;">${escHtml(d.tenMon)}</strong>
+                        <span style="color:var(--primary); font-weight:700;">${formatVND(d.gia)}</span>
+                    </div>
+                `).join('');
+            } else if (normalizedKw && filtered.length === 0) {
+                quickBox.style.display = 'block';
+                quickBox.innerHTML = `<div style="padding:8px 10px; font-size:12px; color:#dc2626; text-align:center;">Không tìm thấy món "${escHtml(currentDishSearchKeyword.trim())}"</div>`;
+            } else {
+                quickBox.style.display = 'none';
+                quickBox.innerHTML = '';
+            }
+        }
 
         if (filtered.length === 0) {
-            sel.innerHTML = '<option value="">Không tìm thấy món phù hợp</option>';
+            sel.innerHTML = '<option value="">Không có món trong mục này</option>';
         } else {
-            sel.innerHTML = '<option value="">-- Chọn món ăn (' + filtered.length + ' món) --</option>' +
-                filtered.map(d => `<option value="${d.maMon}">${escHtml(d.tenMon)} (${formatVND(d.gia)})</option>`).join('');
-            if (filtered.length === 1) {
-                sel.value = filtered[0].maMon;
+            sel.innerHTML = '<option value="">-- Chọn món ăn --</option>' +
+                filtered.map(d => `<option value="${d.maMon}">${escHtml(d.tenMon)} — ${formatVND(d.gia)}</option>`).join('');
+            // Khi đang gõ tìm kiếm hoặc chỉ có 1 món, tự động chọn sẵn món đầu tiên để bấm Thêm được ngay
+            if (normalizedKw || filtered.length === 1) {
+                sel.value = String(filtered[0].maMon);
             }
         }
     }
@@ -4298,6 +4376,7 @@
             allCategories = Array.isArray(data) ? data : [];
             renderCategoryList();
             renderCategoryDropdown();
+            if (typeof renderOrderCategoryPills === 'function') renderOrderCategoryPills();
         } catch (e) {
             allCategories = [];
             tbody.innerHTML = `
