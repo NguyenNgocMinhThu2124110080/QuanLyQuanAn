@@ -659,10 +659,36 @@
         .grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; }
         .grid-4 { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; }
         .grid-table-order { display: grid; grid-template-columns: 1fr 420px; gap: 24px; }
+        .mobile-back-to-tables-bar {
+            display: none;
+            margin-bottom: 12px;
+        }
         @media (max-width: 1024px) {
             .grid-table-order { grid-template-columns: 1fr; }
             .grid-3 { grid-template-columns: 1fr; }
             .grid-4 { grid-template-columns: repeat(2, 1fr); }
+
+            /* Chuyển trang trên di động / máy tính bảng khi chọn bàn */
+            #tab-tables:not(.table-detail-page-active) #table-detail-col {
+                display: none !important;
+            }
+            #tab-tables.table-detail-page-active .table-filter-bar,
+            #tab-tables.table-detail-page-active #table-list-col {
+                display: none !important;
+            }
+            #tab-tables.table-detail-page-active #table-detail-col {
+                display: block !important;
+                animation: modalPop 0.18s ease-out;
+            }
+            #tab-tables.table-detail-page-active .mobile-back-to-tables-bar {
+                display: flex !important;
+                align-items: center;
+                justify-content: space-between;
+                gap: 8px;
+            }
+            .order-panel {
+                position: static !important;
+            }
         }
         @media (max-width: 768px) {
             header {
@@ -1146,14 +1172,20 @@
 
         <div class="grid-table-order">
             <!-- BÊN TRÁI: DANH SÁCH BÀN ĂN -->
-            <div>
+            <div id="table-list-col">
                 <div class="table-grid" id="tables-container">
                     <p style="color:var(--text-muted)">Đang tải sơ đồ bàn...</p>
                 </div>
             </div>
 
             <!-- BÊN PHẢI: CHI TIẾT ĐƠN HÀNG CỦA BÀN ĐƯỢC CHỌN -->
-            <div>
+            <div id="table-detail-col">
+                <div class="mobile-back-to-tables-bar">
+                    <button type="button" class="btn btn-primary btn-sm" onclick="backToTableMap()" style="display:inline-flex; align-items:center; gap:6px; font-weight:700; padding:8px 14px; border-radius:8px; box-shadow:var(--shadow-sm);">
+                        &larr; Quay lại Sơ đồ bàn
+                    </button>
+                    <span style="font-size:12px; color:var(--text-muted); font-weight:700;">Trang gọi món &amp; Thanh toán</span>
+                </div>
                 <div class="card order-panel" id="order-panel-box">
                     <div class="card-header">
                         <div class="card-title" id="order-panel-title">
@@ -3105,6 +3137,9 @@
         if (targetBtn) targetBtn.classList.add('active');
         const targetTab = $('tab-' + tabName);
         if (targetTab) targetTab.classList.add('active');
+        if (tabName === 'tables' && $('tab-tables')) {
+            $('tab-tables').classList.remove('table-detail-page-active');
+        }
 
         refreshCurrentTab();
     }
@@ -3478,11 +3513,28 @@
         }).join('');
     }
 
+    function backToTableMap() {
+        const tabEl = $('tab-tables');
+        if (tabEl) tabEl.classList.remove('table-detail-page-active');
+        selectedTable = null;
+        selectedOrder = null;
+        renderTableGrid();
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
     async function selectTable(maBan) {
         selectedTable = allTables.find(t => t.maBan === maBan);
         renderTableGrid();
 
         if (!selectedTable) return;
+
+        const tabEl = $('tab-tables');
+        if (tabEl) {
+            tabEl.classList.add('table-detail-page-active');
+        }
+        if (window.innerWidth <= 1024) {
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
 
         $('order-panel-title').textContent = selectedTable.tenBan;
         const statusBadge = $('order-table-status-badge');
@@ -3954,7 +4006,11 @@
             showToast('Đã hủy đơn hàng và giải phóng bàn thành công!');
             selectedOrder = null;
             await loadTables();
-            if (selectedTable) selectTable(selectedTable.maBan);
+            if (window.innerWidth <= 1024) {
+                backToTableMap();
+            } else if (selectedTable) {
+                selectTable(selectedTable.maBan);
+            }
         } catch (e) {
             showToast('Lỗi hủy đơn: ' + e.message, 'error');
         }
@@ -5868,7 +5924,11 @@
             notificationsStore = notificationsStore.filter(n => n.maDon !== maDon);
             renderNotificationList();
             await loadTables();
-            if (selectedTable) selectTable(selectedTable.maBan);
+            if (window.innerWidth <= 1024) {
+                backToTableMap();
+            } else if (selectedTable) {
+                selectTable(selectedTable.maBan);
+            }
             await checkCookedOrdersNotification();
             await loadPendingOrders();
             await loadRecentPayments();
@@ -5992,7 +6052,11 @@
             notificationsStore = notificationsStore.filter(n => n.maDon !== maDon);
             renderNotificationList();
             await loadTables();
-            if (selectedTable) selectTable(selectedTable.maBan);
+            if (window.innerWidth <= 1024) {
+                backToTableMap();
+            } else if (selectedTable) {
+                selectTable(selectedTable.maBan);
+            }
             await checkCookedOrdersNotification();
             await loadPendingOrders();
             await loadRecentPayments();
