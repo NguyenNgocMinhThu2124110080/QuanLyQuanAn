@@ -2248,24 +2248,28 @@
             if (!Array.isArray(orders)) return;
 
             const newTablesWithCooked = new Map();
-            const currentCooked = orders.filter(o => o.trangThai === 'HOAN_THANH');
-
-            currentCooked.forEach(o => {
-                if (o.ban && o.ban.maBan) {
-                    newTablesWithCooked.set(o.ban.maBan, {
-                        maDon: o.maDon,
-                        tenBan: o.ban.tenBan,
-                        ngayDat: o.ngayDat
-                    });
-                }
+            // CHỈ LẤY CÁC ĐƠN ĐÃ NẤU XONG CỦA BÀN ĐANG CÓ KHÁCH (CO_KHACH)
+            const currentCooked = orders.filter(o => {
+                if (o.trangThai !== 'HOAN_THANH' || !o.ban || !o.ban.maBan) return false;
+                const tbl = allTables.find(t => t.maBan === o.ban.maBan);
+                return tbl ? (tbl.trangThai === 'CO_KHACH') : false;
             });
 
-            // Lần đầu tải trang -> nạp các đơn đã nấu xong vào chuông thông báo
+            currentCooked.forEach(o => {
+                newTablesWithCooked.set(o.ban.maBan, {
+                    maDon: o.maDon,
+                    tenBan: o.ban.tenBan,
+                    ngayDat: o.ngayDat
+                });
+            });
+
+            // Lần đầu tải trang -> nạp các đơn đang thực sự chờ lên món của bàn có khách
             if (isFirstCookedCheck) {
                 knownCookedOrderIds = new Set(currentCooked.map(o => o.maDon));
                 isFirstCookedCheck = false;
                 tablesWithCookedOrders = newTablesWithCooked;
 
+                notificationsStore = [];
                 currentCooked.forEach(o => {
                     const tableName = o.ban ? o.ban.tenBan : `Bàn #${o.maBan}`;
                     const timeStr = o.ngayDat ? new Date(o.ngayDat).toLocaleTimeString('vi-VN', { hour:'2-digit', minute:'2-digit' }) : 'Vừa xong';
@@ -2283,6 +2287,10 @@
                 renderNotificationList();
                 return;
             }
+
+            // Loại bỏ các thông báo của đơn không còn hợp lệ (đã thanh toán hoặc đã hủy hoặc bàn đã trống)
+            const activeCookedMap = new Map(currentCooked.map(o => [o.maDon, o]));
+            notificationsStore = notificationsStore.filter(n => activeCookedMap.has(n.maDon));
 
             // Tìm những đơn hàng mới chuyển sang HOAN_THANH
             const newlyCooked = currentCooked.filter(o => !knownCookedOrderIds.has(o.maDon));
@@ -2322,6 +2330,7 @@
                 }
             } else {
                 tablesWithCookedOrders = newTablesWithCooked;
+                renderNotificationList();
             }
         } catch (err) {
             // Im lặng nếu lỗi mạng tạm thời
@@ -2654,7 +2663,18 @@
 
     async function resetTableStatus(maBan) {
         try {
+            const orders = await apiFetch('/api/don-hang').catch(() => []);
+            const unfinished = (Array.isArray(orders) ? orders : []).filter(o => 
+                o.ban && o.ban.maBan === maBan && o.trangThai !== 'DA_THANH_TOAN' && o.trangThai !== 'HUY'
+            );
+            for (const o of unfinished) {
+                await apiFetch(`/api/don-hang/${o.maDon}/huy-don`, { method: 'PUT' }).catch(() => {});
+            }
+
             await apiFetch(`/api/ban-an/${maBan}/trang-thai?trangThai=TRONG`, { method: 'PUT' });
+            notificationsStore = notificationsStore.filter(n => n.maBan !== maBan);
+            if (tablesWithCookedOrders) tablesWithCookedOrders.delete(maBan);
+            renderNotificationList();
             showToast('Đã cập nhật trạng thái bàn về TRỐNG');
             await loadTables();
             selectTable(maBan);
@@ -3360,8 +3380,11 @@
 
             // Làm mới dữ liệu
             selectedOrder = null;
+            notificationsStore = notificationsStore.filter(n => n.maDon !== maDon);
+            renderNotificationList();
             await loadTables();
             if (selectedTable) selectTable(selectedTable.maBan);
+            await checkCookedOrdersNotification();
             await loadPendingOrders();
             await loadRecentPayments();
             await loadDailyRevenue();
