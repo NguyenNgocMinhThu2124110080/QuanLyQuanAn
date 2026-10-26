@@ -1092,7 +1092,6 @@
         </div>
         <div>
             <h1>QUẢN LÝ QUÁN ĂN</h1>
-            <p>Hệ thống Quản lý Bán hàng & Điểm bán POS</p>
         </div>
     </div>
     <div style="display:flex; align-items:center; gap:12px;">
@@ -1147,10 +1146,10 @@
         Bếp chế biến
     </button>
     <button id="nav-btn-cashier" onclick="switchNav('cashier', this)">
-        Thu ngân & Báo cáo
+        Thu ngân
     </button>
     <button id="nav-btn-admin" onclick="switchNav('admin', this)" style="display:none;">
-        Quản trị Tài khoản (Admin)
+        Tài khoản (Admin)
     </button>
 </nav>
 
@@ -1182,9 +1181,8 @@
             <div id="table-detail-col">
                 <div class="mobile-back-to-tables-bar">
                     <button type="button" class="btn btn-primary btn-sm" onclick="backToTableMap()" style="display:inline-flex; align-items:center; gap:6px; font-weight:700; padding:8px 14px; border-radius:8px; box-shadow:var(--shadow-sm);">
-                        &larr; Quay lại Sơ đồ bàn
+                        &larr; Sơ đồ bàn
                     </button>
-                    <span style="font-size:12px; color:var(--text-muted); font-weight:700;">Trang gọi món &amp; Thanh toán</span>
                 </div>
                 <div class="card order-panel" id="order-panel-box">
                     <div class="card-header">
@@ -1245,7 +1243,7 @@
                                 <input type="number" id="input-food-qty" value="1" min="1" max="50" style="width:65px;">
                                 <button class="btn btn-primary" onclick="addDishToCurrentOrder()">Thêm</button>
                             </div>
-                            <small style="color:var(--text-muted); font-size:11px; display:block; margin-top:4px;">* Tự động kiểm tra và trừ tồn kho nguyên liệu</small>
+
                         </div>
                         <!-- TRẠNG THÁI TIẾN ĐỘ BẾP NẤU (KDS ALERT CHO PHỤC VỤ) -->
                         <div id="order-kitchen-status-box" style="display:none; border:1px solid #e2e8f0; border-radius:var(--radius-sm); padding:8px 12px; margin-bottom:10px; align-items:center; gap:8px;"></div>
@@ -1442,10 +1440,10 @@
             <!-- DANH SÁCH TỒN KHO NGUYÊN LIỆU -->
             <div class="card">
                 <div class="card-header" style="flex-wrap:wrap; gap:8px;">
-                    <div class="card-title">Báo cáo tồn kho & Cảnh báo nguyên liệu</div>
+                    <div class="card-title">Tồn kho nguyên liệu</div>
                     <div style="display:flex; gap:6px; flex-wrap:wrap;">
-                        <button class="btn btn-primary btn-sm" id="btn-open-add-nl" onclick="openAddIngredientModal()">+ Thêm nguyên liệu</button>
-                        <button class="btn btn-secondary btn-sm" id="btn-open-add-ncc" onclick="openAddSupplierModal()">+ Thêm Nhà cung cấp</button>
+                        <button class="btn btn-primary btn-sm" id="btn-open-add-nl" onclick="openAddIngredientModal()">+ Nguyên liệu</button>
+                        <button class="btn btn-secondary btn-sm" id="btn-open-add-ncc" onclick="openAddSupplierModal()">+ Nhà cung cấp</button>
                         <button class="btn btn-secondary btn-sm" onclick="loadInventoryReport()">Làm mới</button>
                     </div>
                 </div>
@@ -1519,13 +1517,8 @@
         <!-- LỊCH SỬ NHẬP XUẤT KHO & BIÊN LAI -->
         <div class="card" style="margin-top:20px;">
             <div class="card-header" style="flex-wrap:wrap; gap:10px;">
-                <div>
-                    <div class="card-title">Lịch sử nhập xuất kho & Biên lai</div>
-                    <p style="font-size:12px; color:var(--text-muted); margin-top:2px;">
-                        Theo dõi toàn bộ các lần nhập nguyên liệu từ nhà cung cấp và xuất kho chế biến (hỗ trợ in lại biên lai)
-                    </p>
-                </div>
-                <button class="btn btn-secondary btn-sm" onclick="loadInventoryHistory()">Làm mới lịch sử</button>
+                <div class="card-title">Lịch sử nhập / xuất kho</div>
+                <button class="btn btn-secondary btn-sm" onclick="loadInventoryHistory()">Làm mới</button>
             </div>
             <div class="table-responsive" style="max-height:400px; overflow-y:auto;">
                 <table class="app-table">
@@ -1557,12 +1550,7 @@
         <!-- BÁO CÁO TÀI CHÍNH: THU - CHI - LỢI NHUẬN -->
         <div class="card" style="margin-bottom:20px;">
             <div class="card-header" style="flex-wrap:wrap; gap:12px;">
-                <div>
-                    <div class="card-title">Báo cáo tài chính: Thu - Chi & Lợi nhuận</div>
-                    <p style="font-size:12px; color:var(--text-muted); margin-top:2px;">
-                        Đối soát tổng doanh thu bán món (Thu), chi phí nhập nguyên liệu kho (Chi) và lợi nhuận ròng
-                    </p>
-                </div>
+                <div class="card-title">Thu - Chi & Lợi nhuận</div>
                 <div style="display:flex; align-items:center; gap:8px; flex-wrap:wrap;">
                     <div class="filter-group" style="display:inline-flex;">
                         <button type="button" id="finance-filter-today" class="btn btn-sm btn-primary" onclick="setFinanceTimeFilter('today')">Hôm nay</button>
@@ -1579,11 +1567,11 @@
                         <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path></svg>
                     </div>
                     <div style="flex:1;">
-                        <div class="kpi-title">Tổng Thu (Doanh thu)</div>
+                        <div class="kpi-title">Tổng Thu</div>
                         <div class="kpi-value" id="kpi-finance-income" style="color:#15803d;">0 ₫</div>
                         <div style="display:flex; align-items:center; justify-content:space-between; margin-top:4px; gap:6px; flex-wrap:wrap;">
-                            <span style="font-size:11px; color:var(--text-muted);" id="kpi-finance-income-sub">0 đơn thanh toán</span>
-                            <span class="kpi-action-hint" style="background:#dcfce7; color:#15803d;">Xem chi tiết thu &rarr;</span>
+                            <span style="font-size:11px; color:var(--text-muted);" id="kpi-finance-income-sub">0 đơn</span>
+                            <span class="kpi-action-hint" style="background:#dcfce7; color:#15803d;">Chi tiết &rarr;</span>
                         </div>
                     </div>
                 </div>
@@ -1594,11 +1582,11 @@
                         <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 16v1a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V7a2 2 0 0 1 2-2h11a2 2 0 0 1 2 2v1"></path><path d="M18 8h4a2 2 0 0 1 2 2v7a2 2 0 0 1-2 2h-4"></path><circle cx="6" cy="19" r="2"></circle><circle cx="18" cy="19" r="2"></circle></svg>
                     </div>
                     <div style="flex:1;">
-                        <div class="kpi-title">Tổng Chi (Nhập kho)</div>
+                        <div class="kpi-title">Tổng Chi</div>
                         <div class="kpi-value" id="kpi-finance-expense" style="color:#b91c1c;">0 ₫</div>
                         <div style="display:flex; align-items:center; justify-content:space-between; margin-top:4px; gap:6px; flex-wrap:wrap;">
-                            <span style="font-size:11px; color:var(--text-muted);" id="kpi-finance-expense-sub">0 phiếu nhập kho</span>
-                            <span class="kpi-action-hint" style="background:#fee2e2; color:#b91c1c;">Xem chi tiết chi &rarr;</span>
+                            <span style="font-size:11px; color:var(--text-muted);" id="kpi-finance-expense-sub">0 phiếu</span>
+                            <span class="kpi-action-hint" style="background:#fee2e2; color:#b91c1c;">Chi tiết &rarr;</span>
                         </div>
                     </div>
                 </div>
@@ -1609,7 +1597,7 @@
                         <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="1" x2="12" y2="23"></line><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path></svg>
                     </div>
                     <div style="flex:1;">
-                        <div class="kpi-title">Lợi nhuận ròng (Thu - Chi)</div>
+                        <div class="kpi-title">Lợi nhuận ròng</div>
                         <div class="kpi-value" id="kpi-finance-profit" style="color:#4338ca;">0 ₫</div>
                         <div style="display:flex; align-items:center; justify-content:space-between; margin-top:4px; gap:6px; flex-wrap:wrap;">
                             <span id="kpi-finance-profit-badge">
@@ -1645,7 +1633,7 @@
             <!-- ĐƠN HÀNG CHỜ THANH TOÁN -->
             <div class="card">
                 <div class="card-header">
-                    <div class="card-title">Đơn hàng đang chờ thanh toán</div>
+                    <div class="card-title">Đơn chờ thanh toán</div>
                     <button class="btn btn-secondary btn-sm" onclick="loadPendingOrders()">Làm mới</button>
                 </div>
                 <div class="table-responsive" style="max-height:450px; overflow-y:auto;">
@@ -1669,7 +1657,7 @@
             <!-- LỊCH SỬ GIAO DỊCH GẦN NHẤT -->
             <div class="card">
                 <div class="card-header">
-                    <div class="card-title">Lịch sử thanh toán gần nhất</div>
+                    <div class="card-title">Lịch sử thanh toán</div>
                     <button class="btn btn-secondary btn-sm" onclick="loadRecentPayments()">Làm mới</button>
                 </div>
                 <div class="table-responsive" style="max-height:450px; overflow-y:auto;">
@@ -1695,12 +1683,7 @@
         <!-- THỐNG KÊ TOP MÓN ĂN BÁN CHẠY NHẤT -->
         <div class="card" style="margin-top:20px;">
             <div class="card-header" style="flex-wrap:wrap; gap:10px;">
-                <div>
-                    <div class="card-title">Thống kê Top món ăn bán chạy nhất</div>
-                    <p style="font-size:12px; color:var(--text-muted); margin-top:2px;">
-                        Xếp hạng các món mang lại doanh thu và số lượng bán cao nhất trong kỳ đã chọn
-                    </p>
-                </div>
+                <div class="card-title">Top món bán chạy</div>
                 <span class="badge" style="background:#eff6ff; color:#1d4ed8; font-size:11px; font-weight:700;" id="top-dishes-count-badge">Đang thống kê...</span>
             </div>
             <div class="table-responsive">
@@ -1724,12 +1707,7 @@
         <!-- SỔ QUỸ THU - CHI DÒNG TIỀN -->
         <div class="card" style="margin-top:20px;">
             <div class="card-header" style="flex-wrap:wrap; gap:10px;">
-                <div>
-                    <div class="card-title">Sổ quỹ Thu - Chi dòng tiền</div>
-                    <p style="font-size:12px; color:var(--text-muted); margin-top:2px;">
-                        Ghi chép liên thông toàn bộ các khoản Thu (Bán hàng) và Chi (Nhập kho nguyên liệu) kèm chứng từ in ấn
-                    </p>
-                </div>
+                <div class="card-title">Sổ quỹ Thu - Chi</div>
                 <div style="display:flex; align-items:center; gap:8px; flex-wrap:wrap;">
                     <label style="margin:0; font-size:12px;">Lọc loại:</label>
                     <select id="cash-flow-filter-type" onchange="renderCashFlowTable()" style="width:auto; padding:5px 10px; font-size:12px;">
@@ -1770,12 +1748,7 @@
     <div id="tab-kitchen" class="tab-panel">
         <div class="card" style="margin-bottom:20px;">
             <div class="card-header" style="flex-wrap:wrap; gap:10px;">
-                <div>
-                    <div class="card-title">Màn hình Bếp chế biến (KDS)</div>
-                    <p style="font-size:12px; color:var(--text-muted); margin-top:2px;">
-                        Theo dõi danh sách món ăn từ từng bàn và cập nhật trạng thái chế biến theo thời gian thực.
-                    </p>
-                </div>
+                <div class="card-title">Bếp chế biến</div>
                 <div style="display:flex; gap:8px;">
                     <button class="btn btn-secondary btn-sm" onclick="loadKitchenOrders()">Làm mới</button>
                 </div>
@@ -1784,11 +1757,11 @@
             <!-- TỔNG QUAN BẾP -->
             <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(200px, 1fr)); gap:12px; margin-bottom:20px;">
                 <div style="background:#fef3c7; border:1px solid #fde68a; border-radius:var(--radius-sm); padding:12px 16px;">
-                    <div style="font-size:12px; color:#92400e; font-weight:600;">Chờ chế biến / Đang nấu</div>
+                    <div style="font-size:12px; color:#92400e; font-weight:600;">Đang nấu</div>
                     <div style="font-size:24px; font-weight:800; color:#b45309;" id="count-kitchen-cooking">0 đơn</div>
                 </div>
                 <div style="background:#dcfce7; border:1px solid #bbf7d0; border-radius:var(--radius-sm); padding:12px 16px;">
-                    <div style="font-size:12px; color:#166534; font-weight:600;">Đã nấu xong (Sẵn sàng phục vụ)</div>
+                    <div style="font-size:12px; color:#166534; font-weight:600;">Đã nấu xong</div>
                     <div style="font-size:24px; font-weight:800; color:#15803d;" id="count-kitchen-completed">0 đơn</div>
                 </div>
             </div>
@@ -1802,12 +1775,7 @@
         <!-- BẢNG CÔNG THỨC & ĐỊNH LƯỢNG NGUYÊN LIỆU MÓN ĂN -->
         <div class="card">
             <div class="card-header" style="flex-wrap:wrap; gap:10px;">
-                <div>
-                    <div class="card-title">Bảng định lượng nguyên liệu món ăn (100% món đã cài công thức)</div>
-                    <p style="font-size:12px; color:var(--text-muted); margin-top:2px;">
-                        Định lượng nguyên liệu tiêu hao khi chế biến món ăn (hệ thống tự động trừ kho nguyên liệu tương ứng)
-                    </p>
-                </div>
+                <div class="card-title">Định lượng công thức món</div>
                 <div style="display:flex; align-items:center; gap:8px; flex-wrap:wrap;">
                     <input type="text" id="recipe-search-input" placeholder="Lọc theo tên món hoặc nguyên liệu..." oninput="filterRecipesTable()" style="width:230px; padding:6px 10px; font-size:12px;">
                     <button class="btn btn-primary btn-sm" onclick="openRecipeModal()">+ Cài công thức món</button>
@@ -1880,15 +1848,10 @@
 
         <div class="card">
             <div class="card-header" style="flex-wrap:wrap; gap:10px;">
-                <div>
-                    <div class="card-title">Quản lý Tài khoản & Đổi tên Nhân sự (Phân quyền Admin)</div>
-                    <p style="font-size:12px; color:var(--text-muted); margin-top:2px;">
-                        Chủ quán (Admin) có quyền đổi tên hiển thị, sửa thông tin cá nhân, cập nhật lương/chức vụ hoặc khóa/mở khóa tài khoản nhân viên
-                    </p>
-                </div>
+                <div class="card-title">Quản lý Tài khoản & Nhân sự</div>
                 <div style="display:flex; gap:8px; flex-wrap:wrap;">
                     <button type="button" class="btn btn-primary btn-sm" onclick="openEditAccountsModal()">
-                        ✎ Đổi tên nhanh các tài khoản
+                        ✎ Đổi tên nhanh
                     </button>
                     <button type="button" class="btn btn-secondary btn-sm" onclick="loadAdminAccountsTable()">
                         Làm mới
