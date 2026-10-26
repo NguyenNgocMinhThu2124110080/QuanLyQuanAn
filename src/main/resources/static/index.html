@@ -4524,7 +4524,8 @@
         $('gr-supplier-address').textContent = (ncc && ncc.diaChi) ? ncc.diaChi : '—';
 
         const nv = pnx.nhanVien;
-        $('gr-creator').textContent = nv ? nv.hoTen : ((currentUser && currentUser.hoTen) ? currentUser.hoTen : 'Thủ kho');
+        const rawCreator = (nv && nv.nguoiDung && nv.nguoiDung.hoTen) ? nv.nguoiDung.hoTen : (nv && nv.hoTen ? nv.hoTen : ((currentUser && currentUser.hoTen) ? currentUser.hoTen : 'Lê Ngọc Bảo Trân'));
+        $('gr-creator').textContent = sanitizeAccountName(rawCreator, '');
 
         const nl = pnx.nguyenLieu;
         const nlName = nl ? (nl.tenNguyenLieu || nl.tenNl || `Nguyên liệu #${nl.nlId}`) : 'Nguyên liệu';
@@ -4958,15 +4959,18 @@
                 const dishes = (detail && Array.isArray(detail.danhSachMon)) ? detail.danhSachMon : [];
 
                 const titleLine = maDon 
-                    ? `Thu tiền đơn hàng #${maDon}${tenBan ? ' (' + tenBan + ')' : ''}` 
-                    : `Giao dịch thanh toán #${p.maTt}`;
+                    ? `Đơn #${maDon}${tenBan ? ' • ' + tenBan : ''}` 
+                    : `Giao dịch #${p.maTt}`;
 
-                const dishSummary = dishes.length > 0
-                    ? dishes.map(d => `${d.tenMon} ×${d.soLuong} (${formatVND(d.thanhTien)})`).join(', ')
+                const totalDishQty = dishes.reduce((s, d) => s + Number(d.soLuong || 0), 0);
+                const shortDishText = dishes.length > 0
+                    ? (dishes.length <= 2
+                        ? dishes.map(d => `${d.tenMon} ×${d.soLuong}`).join(', ')
+                        : `${dishes[0].tenMon} ×${dishes[0].soLuong}, ${dishes[1].tenMon} ×${dishes[1].soLuong} (+${dishes.length - 2} món khác)`)
                     : '';
 
                 let methodLabel = 'Tiền mặt';
-                if (p.phuongThuc === 'CHUYEN_KHOAN') methodLabel = 'Chuyển khoản QR';
+                if (p.phuongThuc === 'CHUYEN_KHOAN') methodLabel = 'Chuyển khoản';
                 if (p.phuongThuc === 'THE') methodLabel = 'Thẻ POS';
 
                 rawCashFlowData.push({
@@ -4975,7 +4979,7 @@
                     time: p.thoiGian,
                     type: 'THU',
                     content: titleLine,
-                    subDetail: dishSummary ? `Món bán: ${dishSummary}` : '',
+                    subDetail: shortDishText ? `${totalDishQty} suất: ${shortDishText}` : '',
                     dishesList: dishes,
                     tenBan: tenBan || 'Bàn ăn',
                     method: methodLabel,
@@ -4992,7 +4996,10 @@
                 const dvt = p.nguyenLieu ? (p.nguyenLieu.donViTinh || p.nguyenLieu.dvt || '') : '';
                 const nccName = p.nhaCungCap ? p.nhaCungCap.tenNcc : 'NCC tự do';
                 const nccPhone = (p.nhaCungCap && p.nhaCungCap.soDienThoai) ? p.nhaCungCap.soDienThoai : '';
-                const nvName = p.nhanVien ? p.nhanVien.hoTen : 'Thủ kho';
+                const rawNv = (p.nhanVien && p.nhanVien.nguoiDung && p.nhanVien.nguoiDung.hoTen)
+                    ? p.nhanVien.nguoiDung.hoTen
+                    : (p.nhanVien && p.nhanVien.hoTen ? p.nhanVien.hoTen : 'Lê Ngọc Bảo Trân');
+                const nvName = sanitizeAccountName(rawNv, '');
                 const khoName = (p.kho && p.kho.tenKho) ? p.kho.tenKho : 'Kho chính';
                 const qty = Number(p.soLuong || 0);
                 const price = Number(p.donGia || 0);
@@ -5003,8 +5010,8 @@
                     code: `#PN-${p.pnId}`,
                     time: p.ngayNhapXuat,
                     type: 'CHI',
-                    content: `Chi nhập kho: ${nlName} (${qty} ${dvt} × ${formatVND(price)}/${dvt || 'đv'})`,
-                    subDetail: `NCC: ${nccName} • Người nhập: ${nvName}${p.ghiChu ? ' • Ghi chú: ' + p.ghiChu : ''}`,
+                    content: `Nhập kho: ${nlName} (${qty} ${dvt})`,
+                    subDetail: `NCC: ${nccName}`,
                     nlName: nlName,
                     dvt: dvt,
                     qty: qty,
@@ -5014,7 +5021,7 @@
                     nvName: nvName,
                     khoName: khoName,
                     ghiChu: p.ghiChu || 'Nhập kho nguyên liệu',
-                    method: 'Quỹ tiền mặt / Công nợ NCC',
+                    method: 'Chi nhập hàng',
                     amount: amt,
                     pnId: p.pnId,
                     rawId: p.pnId
@@ -5061,43 +5068,44 @@
         tbody.innerHTML = displayList.map(item => {
             const isThu = item.type === 'THU';
             const badgeType = isThu
-                ? '<span class="badge" style="background:#dcfce7; color:#15803d; font-weight:700;">+ THU (Vào)</span>'
-                : '<span class="badge" style="background:#fee2e2; color:#b91c1c; font-weight:700;">- CHI (Ra)</span>';
+                ? '<span class="badge" style="background:#dcfce7; color:#15803d; font-weight:700; white-space:nowrap;">+ Thu</span>'
+                : '<span class="badge" style="background:#fee2e2; color:#b91c1c; font-weight:700; white-space:nowrap;">- Chi</span>';
 
-            const timeStr = item.time ? new Date(item.time).toLocaleString('vi-VN') : '—';
+            const dObj = item.time ? new Date(item.time) : null;
+            const timeStr = (dObj && !isNaN(dObj.getTime()))
+                ? `${dObj.toLocaleTimeString('vi-VN', {hour:'2-digit', minute:'2-digit'})} • ${dObj.toLocaleDateString('vi-VN')}`
+                : '—';
             const amountStr = isThu 
-                ? `<span style="font-weight:700; color:#15803d; font-size:13px;">+${formatVND(item.amount)}</span>`
-                : `<span style="font-weight:700; color:#b91c1c; font-size:13px;">-${formatVND(item.amount)}</span>`;
+                ? `<span style="font-weight:700; color:#15803d; font-size:13px; white-space:nowrap;">+${formatVND(item.amount)}</span>`
+                : `<span style="font-weight:700; color:#b91c1c; font-size:13px; white-space:nowrap;">-${formatVND(item.amount)}</span>`;
 
             let actionHtml = '—';
             if (isThu && item.orderId) {
                 actionHtml = `
-                    <button class="btn btn-secondary btn-sm" onclick="reprintReceiptInvoice(${item.orderId}, '${item.paymentMethod || 'TIEN_MAT'}')" style="padding:4px 8px; font-size:12px; display:inline-flex; align-items:center; gap:4px;" title="Xem và in hoá đơn bán hàng">
-                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 6 2 18 2 18 9"></polyline><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"></path><rect x="6" y="14" width="12" height="8"></rect></svg>
+                    <button class="btn btn-secondary btn-sm" onclick="reprintReceiptInvoice(${item.orderId}, '${item.paymentMethod || 'TIEN_MAT'}')" style="padding:4px 8px; font-size:12px; display:inline-flex; align-items:center; gap:4px; white-space:nowrap;" title="Xem và in hoá đơn bán hàng">
                         In HĐ
                     </button>
                 `;
             } else if (!isThu && item.pnId) {
                 actionHtml = `
-                    <button class="btn btn-secondary btn-sm" onclick="viewGoodsReceiptById(${item.pnId})" style="padding:4px 8px; font-size:12px; display:inline-flex; align-items:center; gap:4px;" title="Xem và in lại biên lai nhập kho">
-                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 6 2 18 2 18 9"></polyline><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"></path><rect x="6" y="14" width="12" height="8"></rect></svg>
-                        In biên lai
+                    <button class="btn btn-secondary btn-sm" onclick="viewGoodsReceiptById(${item.pnId})" style="padding:4px 8px; font-size:12px; display:inline-flex; align-items:center; gap:4px; white-space:nowrap;" title="Xem và in lại biên lai nhập kho">
+                        Biên lai
                     </button>
                 `;
             }
 
             return `
                 <tr>
-                    <td><strong>${item.code}</strong></td>
-                    <td style="font-size:12px; color:var(--text-muted);">${timeStr}</td>
-                    <td>${badgeType}</td>
+                    <td style="white-space:nowrap;"><strong>${item.code}</strong></td>
+                    <td style="font-size:12px; color:var(--text-muted); white-space:nowrap;">${timeStr}</td>
+                    <td style="white-space:nowrap;">${badgeType}</td>
                     <td>
                         <div style="font-weight:700; color:#1e293b;">${escHtml(item.content)}</div>
-                        ${item.subDetail ? `<div style="font-size:11px; color:#64748b; margin-top:2px;">${escHtml(item.subDetail)}</div>` : ''}
+                        ${item.subDetail ? `<div style="font-size:11px; color:#64748b; margin-top:1px;">${escHtml(item.subDetail)}</div>` : ''}
                     </td>
-                    <td style="font-size:12px;">${escHtml(item.method)}</td>
-                    <td style="text-align:right;">${amountStr}</td>
-                    <td style="text-align:center;">${actionHtml}</td>
+                    <td style="font-size:12px; white-space:nowrap;">${escHtml(item.method)}</td>
+                    <td style="text-align:right; white-space:nowrap;">${amountStr}</td>
+                    <td style="text-align:center; white-space:nowrap;">${actionHtml}</td>
                 </tr>
             `;
         }).join('');
