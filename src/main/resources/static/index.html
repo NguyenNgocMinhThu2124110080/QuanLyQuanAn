@@ -549,6 +549,17 @@
         .table-card.status-TRONG { border-top: 5px solid var(--success); }
         .table-card.status-CO_KHACH { border-top: 5px solid var(--danger); background: #fffcfb; }
         .table-card.status-DAT_TRUOC { border-top: 5px solid var(--info); }
+        .table-card.cooked-ready {
+            border-color: #10b981 !important;
+            border-top: 5px solid #10b981 !important;
+            background: #f0fdf4 !important;
+            animation: pulse-cooked 2s infinite ease-in-out;
+        }
+        @keyframes pulse-cooked {
+            0% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.5); }
+            70% { box-shadow: 0 0 0 8px rgba(16, 185, 129, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0); }
+        }
 
         .table-header {
             display: flex;
@@ -897,6 +908,8 @@
                             </div>
                             <small style="color:var(--text-muted); font-size:11px; display:block; margin-top:4px;">* Tự động kiểm tra và trừ tồn kho nguyên liệu</small>
                         </div>
+                        <!-- TRẠNG THÁI TIẾN ĐỘ BẾP NẤU (KDS ALERT CHO PHỤC VỤ) -->
+                        <div id="order-kitchen-status-box" style="display:none; border:1px solid #e2e8f0; border-radius:var(--radius-sm); padding:8px 12px; margin-bottom:10px; align-items:center; gap:8px;"></div>
 
                         <!-- DANH SÁCH MÓN ĐÃ GỌI -->
                         <div style="max-height:220px; overflow-y:auto; padding-right:4px;">
@@ -1518,6 +1531,9 @@
     let selectedTable = null;
     let selectedOrder = null;
     let selectedPayMethod = 'TIEN_MAT';
+    let tablesWithCookedOrders = new Map(); // maBan -> { maDon, tenBan }
+    let knownCookedOrderIds = new Set();
+    let isFirstCookedCheck = true;
 
     // ─────────────────────────────────────────────────────────────
     // UTILITIES
@@ -1538,7 +1554,43 @@
         const t = $('toast');
         t.textContent = message;
         t.className = `show ${type}`;
-        setTimeout(() => { t.className = ''; }, 4000);
+        setTimeout(() => { t.className = ''; }, 4500);
+    }
+
+    // Âm thanh chuông báo tinh tế khi bếp nấu xong (Web Audio API)
+    function playKitchenNotificationChime() {
+        try {
+            const AudioCtx = window.AudioContext || window.webkitAudioContext;
+            if (!AudioCtx) return;
+            const ctx = new AudioCtx();
+            const now = ctx.currentTime;
+            
+            // Note 1: E5 (659.25 Hz)
+            const osc1 = ctx.createOscillator();
+            const gain1 = ctx.createGain();
+            osc1.type = 'sine';
+            osc1.frequency.setValueAtTime(659.25, now);
+            gain1.gain.setValueAtTime(0.15, now);
+            gain1.gain.exponentialRampToValueAtTime(0.001, now + 0.35);
+            osc1.connect(gain1);
+            gain1.connect(ctx.destination);
+            osc1.start(now);
+            osc1.stop(now + 0.35);
+
+            // Note 2: B5 (987.77 Hz)
+            const osc2 = ctx.createOscillator();
+            const gain2 = ctx.createGain();
+            osc2.type = 'sine';
+            osc2.frequency.setValueAtTime(987.77, now + 0.12);
+            gain2.gain.setValueAtTime(0.18, now + 0.12);
+            gain2.gain.exponentialRampToValueAtTime(0.001, now + 0.55);
+            osc2.connect(gain2);
+            gain2.connect(ctx.destination);
+            osc2.start(now + 0.12);
+            osc2.stop(now + 0.55);
+        } catch (e) {
+            // AudioContext fallback
+        }
     }
 
     let authPromise = null;
@@ -1908,8 +1960,23 @@
             </div>
         `;
         try {
-            const data = await apiFetch('/api/ban-an');
-            allTables = Array.isArray(data) ? data : [];
+            const [tableData, orderData] = await Promise.all([
+                apiFetch('/api/ban-an'),
+                apiFetch('/api/don-hang').catch(() => [])
+            ]);
+            allTables = Array.isArray(tableData) ? tableData : [];
+
+            // Cập nhật danh sách bàn có đơn đã nấu xong
+            const newTablesWithCooked = new Map();
+            if (Array.isArray(orderData)) {
+                orderData.filter(o => o.trangThai === 'HOAN_THANH').forEach(o => {
+                    if (o.ban && o.ban.maBan) {
+                        newTablesWithCooked.set(o.ban.maBan, { maDon: o.maDon, tenBan: o.ban.tenBan });
+                    }
+                });
+            }
+            tablesWithCookedOrders = newTablesWithCooked;
+
             renderTableGrid();
         } catch (e) {
             allTables = [];
@@ -1921,6 +1988,64 @@
                     <button class="btn btn-secondary btn-sm" onclick="loadTables()">Thử lại</button>
                 </div>
             `;
+        }
+    }
+
+    // Kiểm tra định kỳ và bắn thông báo khi có món nấu xong
+    async function checkCookedOrdersNotification() {
+        try {
+            const orders = await apiFetch('/api/don-hang');
+            if (!Array.isArray(orders)) return;
+
+            const newTablesWithCooked = new Map();
+            const currentCooked = orders.filter(o => o.trangThai === 'HOAN_THANH');
+
+            currentCooked.forEach(o => {
+                if (o.ban && o.ban.maBan) {
+                    newTablesWithCooked.set(o.ban.maBan, {
+                        maDon: o.maDon,
+                        tenBan: o.ban.tenBan,
+                        ngayDat: o.ngayDat
+                    });
+                }
+            });
+
+            // Lần đầu tải trang -> khởi tạo danh sách để tránh spam toast thông báo cũ
+            if (isFirstCookedCheck) {
+                knownCookedOrderIds = new Set(currentCooked.map(o => o.maDon));
+                isFirstCookedCheck = false;
+                tablesWithCookedOrders = newTablesWithCooked;
+                return;
+            }
+
+            // Tìm những đơn hàng mới chuyển sang HOAN_THANH
+            const newlyCooked = currentCooked.filter(o => !knownCookedOrderIds.has(o.maDon));
+            if (newlyCooked.length > 0) {
+                newlyCooked.forEach(o => {
+                    knownCookedOrderIds.add(o.maDon);
+                    const tableName = o.ban ? o.ban.tenBan : `Bàn #${o.maBan}`;
+
+                    // Phát chuông báo âm thanh
+                    playKitchenNotificationChime();
+
+                    // Bắn Toast thông báo nổi bật cho nhân viên
+                    showToast(`Bếp đã nấu xong món cho ${tableName} (Đơn #${o.maDon})! Nhân viên vui lòng lên món cho khách.`, 'success');
+                });
+
+                tablesWithCookedOrders = newTablesWithCooked;
+
+                // Cập nhật lại giao diện bàn ăn nếu đang ở tab sơ đồ bàn
+                if (currentTabName === 'tables') {
+                    renderTableGrid();
+                    if (selectedTable && newTablesWithCooked.has(selectedTable.maBan)) {
+                        loadOrderForTable(selectedTable.maBan);
+                    }
+                }
+            } else {
+                tablesWithCookedOrders = newTablesWithCooked;
+            }
+        } catch (err) {
+            // Im lặng nếu lỗi mạng tạm thời
         }
     }
 
@@ -1972,18 +2097,27 @@
 
         $('tables-container').innerHTML = filtered.map(t => {
             const isSelected = selectedTable && selectedTable.maBan === t.maBan;
-            const statusClass = `status-${t.trangThai}`;
+            const hasCooked = (t.trangThai === 'CO_KHACH') && tablesWithCookedOrders && tablesWithCookedOrders.has(t.maBan);
+            const statusClass = `status-${t.trangThai} ${hasCooked ? 'cooked-ready' : ''}`;
             const badgeText = t.trangThai === 'TRONG' ? 'Trống' : (t.trangThai === 'CO_KHACH' ? 'Có khách' : 'Đặt trước');
+
+            const badgeHtml = hasCooked
+                ? `<span class="badge" style="background:#10b981; color:#fff; font-weight:700;">Đã nấu xong</span>`
+                : `<span class="badge ${t.trangThai === 'TRONG' ? 'badge-success' : 'badge-danger'}">${badgeText}</span>`;
+
+            const previewText = hasCooked
+                ? `<span style="color:#15803d; font-weight:700;">Sẵn sàng lên món</span>`
+                : (t.trangThai === 'CO_KHACH' ? 'Đang phục vụ' : 'Sẵn sàng');
 
             return `
             <div class="table-card ${statusClass} ${isSelected ? 'selected' : ''}" onclick="selectTable(${t.maBan})">
                 <div class="table-header">
                     <span class="table-name">${escHtml(t.tenBan)}</span>
-                    <span class="badge ${t.trangThai === 'TRONG' ? 'badge-success' : 'badge-danger'}">${badgeText}</span>
+                    ${badgeHtml}
                 </div>
                 <div class="table-capacity">${t.sucChua || 4} chỗ ngồi</div>
                 <div class="table-order-preview">
-                    ${t.trangThai === 'CO_KHACH' ? 'Đang phục vụ' : 'Sẵn sàng'}
+                    ${previewText}
                 </div>
             </div>`;
         }).join('');
@@ -2128,6 +2262,36 @@
         $('current-order-id').textContent = `#${order.maDon}`;
         $('current-order-time').textContent = order.ngayDat ? new Date(order.ngayDat).toLocaleTimeString('vi-VN', {hour:'2-digit', minute:'2-digit'}) : '--:--';
         $('current-order-total').textContent = formatVND(order.tongTien);
+
+        // Trạng thái bếp chế biến (KDS Alert)
+        const statusBox = $('order-kitchen-status-box');
+        if (statusBox) {
+            if (order.trangThai === 'HOAN_THANH') {
+                statusBox.style.display = 'flex';
+                statusBox.style.background = '#ecfdf5';
+                statusBox.style.borderColor = '#a7f3d0';
+                statusBox.innerHTML = `
+                    <div style="flex:1;">
+                        <div style="color:#065f46; font-weight:700; font-size:13px;">Bếp đã nấu xong toàn bộ món!</div>
+                        <div style="color:#047857; font-size:11px;">Nhân viên nhận món tại bếp và lên bàn phục vụ khách.</div>
+                    </div>
+                    <span class="badge" style="background:#10b981; color:#fff; font-size:11px; font-weight:700;">Đã nấu xong</span>
+                `;
+            } else if (order.trangThai === 'DANG_CHE_BIEN') {
+                statusBox.style.display = 'flex';
+                statusBox.style.background = '#fffbeb';
+                statusBox.style.borderColor = '#fde68a';
+                statusBox.innerHTML = `
+                    <div style="flex:1;">
+                        <div style="color:#92400e; font-weight:700; font-size:13px;">Bếp đang nấu món...</div>
+                        <div style="color:#b45309; font-size:11px;">Đơn hàng đã tiếp nhận và đang chế biến trong bếp.</div>
+                    </div>
+                    <span class="badge" style="background:#f59e0b; color:#fff; font-size:11px; font-weight:700;">Đang nấu</span>
+                `;
+            } else {
+                statusBox.style.display = 'none';
+            }
+        }
 
         // Nạp danh sách món ăn vào dropdown có lọc tìm kiếm
         populateDishSelect();
@@ -2334,10 +2498,13 @@
         if (btn) { btn.disabled = true; btn.textContent = 'Đang lưu món...'; }
 
         const id = $('food-id').value;
+        const currentDish = id ? allDishes.find(d => d.maMon === Number(id)) : null;
         const body = {
             tenMon: $('food-name').value.trim(),
             gia: Number($('food-price').value),
             moTa: $('food-desc').value.trim(),
+            trangThai: (currentDish && currentDish.trangThai !== undefined) ? currentDish.trangThai : 1,
+            hinhAnh: currentDish ? currentDish.hinhAnh : null,
             danhMuc: { maDanhmuc: Number($('food-category').value) }
         };
 
@@ -2346,7 +2513,7 @@
                 method: id ? 'PUT' : 'POST',
                 body: JSON.stringify(body)
             });
-            showToast(id ? 'Đã cập nhật món ăn!' : 'Đã thêm món ăn mới!');
+            showToast(id ? 'Đã cập nhật món ăn thành công!' : 'Đã thêm món ăn mới!');
             resetFoodForm();
             await loadDishes();
         } catch (e) {
@@ -2365,6 +2532,11 @@
         $('food-desc').value = dish.moTa || '';
         $('food-category').value = dish.danhMuc ? dish.danhMuc.maDanhmuc : '';
         $('btn-save-food').textContent = 'Cập nhật món';
+        const form = $('food-form');
+        if (form) {
+            form.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            setTimeout(() => $('food-name') && $('food-name').focus(), 250);
+        }
     }
 
     async function deleteFood(id) {
@@ -3132,12 +3304,15 @@
         }
     }
 
-    // Tự động làm mới màn hình bếp mỗi 6 giây khi đang mở tab bếp
+    // Tự động kiểm tra thông báo món nấu xong cho nhân viên & làm mới màn hình bếp
     setInterval(() => {
-        if (currentTabName === 'kitchen' && !document.hidden) {
-            loadKitchenOrders();
+        if (!document.hidden) {
+            checkCookedOrdersNotification();
+            if (currentTabName === 'kitchen') {
+                loadKitchenOrders();
+            }
         }
-    }, 6000);
+    }, 4000);
 
     // ─────────────────────────────────────────────────────────────
     // INITIALIZATION

@@ -33,9 +33,20 @@ public class DanhMucMonAnController {
 
     @PutMapping("/{id}")
     public org.springframework.http.ResponseEntity<DanhMucMonAn> update(@PathVariable Integer id, @RequestBody DanhMucMonAn entity) {
-        if (!repository.existsById(id)) return org.springframework.http.ResponseEntity.notFound().build();
-        entity.setMaDanhmuc(id);
-        return org.springframework.http.ResponseEntity.ok(repository.save(entity));
+        return repository.findById(id).map(existing -> {
+            if (entity.getTenDanhmuc() != null && !entity.getTenDanhmuc().trim().isEmpty()) {
+                existing.setTenDanhmuc(entity.getTenDanhmuc().trim());
+            }
+            if (entity.getMoTa() != null) {
+                existing.setMoTa(entity.getMoTa());
+            }
+            if (entity.getTrangThai() != null) {
+                existing.setTrangThai(entity.getTrangThai());
+            } else if (existing.getTrangThai() == null) {
+                existing.setTrangThai(1);
+            }
+            return org.springframework.http.ResponseEntity.ok(repository.save(existing));
+        }).orElse(org.springframework.http.ResponseEntity.notFound().build());
     }
 
     @DeleteMapping("/{id}")

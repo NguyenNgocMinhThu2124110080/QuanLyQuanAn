@@ -58,9 +58,29 @@ public class MonAnController {
 
     @PutMapping("/{id}")
     public ResponseEntity<MonAn> update(@PathVariable Integer id, @RequestBody MonAn monAn) {
-        if (!monAnRepository.existsById(id)) return ResponseEntity.notFound().build();
-        monAn.setMaMon(id);
-        return ResponseEntity.ok(monAnRepository.save(monAn));
+        return monAnRepository.findById(id).map(existing -> {
+            if (monAn.getTenMon() != null && !monAn.getTenMon().trim().isEmpty()) {
+                existing.setTenMon(monAn.getTenMon().trim());
+            }
+            if (monAn.getGia() != null) {
+                existing.setGia(monAn.getGia());
+            }
+            if (monAn.getMoTa() != null) {
+                existing.setMoTa(monAn.getMoTa());
+            }
+            if (monAn.getHinhAnh() != null) {
+                existing.setHinhAnh(monAn.getHinhAnh());
+            }
+            if (monAn.getTrangThai() != null) {
+                existing.setTrangThai(monAn.getTrangThai());
+            } else if (existing.getTrangThai() == null) {
+                existing.setTrangThai(1);
+            }
+            if (monAn.getDanhMuc() != null && monAn.getDanhMuc().getMaDanhmuc() != null) {
+                existing.setDanhMuc(monAn.getDanhMuc());
+            }
+            return ResponseEntity.ok(monAnRepository.save(existing));
+        }).orElse(ResponseEntity.notFound().build());
     }
 
     @DeleteMapping("/{id}")
