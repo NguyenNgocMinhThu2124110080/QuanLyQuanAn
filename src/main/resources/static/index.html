@@ -1181,7 +1181,8 @@
                                 <span>Thành tiền</span>
                             </div>
                             <div class="total-amount-display" id="current-order-total">0 ₫</div>
-                            <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-top:10px;">
+                            <div style="display:grid; grid-template-columns:1fr 1fr 1.3fr; gap:6px; margin-top:10px;">
+                                <button class="btn btn-secondary btn-sm" onclick="openTransferTableModal()" title="Chuyển toàn bộ đơn của bàn này sang một bàn trống khác">Đổi bàn</button>
                                 <button class="btn btn-danger btn-sm" onclick="cancelCurrentOrder()">Hủy đơn</button>
                                 <button class="btn btn-success" onclick="openPaymentForCurrentOrder()">Thanh toán</button>
                             </div>
@@ -1359,9 +1360,13 @@
         <div class="grid-table-order">
             <!-- DANH SÁCH TỒN KHO NGUYÊN LIỆU -->
             <div class="card">
-                <div class="card-header">
+                <div class="card-header" style="flex-wrap:wrap; gap:8px;">
                     <div class="card-title">Báo cáo tồn kho & Cảnh báo nguyên liệu</div>
-                    <button class="btn btn-secondary btn-sm" onclick="loadInventoryReport()">Làm mới</button>
+                    <div style="display:flex; gap:6px; flex-wrap:wrap;">
+                        <button class="btn btn-primary btn-sm" id="btn-open-add-nl" onclick="openAddIngredientModal()">+ Thêm nguyên liệu</button>
+                        <button class="btn btn-secondary btn-sm" id="btn-open-add-ncc" onclick="openAddSupplierModal()">+ Thêm Nhà cung cấp</button>
+                        <button class="btn btn-secondary btn-sm" onclick="loadInventoryReport()">Làm mới</button>
+                    </div>
                 </div>
                 <div class="table-responsive" style="max-height:500px; overflow-y:auto;">
                     <table class="app-table">
@@ -1606,6 +1611,35 @@
             </div>
         </div>
 
+        <!-- THỐNG KÊ TOP MÓN ĂN BÁN CHẠY NHẤT -->
+        <div class="card" style="margin-top:20px;">
+            <div class="card-header" style="flex-wrap:wrap; gap:10px;">
+                <div>
+                    <div class="card-title">Thống kê Top món ăn bán chạy nhất</div>
+                    <p style="font-size:12px; color:var(--text-muted); margin-top:2px;">
+                        Xếp hạng các món mang lại doanh thu và số lượng bán cao nhất trong kỳ đã chọn
+                    </p>
+                </div>
+                <span class="badge" style="background:#eff6ff; color:#1d4ed8; font-size:11px; font-weight:700;" id="top-dishes-count-badge">Đang thống kê...</span>
+            </div>
+            <div class="table-responsive">
+                <table class="app-table">
+                    <thead>
+                        <tr>
+                            <th style="width:80px;">Hạng</th>
+                            <th>Tên món ăn</th>
+                            <th style="text-align:center;">Số lượng đã bán</th>
+                            <th style="width:240px;">Tỷ trọng doanh thu</th>
+                            <th style="text-align:right;">Doanh thu mang lại</th>
+                        </tr>
+                    </thead>
+                    <tbody id="top-selling-dishes-tbody">
+                        <tr><td colspan="5" style="text-align:center; color:var(--text-muted);">Đang tổng hợp dữ liệu món bán chạy...</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
         <!-- SỔ QUỸ THU - CHI DÒNG TIỀN -->
         <div class="card" style="margin-top:20px;">
             <div class="card-header" style="flex-wrap:wrap; gap:10px;">
@@ -1615,13 +1649,17 @@
                         Ghi chép liên thông toàn bộ các khoản Thu (Bán hàng) và Chi (Nhập kho nguyên liệu) kèm chứng từ in ấn
                     </p>
                 </div>
-                <div style="display:flex; align-items:center; gap:8px;">
+                <div style="display:flex; align-items:center; gap:8px; flex-wrap:wrap;">
                     <label style="margin:0; font-size:12px;">Lọc loại:</label>
                     <select id="cash-flow-filter-type" onchange="renderCashFlowTable()" style="width:auto; padding:5px 10px; font-size:12px;">
                         <option value="ALL">Tất cả (Thu & Chi)</option>
                         <option value="THU">Chỉ dòng Thu (+)</option>
                         <option value="CHI">Chỉ dòng Chi (-)</option>
                     </select>
+                    <button type="button" class="btn btn-success btn-sm" onclick="exportCashFlowToCSV()" style="display:inline-flex; align-items:center; gap:5px; font-weight:700;" title="Xuất toàn bộ báo cáo Sổ quỹ Thu - Chi ra file Excel (.csv)">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+                        Xuất Excel (.csv)
+                    </button>
                 </div>
             </div>
             <div class="table-responsive" style="max-height:480px; overflow-y:auto;">
@@ -1732,8 +1770,28 @@
                     <span>Bàn ăn: <strong id="pay-table-name">--</strong></span>
                     <span>Đơn hàng: <strong id="pay-order-code">#--</strong></span>
                 </div>
-                <div style="display:flex; justify-content:space-between; font-size:16px; font-weight:700; color:var(--primary); margin-top:8px; border-top:1px dashed var(--border); padding-top:6px;">
-                    <span>Tổng tiền thanh toán:</span>
+                <div style="display:flex; justify-content:space-between; margin-top:6px; color:#475569;">
+                    <span>Tạm tính tiền món:</span>
+                    <strong id="pay-subtotal-amount">0 ₫</strong>
+                </div>
+                <div style="margin-top:8px; padding-top:8px; border-top:1px dashed #cbd5e1;">
+                    <div style="display:flex; justify-content:space-between; align-items:center; gap:6px; flex-wrap:wrap;">
+                        <span style="font-size:12px; font-weight:600; color:#334155;">Chiết khấu / Khuyến mãi:</span>
+                        <div style="display:flex; gap:4px;">
+                            <button type="button" class="btn btn-sm btn-primary pay-disc-btn" data-pct="0" onclick="setPaymentDiscountPercent(0)" style="padding:2px 7px; font-size:11px;">0%</button>
+                            <button type="button" class="btn btn-sm btn-secondary pay-disc-btn" data-pct="5" onclick="setPaymentDiscountPercent(5)" style="padding:2px 7px; font-size:11px;">-5%</button>
+                            <button type="button" class="btn btn-sm btn-secondary pay-disc-btn" data-pct="10" onclick="setPaymentDiscountPercent(10)" style="padding:2px 7px; font-size:11px;">-10%</button>
+                            <button type="button" class="btn btn-sm btn-secondary pay-disc-btn" data-pct="15" onclick="setPaymentDiscountPercent(15)" style="padding:2px 7px; font-size:11px;">-15%</button>
+                            <button type="button" class="btn btn-sm btn-secondary pay-disc-btn" data-pct="20" onclick="setPaymentDiscountPercent(20)" style="padding:2px 7px; font-size:11px;">-20%</button>
+                        </div>
+                    </div>
+                    <div id="pay-discount-row" style="display:none; justify-content:space-between; margin-top:4px; font-size:12px; color:#15803d; font-weight:700;">
+                        <span>Số tiền được giảm (<span id="pay-discount-pct-label">0%</span>):</span>
+                        <span id="pay-discount-amount">-0 ₫</span>
+                    </div>
+                </div>
+                <div style="display:flex; justify-content:space-between; font-size:16px; font-weight:800; color:var(--primary); margin-top:8px; border-top:1px dashed var(--border); padding-top:6px;">
+                    <span>Cần thanh toán:</span>
                     <span id="pay-order-amount">0 ₫</span>
                 </div>
             </div>
@@ -1930,6 +1988,111 @@
                 <button type="button" class="btn btn-secondary btn-sm" onclick="scrollToCashFlowLedger()">Cuộn xuống Sổ quỹ</button>
                 <button type="button" class="btn btn-primary" onclick="closeModal('finance-detail-modal')">Đóng</button>
             </div>
+        </div>
+    </div>
+</div>
+
+<!-- ===== MODAL: ĐỔI BÀN / CHUYỂN BÀN CHO KHÁCH ===== -->
+<div class="modal-overlay" id="transfer-table-modal">
+    <div class="modal-dialog" style="max-width:440px;">
+        <div class="modal-header">
+            <h3>Đổi bàn / Chuyển bàn cho khách</h3>
+            <button class="modal-close" onclick="closeModal('transfer-table-modal')">&times;</button>
+        </div>
+        <div class="modal-body">
+            <form onsubmit="submitTransferTable(event)">
+                <div style="background:#f8fafc; padding:10px 12px; border-radius:6px; border:1px solid var(--border); margin-bottom:12px; font-size:13px;">
+                    <div>Bàn hiện tại: <strong id="transfer-from-table-name" style="color:var(--primary);">--</strong></div>
+                    <div style="margin-top:4px;">Đơn hàng đang mở: <strong id="transfer-from-order-id">#--</strong></div>
+                </div>
+                <label>Chọn bàn trống muốn chuyển đến <span style="color:red">*</span></label>
+                <select id="transfer-to-table-select" required></select>
+                <div style="background:#eff6ff; color:#1e40af; padding:8px 12px; border-radius:6px; font-size:12px; margin-top:12px; border:1px solid #bfdbfe;">
+                    Toàn bộ các món đã gọi và trạng thái nấu sẽ được dời sang bàn mới, đồng thời bàn cũ được trả về trạng thái <strong>Trống</strong>.
+                </div>
+                <div style="display:flex; justify-content:flex-end; gap:8px; margin-top:16px;">
+                    <button type="button" class="btn btn-secondary" onclick="closeModal('transfer-table-modal')">Hủy</button>
+                    <button type="submit" class="btn btn-primary" id="btn-submit-transfer">Xác nhận đổi bàn</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- ===== MODAL: THÊM NGUYÊN LIỆU MỚI VÀO KHO ===== -->
+<div class="modal-overlay" id="add-ingredient-modal">
+    <div class="modal-dialog" style="max-width:460px;">
+        <div class="modal-header">
+            <h3>Thêm Nguyên liệu mới vào danh mục Kho</h3>
+            <button class="modal-close" onclick="closeModal('add-ingredient-modal')">&times;</button>
+        </div>
+        <div class="modal-body">
+            <form id="add-ingredient-form" onsubmit="submitNewIngredient(event)">
+                <label>Tên nguyên liệu mới <span style="color:red">*</span></label>
+                <input type="text" id="new-nl-name" required placeholder="VD: Bơ lạt Anchor, Sữa đặc, Tương ớt...">
+
+                <div class="grid-2" style="gap:10px;">
+                    <div>
+                        <label>Đơn vị tính <span style="color:red">*</span></label>
+                        <input type="text" id="new-nl-unit" required placeholder="VD: kg, lít, hộp, chai" value="kg">
+                    </div>
+                    <div>
+                        <label>Đơn giá nhập chuẩn (VNĐ) <span style="color:red">*</span></label>
+                        <input type="number" id="new-nl-price" required min="500" step="500" placeholder="VD: 60000">
+                    </div>
+                </div>
+
+                <div class="grid-2" style="gap:10px;">
+                    <div>
+                        <label>Số lượng tồn đầu kỳ</label>
+                        <input type="number" id="new-nl-stock" step="0.1" min="0" value="20">
+                    </div>
+                    <div>
+                        <label>Nhà cung cấp chính <span style="color:red">*</span></label>
+                        <select id="new-nl-supplier" required></select>
+                    </div>
+                </div>
+
+                <div style="display:flex; justify-content:flex-end; gap:8px; margin-top:16px;">
+                    <button type="button" class="btn btn-secondary" onclick="closeModal('add-ingredient-modal')">Hủy</button>
+                    <button type="submit" class="btn btn-primary" id="btn-save-new-nl">Lưu nguyên liệu</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- ===== MODAL: THÊM NHÀ CUNG CẤP MỚI ===== -->
+<div class="modal-overlay" id="add-supplier-modal">
+    <div class="modal-dialog" style="max-width:460px;">
+        <div class="modal-header">
+            <h3>Thêm Nhà cung cấp mới</h3>
+            <button class="modal-close" onclick="closeModal('add-supplier-modal')">&times;</button>
+        </div>
+        <div class="modal-body">
+            <form id="add-supplier-form" onsubmit="submitNewSupplier(event)">
+                <label>Tên Nhà cung cấp <span style="color:red">*</span></label>
+                <input type="text" id="new-ncc-name" required placeholder="VD: Công ty Thực phẩm CP Sài Gòn">
+
+                <div class="grid-2" style="gap:10px;">
+                    <div>
+                        <label>Số điện thoại <span style="color:red">*</span></label>
+                        <input type="text" id="new-ncc-phone" required placeholder="VD: 0909123456">
+                    </div>
+                    <div>
+                        <label>Email liên hệ</label>
+                        <input type="email" id="new-ncc-email" placeholder="VD: contact@ncc.vn">
+                    </div>
+                </div>
+
+                <label>Địa chỉ kho / giao dịch <span style="color:red">*</span></label>
+                <input type="text" id="new-ncc-address" required placeholder="VD: KCN Tân Bình, TP.HCM">
+
+                <div style="display:flex; justify-content:flex-end; gap:8px; margin-top:16px;">
+                    <button type="button" class="btn btn-secondary" onclick="closeModal('add-supplier-modal')">Hủy</button>
+                    <button type="submit" class="btn btn-primary" id="btn-save-new-ncc">Lưu Nhà cung cấp</button>
+                </div>
+            </form>
         </div>
     </div>
 </div>
@@ -3049,6 +3212,7 @@
         } else {
             itemsContainer.innerHTML = order.danhSachMon.map(item => {
                 let itemTag = '';
+                const isItemCooked = (order.trangThai === 'HOAN_THANH') || (hasPreviousCooked && cookedSet.has(Number(item.maCtdh)));
                 if (order.trangThai === 'HOAN_THANH') {
                     itemTag = '<span class="badge" style="background:#dcfce7; color:#15803d; font-size:10px; margin-left:6px;">✓ Đã nấu xong</span>';
                 } else if (hasPreviousCooked) {
@@ -3066,9 +3230,10 @@
                                 ${formatVND(item.donGia)} &times; ${item.soLuong}
                             </div>
                         </div>
-                        <div style="display:flex; align-items:center; gap:8px;">
+                        <div style="display:flex; align-items:center; gap:6px;">
                             <span style="font-weight:700; color:var(--text-main);">${formatVND(item.thanhTien)}</span>
-                            <button class="btn btn-danger btn-sm" onclick="deleteDishFromOrder(${item.maCtdh})" title="Huỷ món">&times;</button>
+                            <button class="btn btn-secondary btn-sm" onclick="quickAddOneMoreDish(${item.maMon})" style="padding:2px 6px; font-size:11px; font-weight:700;" title="Gọi thêm +1 suất món này">+1</button>
+                            <button class="btn btn-danger btn-sm" onclick="deleteDishFromOrder(${item.maCtdh}, ${isItemCooked}, ${item.maMon || 0}, ${item.soLuong || 1}, '${escHtml(item.tenMon)}')" title="${isItemCooked ? 'Món đã nấu xong (Chỉ Quản lý mới được phép hủy)' : 'Huỷ món & hoàn trả nguyên liệu vào kho'}">&times;</button>
                         </div>
                     </div>
                 `;
@@ -3128,14 +3293,170 @@
         }
     }
 
-    async function deleteDishFromOrder(maCtdh) {
-        if (!confirm('Bạn có chắc muốn huỷ món này khỏi đơn?')) return;
+    async function quickAddOneMoreDish(maMon) {
+        if (!selectedOrder || !maMon) return;
+        $('select-food-to-order').value = maMon;
+        $('input-food-qty').value = 1;
+        await addDishToCurrentOrder();
+    }
+
+    async function restoreIngredientStockForDish(maMon, soLuongMon) {
+        if (!maMon || !soLuongMon) return;
+        try {
+            const recipes = await apiFetch(`/api/cong-thuc-mon/mon/${maMon}`).catch(() => []);
+            if (!Array.isArray(recipes) || recipes.length === 0) return;
+
+            for (const r of recipes) {
+                const nlId = r.id ? r.id.nlId : (r.nguyenLieu ? r.nguyenLieu.nlId : null);
+                if (!nlId) continue;
+                const nl = await apiFetch(`/api/nguyen-lieu/${nlId}`).catch(() => null);
+                if (nl) {
+                    const addBack = Number(r.soLuongDung || 0) * Number(soLuongMon || 1);
+                    nl.soLuongTon = Number((Number(nl.soLuongTon || 0) + addBack).toFixed(3));
+                    await apiFetch(`/api/nguyen-lieu/${nlId}`, {
+                        method: 'PUT',
+                        body: JSON.stringify(nl)
+                    });
+                }
+            }
+        } catch (err) {
+            console.warn('Lỗi hoàn trả tồn kho:', err);
+        }
+    }
+
+    async function deleteDishFromOrder(maCtdh, isItemCooked, maMon, soLuong, tenMon) {
+        const role = currentUser ? (currentUser.vaiTro || '') : '';
+        if (isItemCooked) {
+            if (!['ADMIN', 'QUAN_LY'].includes(role)) {
+                showToast(`Món "${tenMon || 'này'}" bếp đã nấu xong & lên bàn! Phục vụ không được tự ý xóa (Chỉ Quản lý / Admin mới có quyền hủy).`, 'error');
+                return;
+            }
+            if (!confirm(`CẢNH BÁO QUẢN LÝ: Món "${tenMon || ''}" bếp ĐÃ NẤU XONG! Bạn có chắc chắn muốn hủy món này khỏi hóa đơn không?`)) return;
+        } else {
+            if (!confirm(`Huỷ món "${tenMon || ''}" (x${soLuong || 1})? Hệ thống sẽ tự động cộng hoàn trả nguyên liệu vào kho.`)) return;
+        }
+
         try {
             await apiFetch(`/api/don-hang/huy-mon/${maCtdh}`, { method: 'DELETE' });
-            showToast('Đã huỷ món thành công!');
+
+            // Nếu món chưa nấu mà hủy -> tự động hoàn trả lại nguyên liệu vào kho
+            if (!isItemCooked && maMon) {
+                await restoreIngredientStockForDish(maMon, soLuong || 1);
+                showToast(`Đã huỷ món "${tenMon || ''}" và hoàn trả nguyên liệu về kho!`);
+            } else {
+                showToast(`Đã huỷ món "${tenMon || ''}" khỏi đơn hàng!`);
+            }
+
+            // Kiểm tra nếu các món còn lại trong đơn đều đã nấu xong trước đó thì trả trạng thái đơn về HOAN_THANH
+            if (selectedOrder) {
+                const updatedDetail = await apiFetch(`/api/don-hang/${selectedOrder.maDon}/chi-tiet-hoa-don`).catch(() => null);
+                if (updatedDetail && Array.isArray(updatedDetail.danhSachMon) && updatedDetail.danhSachMon.length > 0) {
+                    const cookedMap = getCookedItemsMap();
+                    const cookedSet = new Set((cookedMap[String(selectedOrder.maDon)] || []).map(Number));
+                    const stillUncooked = updatedDetail.danhSachMon.filter(i => !cookedSet.has(Number(i.maCtdh)));
+                    if (cookedSet.size > 0 && stillUncooked.length === 0 && updatedDetail.trangThai !== 'HOAN_THANH') {
+                        await apiFetch(`/api/don-hang/${selectedOrder.maDon}/trang-thai?trangThai=HOAN_THANH`, { method: 'PUT' });
+                    }
+                }
+            }
+
+            await loadTables();
             await loadOrderForTable(selectedTable.maBan);
+            if (currentTabName === 'kitchen') await loadKitchenOrders();
         } catch (e) {
             showToast('Lỗi huỷ món: ' + e.message, 'error');
+        }
+    }
+
+    function openTransferTableModal() {
+        if (!selectedTable || !selectedOrder) {
+            showToast('Vui lòng chọn bàn đang có đơn hàng để đổi bàn!', 'error');
+            return;
+        }
+        const emptyTables = (allTables || []).filter(t => t.trangThai === 'TRONG' && t.maBan !== selectedTable.maBan);
+        if (emptyTables.length === 0) {
+            showToast('Hiện không còn bàn nào đang TRỐNG để chuyển đến!', 'error');
+            return;
+        }
+        $('transfer-from-table-name').textContent = selectedTable.tenBan;
+        $('transfer-from-order-id').textContent = `#${selectedOrder.maDon}`;
+        $('transfer-to-table-select').innerHTML = emptyTables.map(t => `
+            <option value="${t.maBan}">${escHtml(t.tenBan)} (${t.sucChua || 4} ghế - Đang trống)</option>
+        `).join('');
+        $('transfer-table-modal').classList.add('active');
+    }
+
+    async function submitTransferTable(e) {
+        e.preventDefault();
+        if (!selectedTable || !selectedOrder) return;
+        const targetMaBan = Number($('transfer-to-table-select').value);
+        if (!targetMaBan) return;
+
+        const btn = $('btn-submit-transfer');
+        const oldText = btn.textContent;
+        btn.disabled = true;
+        btn.textContent = 'Đang chuyển bàn...';
+
+        try {
+            const oldOrder = selectedOrder;
+            const oldTable = selectedTable;
+            const oldStatus = oldOrder.trangThai;
+            const items = Array.isArray(oldOrder.danhSachMon) ? oldOrder.danhSachMon : [];
+            const cookedMap = getCookedItemsMap();
+            const oldCookedSet = new Set((cookedMap[String(oldOrder.maDon)] || []).map(Number));
+
+            // 1. Tạo đơn mới trên bàn đích
+            const nvIdToUse = (currentUser && currentUser.nvId) ? currentUser.nvId : 2;
+            const newOrder = await apiFetch('/api/don-hang/mo-ban-tao-don', {
+                method: 'POST',
+                body: JSON.stringify({ maBan: targetMaBan, maNv: nvIdToUse })
+            });
+
+            // 2. Chuyển toàn bộ các món sang đơn mới (và hoàn trả tồn kho tạm để không bị trừ kho 2 lần)
+            const newCookedCtdhIds = [];
+            for (const item of items) {
+                await restoreIngredientStockForDish(item.maMon, item.soLuong);
+                const createdCtdh = await apiFetch('/api/don-hang/them-mon', {
+                    method: 'POST',
+                    body: JSON.stringify({
+                        maDon: newOrder.maDon,
+                        maMon: item.maMon,
+                        soLuong: item.soLuong
+                    })
+                });
+                if (oldCookedSet.has(Number(item.maCtdh)) && createdCtdh && createdCtdh.maCtdh) {
+                    newCookedCtdhIds.push(createdCtdh.maCtdh);
+                }
+            }
+
+            if (newCookedCtdhIds.length > 0) {
+                markOrderItemsAsCooked(newOrder.maDon, newCookedCtdhIds);
+            }
+
+            // 3. Đồng bộ trạng thái nấu sang đơn mới
+            if (oldStatus === 'HOAN_THANH') {
+                await apiFetch(`/api/don-hang/${newOrder.maDon}/trang-thai?trangThai=HOAN_THANH`, { method: 'PUT' });
+                const newDetail = await apiFetch(`/api/don-hang/${newOrder.maDon}/chi-tiet-hoa-don`).catch(() => null);
+                if (newDetail && Array.isArray(newDetail.danhSachMon)) {
+                    markOrderItemsAsCooked(newOrder.maDon, newDetail.danhSachMon.map(i => i.maCtdh));
+                }
+            }
+
+            // 4. Hủy đơn cũ và giải phóng bàn cũ về TRỐNG
+            await apiFetch(`/api/don-hang/${oldOrder.maDon}/huy-don`, { method: 'PUT' });
+            await apiFetch(`/api/ban-an/${oldTable.maBan}/trang-thai?trangThai=TRONG`, { method: 'PUT' });
+
+            closeModal('transfer-table-modal');
+            const targetTableObj = allTables.find(t => t.maBan === targetMaBan);
+            showToast(`Đã chuyển toàn bộ đơn từ ${oldTable.tenBan} sang ${targetTableObj ? targetTableObj.tenBan : 'bàn mới'} thành công!`);
+
+            await loadTables();
+            await selectTable(targetMaBan);
+        } catch (err) {
+            showToast('Lỗi chuyển bàn: ' + err.message, 'error');
+        } finally {
+            btn.disabled = false;
+            btn.textContent = oldText;
         }
     }
 
@@ -3570,8 +3891,106 @@
 
             $('movement-supplier').innerHTML = '<option value="">-- Chọn nhà cung cấp --</option>' +
                 allSuppliers.map(s => `<option value="${s.nccId}">${escHtml(s.tenNcc)}</option>`).join('');
+
+            if ($('new-nl-supplier')) {
+                $('new-nl-supplier').innerHTML = allSuppliers.map(s => `<option value="${s.nccId}">${escHtml(s.tenNcc)}</option>`).join('');
+            }
         } catch (e) {
             console.warn(e);
+        }
+    }
+
+    async function openAddIngredientModal() {
+        const role = currentUser ? (currentUser.vaiTro || '') : '';
+        if (role === 'DAU_BEP') {
+            showToast('Quyền Đầu bếp chỉ lập phiếu xuất kho. Vui lòng dùng tài khoản Quản lý / Admin để thêm danh mục nguyên liệu mới!', 'error');
+            return;
+        }
+        await loadInventoryDropdowns();
+        $('add-ingredient-form').reset();
+        $('new-nl-unit').value = 'kg';
+        $('new-nl-stock').value = '15';
+        $('add-ingredient-modal').classList.add('active');
+    }
+
+    async function submitNewIngredient(e) {
+        e.preventDefault();
+        const btn = $('btn-save-new-nl');
+        const oldText = btn.textContent;
+        btn.disabled = true;
+        btn.textContent = 'Đang lưu...';
+
+        try {
+            const payload = {
+                tenNguyenLieu: $('new-nl-name').value.trim(),
+                donViTinh: $('new-nl-unit').value.trim() || 'kg',
+                giaNhap: Number($('new-nl-price').value || 0),
+                soLuongTon: Number($('new-nl-stock').value || 0),
+                trangThai: 1,
+                nhaCungCap: { nccId: Number($('new-nl-supplier').value || 1) }
+            };
+            const created = await apiFetch('/api/nguyen-lieu', {
+                method: 'POST',
+                body: JSON.stringify(payload)
+            });
+
+            closeModal('add-ingredient-modal');
+            showToast(`Đã thêm nguyên liệu mới "${payload.tenNguyenLieu}" vào kho!`);
+            await loadInventoryReport();
+            await loadInventoryDropdowns();
+            if (created && created.nlId) {
+                $('movement-ingredient').value = created.nlId;
+                onIngredientSelectChange();
+            }
+        } catch (err) {
+            showToast('Lỗi thêm nguyên liệu: ' + err.message, 'error');
+        } finally {
+            btn.disabled = false;
+            btn.textContent = oldText;
+        }
+    }
+
+    function openAddSupplierModal() {
+        const role = currentUser ? (currentUser.vaiTro || '') : '';
+        if (role === 'DAU_BEP') {
+            showToast('Chỉ Quản lý / Admin mới có quyền thêm Nhà cung cấp mới!', 'error');
+            return;
+        }
+        $('add-supplier-form').reset();
+        $('add-supplier-modal').classList.add('active');
+    }
+
+    async function submitNewSupplier(e) {
+        e.preventDefault();
+        const btn = $('btn-save-new-ncc');
+        const oldText = btn.textContent;
+        btn.disabled = true;
+        btn.textContent = 'Đang lưu...';
+
+        try {
+            const payload = {
+                tenNcc: $('new-ncc-name').value.trim(),
+                soDienThoai: $('new-ncc-phone').value.trim(),
+                email: $('new-ncc-email').value.trim(),
+                diaChi: $('new-ncc-address').value.trim(),
+                trangThai: 1
+            };
+            const created = await apiFetch('/api/nha-cung-cap', {
+                method: 'POST',
+                body: JSON.stringify(payload)
+            });
+
+            closeModal('add-supplier-modal');
+            showToast(`Đã thêm Nhà cung cấp "${payload.tenNcc}" thành công!`);
+            await loadInventoryDropdowns();
+            if (created && created.nccId) {
+                $('movement-supplier').value = created.nccId;
+            }
+        } catch (err) {
+            showToast('Lỗi thêm Nhà cung cấp: ' + err.message, 'error');
+        } finally {
+            btn.disabled = false;
+            btn.textContent = oldText;
         }
     }
 
@@ -4176,6 +4595,9 @@
             // Sắp xếp thời gian mới nhất lên đầu
             rawCashFlowData.sort((a, b) => new Date(b.time || 0).getTime() - new Date(a.time || 0).getTime());
 
+            // Render bảng Top món ăn bán chạy
+            renderTopSellingDishes(filteredPayments);
+
             // Render vào bảng sổ quỹ
             renderCashFlowTable();
 
@@ -4483,12 +4905,118 @@
         }
     }
 
+    function renderTopSellingDishes(filteredPayments) {
+        const tbody = $('top-selling-dishes-tbody');
+        const badge = $('top-dishes-count-badge');
+        if (!tbody) return;
+
+        const dishStats = new Map();
+        let grandTotalDishRev = 0;
+
+        (filteredPayments || []).forEach(p => {
+            const maDon = p.donHang ? p.donHang.maDon : null;
+            const detail = maDon ? orderDetailCache.get(maDon) : null;
+            const items = (detail && Array.isArray(detail.danhSachMon)) ? detail.danhSachMon : [];
+            items.forEach(m => {
+                const key = m.tenMon || `Món #${m.maMon}`;
+                const cur = dishStats.get(key) || { tenMon: key, qty: 0, rev: 0 };
+                cur.qty += Number(m.soLuong || 0);
+                cur.rev += Number(m.thanhTien || 0);
+                grandTotalDishRev += Number(m.thanhTien || 0);
+                dishStats.set(key, cur);
+            });
+        });
+
+        const sorted = Array.from(dishStats.values()).sort((a, b) => {
+            if (b.qty !== a.qty) return b.qty - a.qty;
+            return b.rev - a.rev;
+        });
+
+        if (badge) badge.textContent = `${sorted.length} món đã bán trong kỳ`;
+
+        if (sorted.length === 0) {
+            tbody.innerHTML = `<tr><td colspan="5" style="text-align:center; padding:20px; color:var(--text-muted);">Chưa có dữ liệu món bán ra trong mốc thời gian này.</td></tr>`;
+            return;
+        }
+
+        tbody.innerHTML = sorted.slice(0, 8).map((d, idx) => {
+            const rank = idx + 1;
+            let rankBadge = `<span class="badge" style="background:#f1f5f9; color:#475569; font-weight:700;">#${rank}</span>`;
+            if (rank === 1) rankBadge = `<span class="badge" style="background:#fef3c7; color:#b45309; border:1px solid #fcd34d; font-weight:800;">TOP 1</span>`;
+            if (rank === 2) rankBadge = `<span class="badge" style="background:#e2e8f0; color:#334155; font-weight:800;">TOP 2</span>`;
+            if (rank === 3) rankBadge = `<span class="badge" style="background:#ffedd5; color:#9a3412; font-weight:800;">TOP 3</span>`;
+
+            const pct = grandTotalDishRev > 0 ? Math.round((d.rev / grandTotalDishRev) * 100) : 0;
+
+            return `
+                <tr>
+                    <td>${rankBadge}</td>
+                    <td><strong style="color:#1e293b; font-size:13px;">${escHtml(d.tenMon)}</strong></td>
+                    <td style="text-align:center;"><span class="badge" style="background:#dcfce7; color:#15803d; font-weight:800; font-size:12px;">${d.qty} suất</span></td>
+                    <td>
+                        <div style="display:flex; align-items:center; gap:8px;">
+                            <div style="flex:1; height:8px; background:#f1f5f9; border-radius:99px; overflow:hidden;">
+                                <div style="width:${pct}%; height:100%; background:var(--primary); border-radius:99px;"></div>
+                            </div>
+                            <span style="font-size:11px; font-weight:700; color:#475569; min-width:32px;">${pct}%</span>
+                        </div>
+                    </td>
+                    <td style="text-align:right; font-weight:800; color:#15803d;">${formatVND(d.rev)}</td>
+                </tr>
+            `;
+        }).join('');
+    }
+
+    function exportCashFlowToCSV() {
+        if (!rawCashFlowData || rawCashFlowData.length === 0) {
+            showToast('Không có dữ liệu dòng tiền để xuất file Excel!', 'error');
+            return;
+        }
+
+        const lines = [];
+        lines.push(['BAO CAO TAI CHINH: SO QUY THU - CHI & LOI NHUAN QUAN AN']);
+        lines.push(['Ky bao cao', currentFinanceSummary.periodText || 'Hom nay']);
+        lines.push(['Tong Thu (Doanh thu ban hang)', currentFinanceSummary.totalIncome]);
+        lines.push(['Tong Chi (Nhap kho nguyen lieu)', currentFinanceSummary.totalExpense]);
+        lines.push(['Loi Nhuan Rong (Thu - Chi)', currentFinanceSummary.netProfit]);
+        lines.push([]);
+        lines.push(['Ma GD / Phieu', 'Thoi gian', 'Phan loai', 'Noi dung giao dich', 'Chi tiet mon ban / hang nhap', 'Hinh thuc / Nha cung cap', 'So tien (VND)']);
+
+        rawCashFlowData.forEach(item => {
+            const timeStr = item.time ? new Date(item.time).toLocaleString('vi-VN') : '';
+            const typeStr = item.type === 'THU' ? 'THU (+)' : 'CHI (-)';
+            const signAmt = item.type === 'THU' ? item.amount : -item.amount;
+            lines.push([
+                item.code || '',
+                timeStr,
+                typeStr,
+                (item.content || '').replace(/"/g, '""'),
+                (item.subDetail || '').replace(/"/g, '""'),
+                (item.method || '').replace(/"/g, '""'),
+                signAmt
+            ]);
+        });
+
+        const csvContent = '\uFEFF' + lines.map(row => row.map(cell => `"${cell}"`).join(',')).join('\r\n');
+        const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `So_Quy_Thu_Chi_Loi_Nhuan_${new Date().toISOString().slice(0, 10)}.csv`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+        showToast('Đã xuất báo cáo Sổ quỹ Thu - Chi ra file Excel (.csv) thành công!');
+    }
+
     async function loadDailyRevenue() {
         await loadFinancialReport();
     }
 
-    // PAYMENT MODAL WORKFLOW
+    // PAYMENT MODAL WORKFLOW (CÓ CHIẾT KHẤU / KHUYẾN MÃI)
     let currentPayingOrder = null;
+    let currentDiscountPercent = 0;
 
     function openPaymentForCurrentOrder() {
         if (!selectedOrder) return;
@@ -4501,16 +5029,41 @@
             $('pay-order-id').value = currentPayingOrder.maDon;
             $('pay-table-name').textContent = currentPayingOrder.tenBan;
             $('pay-order-code').textContent = `#${currentPayingOrder.maDon}`;
-            $('pay-order-amount').textContent = formatVND(currentPayingOrder.tongTien);
+            if ($('pay-subtotal-amount')) $('pay-subtotal-amount').textContent = formatVND(currentPayingOrder.tongTien);
 
             $('pay-customer-cash').value = '';
             $('pay-change-money').textContent = '0 ₫';
 
+            setPaymentDiscountPercent(0);
             selectPayMethod('TIEN_MAT');
             $('payment-modal').classList.add('active');
         } catch (e) {
             showToast('Lỗi: ' + e.message, 'error');
         }
+    }
+
+    function setPaymentDiscountPercent(pct) {
+        currentDiscountPercent = Number(pct || 0);
+        document.querySelectorAll('.pay-disc-btn').forEach(b => {
+            if (Number(b.getAttribute('data-pct')) === currentDiscountPercent) {
+                b.className = 'btn btn-sm btn-primary pay-disc-btn';
+            } else {
+                b.className = 'btn btn-sm btn-secondary pay-disc-btn';
+            }
+        });
+
+        const subtotal = currentPayingOrder ? Number(currentPayingOrder.tongTien || 0) : 0;
+        const discAmt = Math.round((subtotal * currentDiscountPercent) / 100);
+        const finalAmt = Math.max(0, subtotal - discAmt);
+
+        const discRow = $('pay-discount-row');
+        if (discRow) {
+            discRow.style.display = currentDiscountPercent > 0 ? 'flex' : 'none';
+            if ($('pay-discount-pct-label')) $('pay-discount-pct-label').textContent = `${currentDiscountPercent}%`;
+            if ($('pay-discount-amount')) $('pay-discount-amount').textContent = `-${formatVND(discAmt)}`;
+        }
+        $('pay-order-amount').textContent = formatVND(finalAmt);
+        calcChangeMoney();
     }
 
     function selectPayMethod(method, btn) {
@@ -4531,7 +5084,9 @@
 
     function calcChangeMoney() {
         if (!currentPayingOrder) return;
-        const total = Number(currentPayingOrder.tongTien || 0);
+        const subtotal = Number(currentPayingOrder.tongTien || 0);
+        const discAmt = Math.round((subtotal * currentDiscountPercent) / 100);
+        const total = Math.max(0, subtotal - discAmt);
         const given = Number($('pay-customer-cash').value || 0);
         const change = given - total;
         $('pay-change-money').textContent = change > 0 ? formatVND(change) : '0 ₫';
