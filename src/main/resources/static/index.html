@@ -1077,6 +1077,9 @@
     <button id="nav-btn-cashier" onclick="switchNav('cashier', this)">
         Thu ngân & Báo cáo
     </button>
+    <button id="nav-btn-admin" onclick="switchNav('admin', this)" style="display:none;">
+        Quản trị Tài khoản (Admin)
+    </button>
 </nav>
 
 <!-- ===== MAIN CONTENT ===== -->
@@ -1754,6 +1757,89 @@
         </div>
     </div>
 
+    <!-- ========================================================
+         TAB 6: QUẢN TRỊ TÀI KHOẢN & NHÂN SỰ (CHỈ DÀNH CHO ADMIN)
+    ======================================================== -->
+    <div id="tab-admin" class="tab-panel">
+        <div class="grid-4" style="margin-bottom:20px;">
+            <div class="kpi-card">
+                <div class="kpi-icon" style="background:#eff6ff; color:#1d4ed8;">
+                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
+                </div>
+                <div>
+                    <div class="kpi-title">Tổng tài khoản nhân sự</div>
+                    <div class="kpi-value" id="admin-kpi-total-staff">0</div>
+                </div>
+            </div>
+            <div class="kpi-card">
+                <div class="kpi-icon" style="background:#dcfce7; color:#15803d;">
+                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>
+                </div>
+                <div>
+                    <div class="kpi-title">Đang hoạt động</div>
+                    <div class="kpi-value" style="color:var(--success);" id="admin-kpi-active-staff">0</div>
+                </div>
+            </div>
+            <div class="kpi-card">
+                <div class="kpi-icon" style="background:#fee2e2; color:#b91c1c;">
+                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
+                </div>
+                <div>
+                    <div class="kpi-title">Tài khoản đang khóa</div>
+                    <div class="kpi-value" style="color:var(--danger);" id="admin-kpi-locked-staff">0</div>
+                </div>
+            </div>
+            <div class="kpi-card">
+                <div class="kpi-icon" style="background:#fff7ed; color:#ea580c;">
+                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="1" x2="12" y2="23"></line><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path></svg>
+                </div>
+                <div>
+                    <div class="kpi-title">Tổng quỹ lương / tháng</div>
+                    <div class="kpi-value" style="color:var(--primary);" id="admin-kpi-total-salary">0 ₫</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-header" style="flex-wrap:wrap; gap:10px;">
+                <div>
+                    <div class="card-title">Quản lý Tài khoản & Đổi tên Nhân sự (Phân quyền Admin)</div>
+                    <p style="font-size:12px; color:var(--text-muted); margin-top:2px;">
+                        Chủ quán (Admin) có quyền đổi tên hiển thị, sửa thông tin cá nhân, cập nhật lương/chức vụ hoặc khóa/mở khóa tài khoản nhân viên
+                    </p>
+                </div>
+                <div style="display:flex; gap:8px; flex-wrap:wrap;">
+                    <button type="button" class="btn btn-primary btn-sm" onclick="openEditAccountsModal()">
+                        ✎ Đổi tên nhanh các tài khoản
+                    </button>
+                    <button type="button" class="btn btn-secondary btn-sm" onclick="loadAdminAccountsTable()">
+                        Làm mới
+                    </button>
+                </div>
+            </div>
+
+            <div class="table-responsive">
+                <table class="app-table">
+                    <thead>
+                        <tr>
+                            <th>Mã NV</th>
+                            <th>Họ và tên hiển thị</th>
+                            <th>Tài khoản đăng nhập</th>
+                            <th>Vai trò / Phân quyền</th>
+                            <th>Liên hệ (SĐT / Email)</th>
+                            <th>Chức vụ & Lương</th>
+                            <th>Trạng thái</th>
+                            <th style="text-align:center;">Thao tác Admin</th>
+                        </tr>
+                    </thead>
+                    <tbody id="admin-accounts-tbody">
+                        <tr><td colspan="8" style="text-align:center; color:var(--text-muted);">Đang tải danh sách tài khoản...</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
 </main>
 
 <!-- ===== MODAL: THANH TOÁN HÓA ĐƠN ===== -->
@@ -2183,12 +2269,7 @@
             <button class="modal-close" onclick="closeModal('login-modal')">&times;</button>
         </div>
         <div class="modal-body">
-            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
-                <label style="margin:0;">Chọn nhanh tài khoản nhân sự:</label>
-                <button type="button" class="btn btn-secondary btn-sm" onclick="openEditAccountsModal()" style="padding:3px 8px; font-size:11px; color:var(--primary); font-weight:700;">
-                    ✎ Đổi tên các tài khoản
-                </button>
-            </div>
+            <label style="margin-bottom:8px; display:block;">Chọn nhanh tài khoản nhân sự (Mật khẩu: 123456):</label>
             <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-bottom:14px;">
                 <button type="button" class="btn btn-secondary btn-sm" onclick="quickLogin('admin', '123456')" style="display:flex; flex-direction:column; align-items:flex-start; padding:8px 10px; text-align:left; line-height:1.3;">
                     <span style="font-size:10px; color:#c2410c; font-weight:800; text-transform:uppercase;">Chủ quán / Admin</span>
@@ -2533,15 +2614,11 @@
 
             userBadge.style.display = 'inline-flex';
             userBadge.style.cursor = 'pointer';
-            userBadge.title = 'Bấm để đổi tài khoản hoặc chỉnh sửa tên hiển thị';
+            userBadge.title = 'Bấm để chuyển ca / đổi tài khoản đăng nhập';
             userBadge.onclick = () => openLoginModal();
             $('current-user-name').textContent = currentUser.hoTen || currentUser.username;
             $('current-user-role').textContent = ROLE_DISPLAY_LABEL[currentUser.vaiTro] || currentUser.vaiTro || 'Nhân viên';
-            authActions.innerHTML = `
-                <button class="btn btn-secondary btn-sm" onclick="openEditAccountsModal()" style="padding:5px 10px; font-size:12px;" title="Đổi tên hiển thị của các tài khoản">✎ Đổi tên TK</button>
-                <button class="btn btn-secondary btn-sm" onclick="openLoginModal()" style="padding:5px 10px; font-size:12px;">Đổi ca</button>
-                <button class="btn-logout" onclick="handleLogout()">Đăng xuất</button>
-            `;
+            authActions.innerHTML = `<button class="btn-logout" onclick="handleLogout()">Đăng xuất</button>`;
         } else {
             userBadge.style.display = 'none';
             authActions.innerHTML = `<button class="btn btn-primary btn-sm" onclick="openLoginModal()">Đăng nhập</button>`;
@@ -2574,24 +2651,40 @@
         }
     }
 
-    async function openEditAccountsModal() {
-        await ensureAuthenticated('admin');
+    async function openEditAccountsModal(filterUserId = null) {
+        if (!currentUser || currentUser.vaiTro !== 'ADMIN') {
+            showToast('Chỉ tài khoản Chủ quán (ADMIN) mới có quyền đổi tên và quản lý tài khoản!', 'error');
+            return;
+        }
         try {
             const list = await apiFetch('/api/nguoi-dung');
             cachedAccountsList = Array.isArray(list) ? list : [];
+            const targetList = filterUserId
+                ? cachedAccountsList.filter(nd => nd.userId === filterUserId)
+                : cachedAccountsList;
+
             const container = $('edit-accounts-list');
-            container.innerHTML = cachedAccountsList.map(nd => {
+            container.innerHTML = targetList.map(nd => {
                 const tk = nd.taiKhoan || {};
                 const roleCode = tk.phanQuyen ? tk.phanQuyen.tenPq : '';
                 const roleLabel = ROLE_DISPLAY_LABEL[roleCode] || roleCode || 'Tài khoản';
                 const cleanName = sanitizeAccountName(nd.hoTen, roleCode);
                 return `
-                    <div style="background:#f8fafc; padding:10px 12px; border-radius:8px; border:1px solid var(--border);">
-                        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
-                            <span style="font-size:12px; font-weight:700; color:var(--primary);">${escHtml(roleLabel)} (Mã đăng nhập: <code>${escHtml(tk.username || '')}</code>)</span>
+                    <div style="background:#f8fafc; padding:12px; border-radius:8px; border:1px solid var(--border);">
+                        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+                            <span style="font-size:12px; font-weight:700; color:var(--primary);">${escHtml(roleLabel)} (Username: <code>${escHtml(tk.username || '')}</code>)</span>
                             <span style="font-size:11px; color:var(--text-muted);">ID #${nd.userId}</span>
                         </div>
-                        <input type="text" class="account-name-input" data-userid="${nd.userId}" value="${escHtml(cleanName)}" required placeholder="Nhập họ và tên hiển thị..." style="margin:0;">
+                        <div class="grid-2" style="gap:8px;">
+                            <div>
+                                <label style="font-size:11px; margin-bottom:3px;">Họ và tên hiển thị <span style="color:red">*</span></label>
+                                <input type="text" class="account-name-input" data-userid="${nd.userId}" value="${escHtml(cleanName)}" required placeholder="Nhập họ và tên..." style="margin:0;">
+                            </div>
+                            <div>
+                                <label style="font-size:11px; margin-bottom:3px;">Số điện thoại</label>
+                                <input type="text" class="account-phone-input" data-userid="${nd.userId}" value="${escHtml(nd.soDienThoai || '')}" placeholder="SĐT liên hệ..." style="margin:0;">
+                            </div>
+                        </div>
                     </div>
                 `;
             }).join('');
@@ -2609,13 +2702,21 @@
         btn.textContent = 'Đang lưu...';
 
         try {
-            const inputs = document.querySelectorAll('.account-name-input');
-            for (const inp of inputs) {
+            const nameInputs = document.querySelectorAll('.account-name-input');
+            const phoneInputs = document.querySelectorAll('.account-phone-input');
+            const phoneMap = new Map();
+            phoneInputs.forEach(inp => phoneMap.set(Number(inp.getAttribute('data-userid')), inp.value.trim()));
+
+            for (const inp of nameInputs) {
                 const uid = Number(inp.getAttribute('data-userid'));
                 const newName = inp.value.trim();
+                const newPhone = phoneMap.get(uid);
                 const existing = cachedAccountsList.find(x => x.userId === uid);
-                if (existing && newName && existing.hoTen !== newName) {
+                if (existing && newName) {
                     existing.hoTen = newName;
+                    if (newPhone !== undefined && newPhone !== '') {
+                        existing.soDienThoai = newPhone;
+                    }
                     await apiFetch(`/api/nguoi-dung/${uid}`, {
                         method: 'PUT',
                         body: JSON.stringify(existing)
@@ -2624,13 +2725,111 @@
             }
             await syncAccountNamesFromServer();
             updateUserHeader();
+            if (currentTabName === 'admin') {
+                await loadAdminAccountsTable();
+            }
             closeModal('edit-accounts-modal');
-            showToast('Đã cập nhật tên các tài khoản thành công!');
+            showToast('Đã cập nhật thông tin tên tài khoản thành công!');
         } catch (err) {
             showToast('Lỗi lưu tên tài khoản: ' + err.message, 'error');
         } finally {
             btn.disabled = false;
             btn.textContent = oldText;
+        }
+    }
+
+    async function loadAdminAccountsTable() {
+        const tbody = $('admin-accounts-tbody');
+        if (!tbody) return;
+        tbody.innerHTML = `<tr><td colspan="8"><div class="ui-loading-box"><div class="spinner"></div><span>Đang tải danh sách tài khoản nhân sự...</span></div></td></tr>`;
+
+        try {
+            const [nvList, ndList] = await Promise.all([
+                apiFetch('/api/nhan-vien'),
+                apiFetch('/api/nguoi-dung')
+            ]);
+            const staffArr = Array.isArray(nvList) ? nvList : [];
+            cachedAccountsList = Array.isArray(ndList) ? ndList : [];
+
+            let activeCount = 0;
+            let lockedCount = 0;
+            let totalSalary = 0;
+
+            staffArr.forEach(nv => {
+                const tk = (nv.nguoiDung && nv.nguoiDung.taiKhoan) ? nv.nguoiDung.taiKhoan : {};
+                if (tk.trangThai === 0) lockedCount++;
+                else activeCount++;
+                totalSalary += Number(nv.luong || 0);
+            });
+
+            if ($('admin-kpi-total-staff')) $('admin-kpi-total-staff').textContent = staffArr.length;
+            if ($('admin-kpi-active-staff')) $('admin-kpi-active-staff').textContent = activeCount;
+            if ($('admin-kpi-locked-staff')) $('admin-kpi-locked-staff').textContent = lockedCount;
+            if ($('admin-kpi-total-salary')) $('admin-kpi-total-salary').textContent = formatVND(totalSalary);
+
+            tbody.innerHTML = staffArr.map(nv => {
+                const nd = nv.nguoiDung || {};
+                const tk = nd.taiKhoan || {};
+                const pq = tk.phanQuyen || {};
+                const roleCode = pq.tenPq || 'USER';
+                const cleanName = sanitizeAccountName(nd.hoTen, roleCode);
+                const isLocked = tk.trangThai === 0;
+
+                let roleBadge = `<span class="badge badge-info">${escHtml(ROLE_DISPLAY_LABEL[roleCode] || roleCode)}</span>`;
+                if (roleCode === 'ADMIN') roleBadge = `<span class="badge" style="background:#ffedd5; color:#c2410c; font-weight:800;">Chủ quán (ADMIN)</span>`;
+                else if (roleCode === 'QUAN_LY') roleBadge = `<span class="badge" style="background:#dbeafe; color:#1d4ed8; font-weight:700;">Quản lý cửa hàng</span>`;
+                else if (roleCode === 'NHAN_VIEN_PHUC_VU') roleBadge = `<span class="badge" style="background:#dcfce7; color:#15803d; font-weight:700;">Nhân viên Phục vụ</span>`;
+                else if (roleCode === 'DAU_BEP') roleBadge = `<span class="badge" style="background:#f3e8ff; color:#7c3aed; font-weight:700;">Bếp trưởng / Kho</span>`;
+
+                const statusBadge = isLocked
+                    ? `<span class="badge badge-danger">Đã khóa</span>`
+                    : `<span class="badge badge-success">Hoạt động</span>`;
+
+                return `
+                    <tr>
+                        <td><strong>#NV-${nv.nvId}</strong></td>
+                        <td>
+                            <strong style="font-size:14px; color:#1e293b;">${escHtml(cleanName)}</strong>
+                            <div style="font-size:11px; color:var(--text-muted);">${escHtml(nd.gioiTinh || '')} • ${escHtml(nd.diaChi || '')}</div>
+                        </td>
+                        <td><code style="background:#f1f5f9; padding:3px 8px; border-radius:4px; font-weight:700; color:#0f172a;">${escHtml(tk.username || '--')}</code></td>
+                        <td>${roleBadge}</td>
+                        <td style="font-size:12px;">
+                            <div><strong>${escHtml(nd.soDienThoai || '--')}</strong></div>
+                            <div style="color:var(--text-muted);">${escHtml(tk.email || '')}</div>
+                        </td>
+                        <td>
+                            <div style="font-weight:600; font-size:12px;">${escHtml(nv.chucVu || '--')}</div>
+                            <div style="color:var(--primary); font-weight:700; font-size:12px;">${formatVND(nv.luong || 0)}</div>
+                        </td>
+                        <td>${statusBadge}</td>
+                        <td style="text-align:center; white-space:nowrap;">
+                            <button class="btn btn-primary btn-sm" onclick="openEditAccountsModal(${nd.userId})" style="padding:4px 10px; font-size:12px; margin-right:4px;">
+                                ✎ Đổi tên / Sửa
+                            </button>
+                            ${roleCode !== 'ADMIN' ? `
+                                <button class="btn ${isLocked ? 'btn-success' : 'btn-danger'} btn-sm" onclick="toggleAccountLockStatus(${tk.taiKhoanId}, ${isLocked ? 1 : 0}, '${escHtml(cleanName)}')" style="padding:4px 8px; font-size:12px;">
+                                    ${isLocked ? 'Mở khóa' : 'Khóa TK'}
+                                </button>
+                            ` : ''}
+                        </td>
+                    </tr>
+                `;
+            }).join('');
+        } catch (err) {
+            tbody.innerHTML = `<tr><td colspan="8" style="text-align:center; color:var(--danger); padding:20px;">Lỗi tải danh sách tài khoản: ${escHtml(err.message)}</td></tr>`;
+        }
+    }
+
+    async function toggleAccountLockStatus(taiKhoanId, newStatus, name) {
+        const actionText = newStatus === 0 ? 'KHÓA' : 'MỞ KHÓA';
+        if (!confirm(`Bạn có chắc muốn ${actionText} tài khoản của nhân sự "${name}"?`)) return;
+        try {
+            await apiFetch(`/api/tai-khoan/${taiKhoanId}/trang-thai?trangThai=${newStatus}`, { method: 'PUT' });
+            showToast(`Đã ${actionText.toLowerCase()} tài khoản của ${name} thành công!`);
+            await loadAdminAccountsTable();
+        } catch (err) {
+            showToast('Lỗi cập nhật trạng thái tài khoản: ' + err.message, 'error');
         }
     }
 
@@ -2642,6 +2841,7 @@
         const navInventory = $('nav-btn-inventory');
         const navKitchen = $('nav-btn-kitchen');
         const navCashier = $('nav-btn-cashier');
+        const navAdmin = $('nav-btn-admin');
         const hintIcon = $('role-hint-icon');
         const hintText = $('role-hint-text');
 
@@ -2651,8 +2851,9 @@
             if (navInventory) navInventory.style.display = 'inline-flex';
             if (navKitchen) navKitchen.style.display = 'inline-flex';
             if (navCashier) navCashier.style.display = 'inline-flex';
+            if (navAdmin) navAdmin.style.display = 'inline-flex';
             if (hintIcon) hintIcon.textContent = '';
-            if (hintText) hintText.innerHTML = `<strong>CHỦ QUÁN / ADMIN</strong> (${escHtml(dispName)}) — Toàn quyền truy cập tất cả các phân hệ: Bàn, Thực đơn, Kho, Bếp & Doanh thu`;
+            if (hintText) hintText.innerHTML = `<strong>CHỦ QUÁN / ADMIN</strong> (${escHtml(dispName)}) — Toàn quyền truy cập tất cả các phân hệ: Bàn, Thực đơn, Kho, Bếp, Doanh thu & Quản trị Tài khoản`;
             setMenuEditingAllowed(true);
         } else if (role === 'QUAN_LY') {
             if (navTables) navTables.style.display = 'inline-flex';
@@ -2660,19 +2861,24 @@
             if (navInventory) navInventory.style.display = 'inline-flex';
             if (navKitchen) navKitchen.style.display = 'inline-flex';
             if (navCashier) navCashier.style.display = 'inline-flex';
+            if (navAdmin) navAdmin.style.display = 'none';
             if (hintIcon) hintIcon.textContent = '';
             if (hintText) hintText.innerHTML = `<strong>QUẢN LÝ CỬA HÀNG</strong> (${escHtml(dispName)}) — Toàn quyền quản lý Bàn ăn, Thực đơn, Kho hàng, Bếp và Thu ngân`;
             setMenuEditingAllowed(true);
+            if (currentTabName === 'admin') {
+                switchNav('tables', navTables);
+            }
         } else if (role === 'NHAN_VIEN_PHUC_VU') {
             if (navTables) navTables.style.display = 'inline-flex';
             if (navMenu) navMenu.style.display = 'inline-flex';
             if (navInventory) navInventory.style.display = 'none'; // Ẩn Kho đối với Phục vụ
             if (navKitchen) navKitchen.style.display = 'none';     // Ẩn Bếp đối với Phục vụ
             if (navCashier) navCashier.style.display = 'none';     // Ẩn Thu ngân & Doanh thu đối với Phục vụ
+            if (navAdmin) navAdmin.style.display = 'none';
             if (hintIcon) hintIcon.textContent = '';
             if (hintText) hintText.innerHTML = `<strong>NHÂN VIÊN PHỤC VỤ</strong> (${escHtml(dispName)}) — Được phép: Sơ đồ bàn, Mở bàn, Gọi món, Hủy món & Xem thực đơn. (Ẩn Kho, Bếp & Doanh thu)`;
             setMenuEditingAllowed(false);
-            if (currentTabName === 'inventory' || currentTabName === 'kitchen' || currentTabName === 'cashier') {
+            if (currentTabName === 'inventory' || currentTabName === 'kitchen' || currentTabName === 'cashier' || currentTabName === 'admin') {
                 switchNav('tables', navTables);
             }
         } else if (role === 'DAU_BEP') {
@@ -2681,10 +2887,11 @@
             if (navInventory) navInventory.style.display = 'inline-flex'; // Đầu bếp xem tồn kho nguyên liệu
             if (navKitchen) navKitchen.style.display = 'inline-flex';   // Màn hình Bếp nấu KDS
             if (navCashier) navCashier.style.display = 'none';     // Ẩn Thu ngân & Doanh thu đối với Đầu bếp
+            if (navAdmin) navAdmin.style.display = 'none';
             if (hintIcon) hintIcon.textContent = '';
             if (hintText) hintText.innerHTML = `<strong>BẾP TRƯỞNG</strong> (${escHtml(dispName)}) — Được phép: Màn hình Bếp chế biến (KDS), Báo nấu xong (Lên món), Xem tồn kho & Xuất kho bếp. (Đã ẩn Giá nhập & Nhập hàng)`;
             setMenuEditingAllowed(false);
-            if (currentTabName === 'tables' || currentTabName === 'menu' || currentTabName === 'cashier') {
+            if (currentTabName === 'tables' || currentTabName === 'menu' || currentTabName === 'cashier' || currentTabName === 'admin') {
                 switchNav('kitchen', navKitchen);
             }
         } else {
@@ -2694,10 +2901,11 @@
             if (navInventory) navInventory.style.display = 'none';
             if (navKitchen) navKitchen.style.display = 'none';
             if (navCashier) navCashier.style.display = 'none';
+            if (navAdmin) navAdmin.style.display = 'none';
             if (hintIcon) hintIcon.textContent = '';
             if (hintText) hintText.innerHTML = '<strong>CHƯA ĐĂNG NHẬP</strong> — Chế độ khách: Xem sơ đồ bàn trống và thực đơn. Bấm Đăng nhập để sử dụng các quyền nghiệp vụ';
             setMenuEditingAllowed(false);
-            if (currentTabName === 'inventory' || currentTabName === 'kitchen' || currentTabName === 'cashier') {
+            if (currentTabName === 'inventory' || currentTabName === 'kitchen' || currentTabName === 'cashier' || currentTabName === 'admin') {
                 switchNav('tables', navTables);
             }
         }
@@ -2810,6 +3018,10 @@
             showToast('Chỉ Quản lý và Admin mới có quyền xem Báo cáo doanh thu & Quỹ thu ngân!', 'error');
             return;
         }
+        if (tabName === 'admin' && role !== 'ADMIN') {
+            showToast('Chỉ Chủ quán (ADMIN) mới có quyền truy cập Quản trị Tài khoản!', 'error');
+            return;
+        }
 
         currentTabName = tabName;
         document.querySelectorAll('nav.main-nav button').forEach(b => b.classList.remove('active'));
@@ -2829,6 +3041,7 @@
         if (currentTabName === 'inventory') { loadInventoryReport(); loadInventoryDropdowns(); loadInventoryHistory(); }
         if (currentTabName === 'kitchen') { loadKitchenOrders(); loadRecipesTable(); }
         if (currentTabName === 'cashier') { loadPendingOrders(); loadRecentPayments(); loadFinancialReport(); }
+        if (currentTabName === 'admin') { loadAdminAccountsTable(); }
     }
 
     // ─────────────────────────────────────────────────────────────
