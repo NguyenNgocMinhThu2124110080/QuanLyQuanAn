@@ -121,8 +121,8 @@ public class DonHangService {
         BigDecimal tongTienMoi = (dh.getTongTien() != null ? dh.getTongTien() : BigDecimal.ZERO).add(thanhTien);
         dh.setTongTien(tongTienMoi);
 
-        // Chuyển trạng thái đơn sang DANG_CHE_BIEN nếu đang là MOI
-        if ("MOI".equalsIgnoreCase(dh.getTrangThai())) {
+        // Chuyển trạng thái đơn sang DANG_CHE_BIEN nếu đang là MOI hoặc HOAN_THANH (khách gọi thêm món mới sau khi bếp đã nấu xong đợt trước)
+        if ("MOI".equalsIgnoreCase(dh.getTrangThai()) || "HOAN_THANH".equalsIgnoreCase(dh.getTrangThai())) {
             dh.setTrangThai("DANG_CHE_BIEN");
         }
 

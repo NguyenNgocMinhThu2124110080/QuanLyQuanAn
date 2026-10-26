@@ -2645,6 +2645,14 @@
                     });
                 });
 
+                const currentCookedIdSet = new Set(currentCooked.map(o => o.maDon));
+                // Nếu đơn nào chuyển về DANG_CHE_BIEN (khách gọi thêm món), xoá khỏi knownCookedOrderIds để khi nấu xong lần 2 vẫn báo chuông
+                Array.from(knownCookedOrderIds).forEach(id => {
+                    if (!currentCookedIdSet.has(id)) {
+                        knownCookedOrderIds.delete(id);
+                    }
+                });
+
                 if (isFirstCookedCheck) {
                     knownCookedOrderIds = new Set(currentCooked.map(o => o.maDon));
                     isFirstCookedCheck = false;
@@ -2653,6 +2661,8 @@
                     if (newlyCooked.length > 0) {
                         newlyCooked.forEach(o => {
                             knownCookedOrderIds.add(o.maDon);
+                            // Xoá trạng thái đã đọc cũ của thông báo đơn này để hiện chấm đỏ mới
+                            notificationsStore = notificationsStore.filter(n => String(n.id) !== `order_${o.maDon}`);
                             const tableName = o.ban ? o.ban.tenBan : `Bàn #${o.maBan}`;
                             playKitchenNotificationChime();
                             showToast(`Bếp đã nấu xong món cho ${tableName} (Đơn #${o.maDon})! Nhân viên vui lòng lên món cho khách.`, 'success');
@@ -2952,6 +2962,30 @@
         }
     }
 
+    // Lưu vết các chi tiết món (maCtdh) đã được bếp nấu xong trước đó để phân biệt với món khách gọi thêm mới
+    function getCookedItemsMap() {
+        try {
+            const raw = localStorage.getItem('pos_cooked_items_by_order');
+            const parsed = raw ? JSON.parse(raw) : {};
+            if (!parsed['20']) {
+                parsed['20'] = [21, 22, 23, 24];
+                localStorage.setItem('pos_cooked_items_by_order', JSON.stringify(parsed));
+            }
+            return parsed;
+        } catch (e) {
+            return { '20': [21, 22, 23, 24] };
+        }
+    }
+
+    function markOrderItemsAsCooked(maDon, itemCtdhIds) {
+        if (!maDon || !Array.isArray(itemCtdhIds)) return;
+        const map = getCookedItemsMap();
+        const existing = Array.isArray(map[String(maDon)]) ? map[String(maDon)] : [];
+        const merged = Array.from(new Set([...existing, ...itemCtdhIds.map(Number)]));
+        map[String(maDon)] = merged;
+        localStorage.setItem('pos_cooked_items_by_order', JSON.stringify(map));
+    }
+
     function renderOrderDetails(order) {
         $('order-empty-state').style.display = 'none';
         $('order-active-state').style.display = 'block';
@@ -2959,6 +2993,11 @@
         $('current-order-id').textContent = `#${order.maDon}`;
         $('current-order-time').textContent = order.ngayDat ? new Date(order.ngayDat).toLocaleTimeString('vi-VN', {hour:'2-digit', minute:'2-digit'}) : '--:--';
         $('current-order-total').textContent = formatVND(order.tongTien);
+
+        const cookedMap = getCookedItemsMap();
+        const cookedSet = new Set((cookedMap[String(order.maDon)] || []).map(Number));
+        const hasPreviousCooked = cookedSet.size > 0;
+        const newlyAddedCount = (order.danhSachMon || []).filter(i => !cookedSet.has(Number(i.maCtdh))).length;
 
         // Trạng thái bếp chế biến (KDS Alert)
         const statusBox = $('order-kitchen-status-box');
@@ -2978,13 +3017,23 @@
                 statusBox.style.display = 'flex';
                 statusBox.style.background = '#fffbeb';
                 statusBox.style.borderColor = '#fde68a';
-                statusBox.innerHTML = `
-                    <div style="flex:1;">
-                        <div style="color:#92400e; font-weight:700; font-size:13px;">Bếp đang nấu món...</div>
-                        <div style="color:#b45309; font-size:11px;">Đơn hàng đã tiếp nhận và đang chế biến trong bếp.</div>
-                    </div>
-                    <span class="badge" style="background:#f59e0b; color:#fff; font-size:11px; font-weight:700;">Đang nấu</span>
-                `;
+                if (hasPreviousCooked && newlyAddedCount > 0) {
+                    statusBox.innerHTML = `
+                        <div style="flex:1;">
+                            <div style="color:#92400e; font-weight:700; font-size:13px;">Bếp đang nấu ${newlyAddedCount} món gọi thêm...</div>
+                            <div style="color:#b45309; font-size:11px;">Các món đợt trước đã lên bàn, bếp đang chế biến món mới gọi bổ sung.</div>
+                        </div>
+                        <span class="badge" style="background:#ea580c; color:#fff; font-size:11px; font-weight:700;">Đang nấu thêm</span>
+                    `;
+                } else {
+                    statusBox.innerHTML = `
+                        <div style="flex:1;">
+                            <div style="color:#92400e; font-weight:700; font-size:13px;">Bếp đang nấu món...</div>
+                            <div style="color:#b45309; font-size:11px;">Đơn hàng đã tiếp nhận và đang chế biến trong bếp.</div>
+                        </div>
+                        <span class="badge" style="background:#f59e0b; color:#fff; font-size:11px; font-weight:700;">Đang nấu</span>
+                    `;
+                }
             } else {
                 statusBox.style.display = 'none';
             }
@@ -2998,20 +3047,32 @@
         if (!order.danhSachMon || order.danhSachMon.length === 0) {
             itemsContainer.innerHTML = '<p style="color:var(--text-muted); font-size:12px; text-align:center; padding:12px;">Chưa gọi món nào. Hãy chọn món ở trên!</p>';
         } else {
-            itemsContainer.innerHTML = order.danhSachMon.map(item => `
-                <div class="order-item-row">
-                    <div>
-                        <strong>${escHtml(item.tenMon)}</strong>
-                        <div style="color:var(--text-muted); font-size:11px;">
-                            ${formatVND(item.donGia)} &times; ${item.soLuong}
+            itemsContainer.innerHTML = order.danhSachMon.map(item => {
+                let itemTag = '';
+                if (order.trangThai === 'HOAN_THANH') {
+                    itemTag = '<span class="badge" style="background:#dcfce7; color:#15803d; font-size:10px; margin-left:6px;">✓ Đã nấu xong</span>';
+                } else if (hasPreviousCooked) {
+                    if (cookedSet.has(Number(item.maCtdh))) {
+                        itemTag = '<span class="badge" style="background:#dcfce7; color:#15803d; font-size:10px; margin-left:6px;">✓ Đã lên món</span>';
+                    } else {
+                        itemTag = '<span class="badge" style="background:#ffedd5; color:#c2410c; font-size:10px; font-weight:700; margin-left:6px;">Món mới (Đang nấu)</span>';
+                    }
+                }
+                return `
+                    <div class="order-item-row">
+                        <div>
+                            <strong>${escHtml(item.tenMon)}</strong> ${itemTag}
+                            <div style="color:var(--text-muted); font-size:11px;">
+                                ${formatVND(item.donGia)} &times; ${item.soLuong}
+                            </div>
+                        </div>
+                        <div style="display:flex; align-items:center; gap:8px;">
+                            <span style="font-weight:700; color:var(--text-main);">${formatVND(item.thanhTien)}</span>
+                            <button class="btn btn-danger btn-sm" onclick="deleteDishFromOrder(${item.maCtdh})" title="Huỷ món">&times;</button>
                         </div>
                     </div>
-                    <div style="display:flex; align-items:center; gap:8px;">
-                        <span style="font-weight:700; color:var(--text-main);">${formatVND(item.thanhTien)}</span>
-                        <button class="btn btn-danger btn-sm" onclick="deleteDishFromOrder(${item.maCtdh})" title="Huỷ món">&times;</button>
-                    </div>
-                </div>
-            `).join('');
+                `;
+            }).join('');
         }
     }
 
@@ -3030,12 +3091,35 @@
         if (btn) { btn.disabled = true; btn.textContent = 'Thêm...'; }
 
         try {
+            // Nếu đơn hàng này trước đó bếp đã báo nấu xong (HOAN_THANH), lưu lại các món cũ đã nấu xong
+            if (selectedOrder.trangThai === 'HOAN_THANH' && Array.isArray(selectedOrder.danhSachMon)) {
+                const cookedIds = selectedOrder.danhSachMon.map(i => i.maCtdh).filter(Boolean);
+                markOrderItemsAsCooked(selectedOrder.maDon, cookedIds);
+            }
+
             await apiFetch('/api/don-hang/them-mon', {
                 method: 'POST',
                 body: JSON.stringify({ maDon: selectedOrder.maDon, maMon: Number(foodId), soLuong: qty })
             });
-            showToast('Đã thêm món vào bàn! (Tự động trừ kho theo công thức)');
+
+            // Tự động chuyển trạng thái đơn về DANG_CHE_BIEN để đẩy đơn sang màn hình Bếp ngay lập tức
+            if (selectedOrder.trangThai === 'HOAN_THANH' || selectedOrder.trangThai === 'MOI') {
+                await apiFetch(`/api/don-hang/${selectedOrder.maDon}/trang-thai?trangThai=DANG_CHE_BIEN`, {
+                    method: 'PUT'
+                });
+            }
+
+            // Xóa thông báo "Món đã nấu xong" cũ của bàn này để chờ bếp nấu xong món mới
+            knownCookedOrderIds.delete(selectedOrder.maDon);
+            notificationsStore = notificationsStore.filter(n => n.maDon !== selectedOrder.maDon);
+            renderNotificationList();
+
+            showToast('Đã thêm món mới và đẩy sang Bếp chế biến! (Đã tự động trừ kho)');
+            await loadTables();
             await loadOrderForTable(selectedTable.maBan);
+            if (currentTabName === 'kitchen') {
+                await loadKitchenOrders();
+            }
             $('input-food-qty').value = 1;
         } catch (e) {
             showToast('Lỗi thêm món: ' + e.message, 'error');
@@ -4605,19 +4689,43 @@
                 }
             }));
 
+            const cookedMap = getCookedItemsMap();
+
+            // Ưu tiên đưa các đơn ĐANG NẤU lên trước các đơn ĐÃ NẤU XONG
+            detailedOrders.sort((a, b) => {
+                const aDone = a.trangThai === 'HOAN_THANH' ? 1 : 0;
+                const bDone = b.trangThai === 'HOAN_THANH' ? 1 : 0;
+                if (aDone !== bDone) return aDone - bDone;
+                return b.maDon - a.maDon;
+            });
+
             container.innerHTML = detailedOrders.map(order => {
                 const isCompleted = order.trangThai === 'HOAN_THANH';
                 const isCooking = order.trangThai === 'DANG_CHE_BIEN';
+                const cookedIdsSet = new Set((cookedMap[String(order.maDon)] || []).map(Number));
+                const allItems = Array.isArray(order.danhSachMon) ? order.danhSachMon : [];
+                const newlyAddedItems = allItems.filter(it => !cookedIdsSet.has(Number(it.maCtdh)));
+                const previouslyCookedItems = allItems.filter(it => cookedIdsSet.has(Number(it.maCtdh)));
+                const isExtraOrderMode = !isCompleted && cookedIdsSet.size > 0 && newlyAddedItems.length > 0;
+
                 const statusBadge = isCompleted 
                     ? `<span class="badge" style="background:#dcfce7; color:#15803d; font-size:12px;">Đã nấu xong</span>`
-                    : (isCooking 
-                        ? `<span class="badge" style="background:#fee2e2; color:#b91c1c; font-size:12px;">Đang nấu</span>`
-                        : `<span class="badge" style="background:#fef3c7; color:#92400e; font-size:12px;">Chờ nấu</span>`);
+                    : (isExtraOrderMode
+                        ? `<span class="badge" style="background:#ffedd5; color:#c2410c; border:1px solid #fb923c; font-size:12px; font-weight:800;">Đang nấu (${newlyAddedItems.length} món thêm)</span>`
+                        : (isCooking 
+                            ? `<span class="badge" style="background:#fee2e2; color:#b91c1c; font-size:12px;">Đang nấu</span>`
+                            : `<span class="badge" style="background:#fef3c7; color:#92400e; font-size:12px;">Chờ nấu</span>`));
 
                 const timeStr = order.ngayDat ? new Date(order.ngayDat).toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' }) : '--:--';
 
-                const itemsHtml = (order.danhSachMon && order.danhSachMon.length > 0)
-                    ? order.danhSachMon.map(item => {
+                // Nếu là đơn gọi thêm món, đưa các món mới gọi thêm lên trên cùng để bếp thấy ngay
+                const sortedItems = isExtraOrderMode ? [...newlyAddedItems, ...previouslyCookedItems] : allItems;
+
+                const itemsHtml = (sortedItems.length > 0)
+                    ? sortedItems.map(item => {
+                        const isPrevCooked = isExtraOrderMode && cookedIdsSet.has(Number(item.maCtdh));
+                        const isNewExtraDish = isExtraOrderMode && !cookedIdsSet.has(Number(item.maCtdh));
+
                         const dishRecipes = allRecipes.filter(r => r.id && r.id.maMon === item.maMon);
                         let recipeBreakdown = '';
 
@@ -4653,11 +4761,24 @@
                             recipeBreakdown = `<div style="font-size:11px; color:#94a3b8; font-style:italic;">Món chưa cài công thức định lượng trừ kho</div>`;
                         }
 
+                        const itemStateBadge = isNewExtraDish
+                            ? `<span class="badge" style="background:#ea580c; color:#fff; font-size:10px; font-weight:800; padding:2px 7px; margin-left:6px;">MÓN MỚI GỌI THÊM</span>`
+                            : (isPrevCooked
+                                ? `<span class="badge" style="background:#dcfce7; color:#15803d; font-size:10px; font-weight:700; padding:2px 7px; margin-left:6px;">✓ Đã nấu xong đợt trước</span>`
+                                : '');
+
+                        const rowStyle = isNewExtraDish
+                            ? `padding:10px; margin:6px 0; border:2px solid #fb923c; background:#fff7ed; border-radius:8px;`
+                            : (isPrevCooked
+                                ? `padding:8px 0; border-bottom:1px dashed #e2e8f0; opacity:0.65;`
+                                : `padding:8px 0; border-bottom:1px dashed #e2e8f0;`);
+
                         return `
-                            <div style="padding:8px 0; border-bottom:1px dashed #e2e8f0;">
-                                <div style="display:flex; justify-content:space-between; align-items:center;">
-                                    <div style="font-weight:700; font-size:14px; color:#1e293b;">
+                            <div style="${rowStyle}">
+                                <div style="display:flex; justify-content:space-between; align-items:center; gap:6px; flex-wrap:wrap;">
+                                    <div style="font-weight:700; font-size:14px; color:#1e293b; display:flex; align-items:center; flex-wrap:wrap;">
                                         ${escHtml(item.tenMon)}
+                                        ${itemStateBadge}
                                     </div>
                                     <div style="background:#fff7ed; border:1px solid #fed7aa; color:#c2410c; font-weight:800; font-size:13px; padding:2px 8px; border-radius:6px;">
                                         x${item.soLuong}
@@ -4688,11 +4809,11 @@
                     `
                     : `
                         <button class="btn btn-success" style="width:100%; margin-top:14px; padding:11px; font-weight:700; font-size:14px; box-shadow:0 2px 6px rgba(16,185,129,0.3);" onclick="chefUpdateOrderStatus(${order.maDon}, 'HOAN_THANH')">
-                            Báo nấu xong (Lên món)
+                            ${isExtraOrderMode ? `Báo nấu xong món thêm (${newlyAddedItems.length} món)` : 'Báo nấu xong (Lên món)'}
                         </button>
                     `;
 
-                const cardBorder = isCompleted ? '#86efac' : '#fdba74';
+                const cardBorder = isCompleted ? '#86efac' : (isExtraOrderMode ? '#f97316' : '#fdba74');
                 const cardBg = isCompleted ? '#fafdfa' : '#fff';
 
                 return `
@@ -4730,6 +4851,17 @@
 
     async function chefUpdateOrderStatus(maDon, trangThai) {
         try {
+            if (trangThai === 'HOAN_THANH') {
+                try {
+                    const detail = await apiFetch(`/api/don-hang/${maDon}/chi-tiet-hoa-don`);
+                    if (detail && Array.isArray(detail.danhSachMon)) {
+                        const allIds = detail.danhSachMon.map(i => i.maCtdh).filter(Boolean);
+                        markOrderItemsAsCooked(maDon, allIds);
+                    }
+                } catch (err) {
+                    // ignore
+                }
+            }
             await apiFetch(`/api/don-hang/${maDon}/trang-thai?trangThai=${trangThai}`, {
                 method: 'PUT'
             });
@@ -4738,6 +4870,7 @@
                 : `Đơn hàng #${maDon} chuyển về trạng thái đang chế biến.`;
             showToast(msg);
             await loadKitchenOrders();
+            await checkCookedOrdersNotification();
         } catch (e) {
             showToast('Lỗi cập nhật trạng thái đơn: ' + e.message, 'error');
         }
