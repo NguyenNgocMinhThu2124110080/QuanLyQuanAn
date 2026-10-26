@@ -1899,46 +1899,109 @@
                 </div>
             </div>
 
-            <!-- KHỐI QR CODE VIETQR ĐỘNG -->
+            <!-- KHỐI QR CODE VIETQR & QUÉT ĐIỆN THOẠI TỰ ĐỘNG BÁO THÀNH CÔNG -->
             <div id="pay-qr-box" style="display:none; text-align:center; padding:14px; background:linear-gradient(180deg, #f8fafc 0%, #eff6ff 100%); border-radius:var(--radius-md); border:1.5px solid #bfdbfe;">
-                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px; gap:8px; flex-wrap:wrap;">
-                    <span class="badge" style="background:#1d4ed8; color:#fff; font-size:11px; font-weight:800; padding:4px 10px; letter-spacing:0.3px;">VIETQR • NAPAS 247</span>
-                    <select id="qr-bank-select" onchange="updateVietQrDisplay()" style="width:auto; margin:0; padding:4px 8px; font-size:12px; font-weight:600; background:#fff; border:1px solid #cbd5e1; border-radius:6px;">
-                        <option value="MB|0901234567|NGUYEN MINH HOANG|MB Bank (Quân Đội)">MB Bank - 0901234567</option>
-                        <option value="VCB|1029384756|NGUYEN MINH HOANG|Vietcombank">Vietcombank - 1029384756</option>
-                        <option value="TCB|1903888999|NGUYEN MINH HOANG|Techcombank">Techcombank - 1903888999</option>
-                        <option value="ACB|686888999|NGUYEN MINH HOANG|ACB Á Châu">ACB - 686888999</option>
-                    </select>
+                <!-- Chế độ hiển thị QR -->
+                <div style="display:grid; grid-template-columns:1fr 1fr; gap:6px; margin-bottom:10px; background:#e2e8f0; padding:4px; border-radius:8px;">
+                    <button type="button" id="qr-mode-btn-scan" class="btn btn-sm btn-primary" onclick="switchQrDisplayMode('MOBILE_SCAN')" style="padding:6px 8px; font-size:11px; font-weight:700;">
+                        📱 Quét ĐT báo Thành công
+                    </button>
+                    <button type="button" id="qr-mode-btn-vietqr" class="btn btn-sm btn-secondary" onclick="switchQrDisplayMode('VIETQR')" style="padding:6px 8px; font-size:11px; font-weight:700;">
+                        🏦 Mã VietQR Ngân hàng
+                    </button>
                 </div>
 
-                <div style="background:#ffffff; display:inline-block; padding:10px; border-radius:12px; border:2px solid #93c5fd; box-shadow:0 4px 12px rgba(37,99,235,0.10); margin:4px auto 10px;">
-                    <img id="pay-vietqr-img" src="" alt="Mã VietQR thanh toán" style="width:210px; height:210px; object-fit:contain; display:block; margin:0 auto;" onerror="handleVietQrImageError(this)">
-                    <div id="pay-vietqr-svg-fallback" style="display:none; width:210px; height:210px; margin:0 auto;"></div>
+                <!-- KHUNG ĐANG CHỜ QUÉT QR -->
+                <div id="qr-active-scan-view">
+                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px; gap:8px; flex-wrap:wrap;">
+                        <span id="qr-badge-mode-label" class="badge" style="background:#15803d; color:#fff; font-size:11px; font-weight:800; padding:4px 10px; letter-spacing:0.3px;">QUÉT QR TRÊN ĐT • TỰ ĐỘNG DUYỆT</span>
+                        <select id="qr-bank-select" onchange="updateVietQrDisplay()" style="width:auto; margin:0; padding:4px 8px; font-size:12px; font-weight:600; background:#fff; border:1px solid #cbd5e1; border-radius:6px;">
+                            <option value="MB|0901234567|NGUYEN MINH HOANG|MB Bank (Quân Đội)">MB Bank - 0901234567</option>
+                            <option value="VCB|1029384756|NGUYEN MINH HOANG|Vietcombank">Vietcombank - 1029384756</option>
+                            <option value="TCB|1903888999|NGUYEN MINH HOANG|Techcombank">Techcombank - 1903888999</option>
+                            <option value="ACB|686888999|NGUYEN MINH HOANG|ACB Á Châu">ACB - 686888999</option>
+                        </select>
+                    </div>
+
+                    <div style="background:#ffffff; display:inline-block; padding:10px; border-radius:12px; border:2px solid #93c5fd; box-shadow:0 4px 12px rgba(37,99,235,0.10); margin:2px auto 8px; position:relative;">
+                        <img id="pay-vietqr-img" src="" alt="Mã QR thanh toán" style="width:215px; height:215px; object-fit:contain; display:block; margin:0 auto;" onerror="handleVietQrImageError(this)">
+                        <div id="pay-vietqr-svg-fallback" style="display:none; width:215px; height:215px; margin:0 auto;"></div>
+                    </div>
+
+                    <!-- Trạng thái lắng nghe điện thoại quét thời gian thực -->
+                    <div id="qr-scan-waiting-box" style="background:#ecfdf5; border:1px solid #86efac; border-radius:8px; padding:8px 10px; margin-bottom:8px; text-align:left;">
+                        <div style="display:flex; align-items:center; justify-content:space-between; gap:6px; flex-wrap:wrap;">
+                            <div style="display:flex; align-items:center; gap:6px; font-size:12px; font-weight:700; color:#166534;">
+                                <span style="display:inline-block; width:9px; height:9px; border-radius:50%; background:#16a34a; box-shadow:0 0 0 3px rgba(22,163,74,0.25);"></span>
+                                <span id="qr-waiting-status-text">Đang chờ điện thoại quét mã QR...</span>
+                            </div>
+                            <div style="display:flex; gap:4px;">
+                                <button type="button" id="qr-auto-timer-btn" class="btn btn-sm btn-secondary" onclick="startFiveSecDemoScanTimer()" style="padding:3px 8px; font-size:11px; font-weight:700;" title="Bấm rồi đưa điện thoại lên quét: sau 5 giây màn hình tự báo Thanh toán thành công!">
+                                    ⏱ Tự báo sau 5s
+                                </button>
+                                <button type="button" class="btn btn-sm btn-success" onclick="simulateMobileQrScanNow()" style="padding:3px 8px; font-size:11px; font-weight:700;" title="Mô phỏng điện thoại vừa quét xong mã QR">
+                                    ✓ ĐT vừa quét xong
+                                </button>
+                            </div>
+                        </div>
+                        <div id="qr-lan-config-row" style="display:flex; align-items:center; justify-content:space-between; gap:6px; margin-top:6px; padding-top:6px; border-top:1px dashed #bbf7d0; font-size:11px; color:#15803d;">
+                            <span>IP Wi-Fi máy tính (cùng mạng):</span>
+                            <div style="display:flex; align-items:center; gap:4px;">
+                                <input type="text" id="qr-lan-host-input" value="192.168.102.116:9090" onchange="onLanHostInputChange()" style="width:138px; margin:0; padding:2px 6px; font-size:11px; font-family:monospace; font-weight:700; height:24px; background:#fff; border:1px solid #86efac; border-radius:4px;">
+                                <a id="qr-open-mobile-preview-link" href="#" target="_blank" style="font-weight:700; color:#1d4ed8; text-decoration:underline; white-space:nowrap;">Mở trang ĐT</a>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div style="background:#ffffff; border:1px solid #dbeafe; border-radius:8px; padding:9px 12px; text-align:left; font-size:12px; line-height:1.55;">
+                        <div style="display:flex; justify-content:space-between;">
+                            <span style="color:#64748b;">Ngân hàng thụ hưởng:</span>
+                            <strong id="qr-bank-name-label" style="color:#1e293b;">MB Bank (Quân Đội)</strong>
+                        </div>
+                        <div style="display:flex; justify-content:space-between;">
+                            <span style="color:#64748b;">Số tài khoản:</span>
+                            <strong id="qr-account-no-label" style="color:#1d4ed8; font-family:monospace; font-size:13px;">0901234567</strong>
+                        </div>
+                        <div style="display:flex; justify-content:space-between;">
+                            <span style="color:#64748b;">Chủ tài khoản:</span>
+                            <strong id="qr-account-holder-label" style="color:#1e293b;">NGUYEN MINH HOANG</strong>
+                        </div>
+                        <div style="display:flex; justify-content:space-between; border-top:1px dashed #e2e8f0; margin-top:4px; padding-top:4px;">
+                            <span style="color:#64748b;">Số tiền thanh toán:</span>
+                            <strong id="qr-transfer-amount" style="color:#15803d; font-size:14px;">0 ₫</strong>
+                        </div>
+                        <div style="display:flex; justify-content:space-between;">
+                            <span style="color:#64748b;">Nội dung CK:</span>
+                            <code id="qr-transfer-content" style="background:#fef3c7; color:#b45309; padding:1px 6px; border-radius:4px; font-weight:700;">TT DON</code>
+                        </div>
+                    </div>
                 </div>
 
-                <div style="background:#ffffff; border:1px solid #dbeafe; border-radius:8px; padding:10px 12px; text-align:left; font-size:12px; line-height:1.6;">
-                    <div style="display:flex; justify-content:space-between;">
-                        <span style="color:#64748b;">Ngân hàng thụ hưởng:</span>
-                        <strong id="qr-bank-name-label" style="color:#1e293b;">MB Bank (Quân Đội)</strong>
+                <!-- KHUNG HIỂN THỊ KHI ĐIỆN THOẠI QUÉT XONG: THANH TOÁN THÀNH CÔNG! -->
+                <div id="qr-scan-success-box" style="display:none; padding:22px 14px; background:linear-gradient(180deg, #ecfdf5 0%, #dcfce7 100%); border:2px solid #22c55e; border-radius:12px; text-align:center; box-shadow:0 8px 24px rgba(22,163,74,0.18);">
+                    <div style="width:68px; height:68px; margin:0 auto 12px; border-radius:50%; background:#16a34a; color:#ffffff; display:flex; align-items:center; justify-content:center; font-size:36px; font-weight:900; box-shadow:0 6px 16px rgba(22,163,74,0.35);">
+                        ✓
                     </div>
-                    <div style="display:flex; justify-content:space-between;">
-                        <span style="color:#64748b;">Số tài khoản:</span>
-                        <strong id="qr-account-no-label" style="color:#1d4ed8; font-family:monospace; font-size:13px;">0901234567</strong>
+                    <div style="font-size:19px; font-weight:900; color:#14532d; letter-spacing:0.3px; text-transform:uppercase;">
+                        THANH TOÁN THÀNH CÔNG!
                     </div>
-                    <div style="display:flex; justify-content:space-between;">
-                        <span style="color:#64748b;">Chủ tài khoản:</span>
-                        <strong id="qr-account-holder-label" style="color:#1e293b;">NGUYEN MINH HOANG</strong>
+                    <div style="font-size:13px; font-weight:600; color:#166534; margin-top:4px;">
+                        Điện thoại đã quét mã QR & xác nhận chuyển khoản hoàn tất
                     </div>
-                    <div style="display:flex; justify-content:space-between; border-top:1px dashed #e2e8f0; margin-top:4px; padding-top:4px;">
-                        <span style="color:#64748b;">Số tiền tự động điền:</span>
-                        <strong id="qr-transfer-amount" style="color:#15803d; font-size:14px;">0 ₫</strong>
+                    <div style="background:#ffffff; border:1px solid #86efac; border-radius:8px; padding:10px 14px; margin:12px auto 8px; max-width:320px; font-size:13px;">
+                        <div style="display:flex; justify-content:space-between; margin-bottom:4px;">
+                            <span style="color:#64748b;">Số tiền đã nhận:</span>
+                            <strong id="qr-success-paid-amount" style="color:#15803d; font-size:15px;">0 ₫</strong>
+                        </div>
+                        <div style="display:flex; justify-content:space-between;">
+                            <span style="color:#64748b;">Đơn hàng / Bàn:</span>
+                            <strong id="qr-success-paid-order" style="color:#0f172a;">#--</strong>
+                        </div>
                     </div>
-                    <div style="display:flex; justify-content:space-between;">
-                        <span style="color:#64748b;">Nội dung CK:</span>
-                        <code id="qr-transfer-content" style="background:#fef3c7; color:#b45309; padding:1px 6px; border-radius:4px; font-weight:700;">TT DON</code>
+                    <div style="font-size:12px; color:#15803d; font-weight:700; margin-top:6px;">
+                        🖨 Đang tự động xuất Phiếu Thanh Toán & giải phóng bàn...
                     </div>
                 </div>
-                <p style="font-size:11px; color:#475569; margin:8px 0 0;">Khách mở App Ngân hàng hoặc MoMo/ZaloPay quét mã QR trên để thanh toán chính xác số tiền</p>
             </div>
         </div>
         <div class="modal-footer">
@@ -3015,6 +3078,9 @@
     }
 
     function closeModal(id) {
+        if (id === 'payment-modal' && typeof stopQrPaymentPolling === 'function') {
+            stopQrPaymentPolling();
+        }
         $(id).classList.remove('active');
     }
 
@@ -5568,19 +5634,91 @@
         `;
     }
 
+    let currentQrDisplayMode = 'MOBILE_SCAN'; // 'MOBILE_SCAN' | 'VIETQR'
+    let qrPaymentPollTimer = null;
+    let qrDemoCountdownTimer = null;
+    let qrPaymentSuccessHandled = false;
+
+    function getDetectedLanHost() {
+        const saved = localStorage.getItem('pos_lan_host');
+        if (saved && saved.trim()) return saved.trim();
+        const host = window.location.host || 'localhost:9090';
+        if (!host.startsWith('localhost') && !host.startsWith('127.0.0.1')) {
+            return host;
+        }
+        return '192.168.102.116:9090';
+    }
+
+    function onLanHostInputChange() {
+        const inp = $('qr-lan-host-input');
+        if (inp && inp.value.trim()) {
+            localStorage.setItem('pos_lan_host', inp.value.trim().replace(/^https?:\/\//, ''));
+            inp.value = localStorage.getItem('pos_lan_host');
+            updateVietQrDisplay();
+        }
+    }
+
+    function switchQrDisplayMode(mode) {
+        currentQrDisplayMode = mode === 'VIETQR' ? 'VIETQR' : 'MOBILE_SCAN';
+        const btnScan = $('qr-mode-btn-scan');
+        const btnViet = $('qr-mode-btn-vietqr');
+        const badge = $('qr-badge-mode-label');
+        const lanRow = $('qr-lan-config-row');
+
+        if (btnScan) {
+            btnScan.className = currentQrDisplayMode === 'MOBILE_SCAN' ? 'btn btn-sm btn-primary' : 'btn btn-sm btn-secondary';
+        }
+        if (btnViet) {
+            btnViet.className = currentQrDisplayMode === 'VIETQR' ? 'btn btn-sm btn-primary' : 'btn btn-sm btn-secondary';
+        }
+        if (badge) {
+            if (currentQrDisplayMode === 'MOBILE_SCAN') {
+                badge.textContent = 'QUÉT QR TRÊN ĐT • TỰ ĐỘNG DUYỆT';
+                badge.style.background = '#15803d';
+            } else {
+                badge.textContent = 'VIETQR • NAPAS 247';
+                badge.style.background = '#1d4ed8';
+            }
+        }
+        if (lanRow) {
+            lanRow.style.display = currentQrDisplayMode === 'MOBILE_SCAN' ? 'flex' : 'none';
+        }
+        updateVietQrDisplay();
+    }
+
+    function buildMobileQrPaymentUrl() {
+        if (!currentPayingOrder) return '';
+        const inp = $('qr-lan-host-input');
+        const host = (inp && inp.value.trim()) ? inp.value.trim().replace(/^https?:\/\//, '') : getDetectedLanHost();
+        const maDon = currentPayingOrder.maDon;
+        const finalAmt = getFinalPayableAmount();
+        return `http://${host}/?qrpay=${maDon}&amt=${finalAmt}`;
+    }
+
     function handleVietQrImageError(imgEl) {
-        if (imgEl) imgEl.style.display = 'none';
+        if (!imgEl) return;
+        // Nếu qrserver.com lỗi thì thử quickchart.io trước khi sang SVG nội bộ
+        if (imgEl.dataset && imgEl.dataset.fallbackUrl && imgEl.src !== imgEl.dataset.fallbackUrl) {
+            imgEl.src = imgEl.dataset.fallbackUrl;
+            return;
+        }
+        imgEl.style.display = 'none';
         const fb = $('pay-vietqr-svg-fallback');
         if (fb) {
             const finalAmt = getFinalPayableAmount();
             const maDon = currentPayingOrder ? currentPayingOrder.maDon : 0;
-            fb.innerHTML = buildOfflineQrSvg(`VIETQR|${maDon}|${finalAmt}`, 210);
+            fb.innerHTML = buildOfflineQrSvg(`VIETQR|${maDon}|${finalAmt}`, 215);
             fb.style.display = 'block';
         }
     }
 
     function updateVietQrDisplay() {
         if (!currentPayingOrder) return;
+        const inp = $('qr-lan-host-input');
+        if (inp && !inp.value) {
+            inp.value = getDetectedLanHost();
+        }
+
         const sel = $('qr-bank-select');
         const rawVal = sel ? sel.value : 'MB|0901234567|NGUYEN MINH HOANG|MB Bank (Quân Đội)';
         const [bankCode, accNo, accHolder, bankLabel] = rawVal.split('|');
@@ -5599,17 +5737,199 @@
         if ($('qr-transfer-amount')) $('qr-transfer-amount').textContent = formatVND(finalAmt);
         if ($('qr-transfer-content')) $('qr-transfer-content').textContent = transferContent;
 
-        const qrUrl = `https://img.vietqr.io/image/${bankCode}-${accNo}-compact2.png?amount=${finalAmt}&addInfo=${encodeURIComponent(transferContent)}&accountName=${encodeURIComponent(accHolder)}`;
+        const mobileUrl = buildMobileQrPaymentUrl();
+        const previewLink = $('qr-open-mobile-preview-link');
+        if (previewLink) {
+            previewLink.href = `/?qrpay=${maDon}&amt=${finalAmt}`;
+        }
+
+        let primaryQrImgUrl = '';
+        let secondaryQrImgUrl = '';
+        if (currentQrDisplayMode === 'MOBILE_SCAN') {
+            primaryQrImgUrl = `https://api.qrserver.com/v1/create-qr-code/?size=240x240&margin=8&ecc=M&data=${encodeURIComponent(mobileUrl)}`;
+            secondaryQrImgUrl = `https://quickchart.io/qr?size=240&margin=2&text=${encodeURIComponent(mobileUrl)}`;
+        } else {
+            primaryQrImgUrl = `https://img.vietqr.io/image/${bankCode}-${accNo}-compact2.png?amount=${finalAmt}&addInfo=${encodeURIComponent(transferContent)}&accountName=${encodeURIComponent(accHolder)}`;
+            secondaryQrImgUrl = `https://api.qrserver.com/v1/create-qr-code/?size=240x240&margin=8&data=${encodeURIComponent(mobileUrl)}`;
+        }
+
         const imgEl = $('pay-vietqr-img');
         const fbEl = $('pay-vietqr-svg-fallback');
         if (fbEl) {
-            fbEl.innerHTML = buildOfflineQrSvg(qrUrl, 210);
+            fbEl.innerHTML = buildOfflineQrSvg(primaryQrImgUrl, 215);
             fbEl.style.display = 'none';
         }
         if (imgEl) {
+            imgEl.dataset.fallbackUrl = secondaryQrImgUrl;
             imgEl.style.display = 'block';
-            imgEl.src = qrUrl;
+            imgEl.src = primaryQrImgUrl;
         }
+    }
+
+    function playQrPaymentSuccessChime() {
+        try {
+            const AudioCtx = window.AudioContext || window.webkitAudioContext;
+            if (!AudioCtx) return;
+            const ctx = new AudioCtx();
+            const notes = [587.33, 880, 1174.66]; // D5 -> A5 -> D6
+            notes.forEach((freq, idx) => {
+                const osc = ctx.createOscillator();
+                const gain = ctx.createGain();
+                osc.type = 'sine';
+                osc.frequency.setValueAtTime(freq, ctx.currentTime + idx * 0.11);
+                gain.gain.setValueAtTime(0.18, ctx.currentTime + idx * 0.11);
+                gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + idx * 0.11 + 0.35);
+                osc.connect(gain);
+                gain.connect(ctx.destination);
+                osc.start(ctx.currentTime + idx * 0.11);
+                osc.stop(ctx.currentTime + idx * 0.11 + 0.36);
+            });
+        } catch (err) {
+            // Ignore audio errors
+        }
+    }
+
+    function resetQrModalVisualState() {
+        qrPaymentSuccessHandled = false;
+        if ($('qr-active-scan-view')) $('qr-active-scan-view').style.display = 'block';
+        if ($('qr-scan-success-box')) $('qr-scan-success-box').style.display = 'none';
+        if ($('qr-waiting-status-text')) $('qr-waiting-status-text').textContent = 'Đang chờ điện thoại quét mã QR...';
+        const timerBtn = $('qr-auto-timer-btn');
+        if (timerBtn) {
+            timerBtn.disabled = false;
+            timerBtn.textContent = '⏱ Tự báo sau 5s';
+        }
+        const footerBtn = document.querySelector('#payment-modal .modal-footer .btn-success');
+        if (footerBtn) {
+            footerBtn.disabled = false;
+            footerBtn.textContent = 'Xác nhận thanh toán';
+        }
+    }
+
+    function stopQrPaymentPolling() {
+        if (qrPaymentPollTimer) {
+            clearInterval(qrPaymentPollTimer);
+            qrPaymentPollTimer = null;
+        }
+        if (qrDemoCountdownTimer) {
+            clearInterval(qrDemoCountdownTimer);
+            qrDemoCountdownTimer = null;
+        }
+    }
+
+    function startQrPaymentPolling() {
+        stopQrPaymentPolling();
+        if (!currentPayingOrder) return;
+        const targetMaDon = currentPayingOrder.maDon;
+
+        qrPaymentPollTimer = setInterval(async () => {
+            const modalEl = $('payment-modal');
+            if (!modalEl || !modalEl.classList.contains('active') || selectedPayMethod !== 'CHUYEN_KHOAN' || qrPaymentSuccessHandled) {
+                stopQrPaymentPolling();
+                return;
+            }
+            try {
+                const detail = await apiFetch(`/api/don-hang/${targetMaDon}/chi-tiet-hoa-don`);
+                if (detail && detail.trangThai === 'DA_THANH_TOAN' && !qrPaymentSuccessHandled) {
+                    await handleQrPaymentDetectedSuccess(detail);
+                }
+            } catch (e) {
+                // Bỏ qua lỗi mạng tạm thời khi polling
+            }
+        }, 1100);
+    }
+
+    async function handleQrPaymentDetectedSuccess(detailObj) {
+        if (qrPaymentSuccessHandled) return;
+        qrPaymentSuccessHandled = true;
+        stopQrPaymentPolling();
+
+        const orderInfo = detailObj || currentPayingOrder;
+        const maDon = orderInfo ? orderInfo.maDon : '';
+        const finalAmt = getFinalPayableAmount();
+
+        playQrPaymentSuccessChime();
+
+        if ($('qr-active-scan-view')) $('qr-active-scan-view').style.display = 'none';
+        if ($('qr-scan-success-box')) $('qr-scan-success-box').style.display = 'block';
+        if ($('qr-success-paid-amount')) $('qr-success-paid-amount').textContent = formatVND(finalAmt);
+        if ($('qr-success-paid-order')) $('qr-success-paid-order').textContent = `#${maDon} (${orderInfo ? orderInfo.tenBan : ''})`;
+
+        const footerBtn = document.querySelector('#payment-modal .modal-footer .btn-success');
+        if (footerBtn) {
+            footerBtn.disabled = true;
+            footerBtn.textContent = '✓ Đã thanh toán thành công!';
+        }
+
+        showToast(`🎉 Điện thoại đã quét QR & thanh toán thành công đơn #${maDon}!`);
+
+        setTimeout(async () => {
+            closeModal('payment-modal');
+            showReceipt(orderInfo, { phuongThuc: 'CHUYEN_KHOAN' });
+
+            selectedOrder = null;
+            notificationsStore = notificationsStore.filter(n => n.maDon !== maDon);
+            renderNotificationList();
+            await loadTables();
+            if (selectedTable) selectTable(selectedTable.maBan);
+            await checkCookedOrdersNotification();
+            await loadPendingOrders();
+            await loadRecentPayments();
+            await loadDailyRevenue();
+        }, 1900);
+    }
+
+    async function simulateMobileQrScanNow() {
+        if (!currentPayingOrder || qrPaymentSuccessHandled) return;
+        const maDon = currentPayingOrder.maDon;
+        try {
+            const nvIdToUse = (currentUser && currentUser.nvId) ? currentUser.nvId : 3;
+            await apiFetch('/api/thanh-toan/thuc-hien', {
+                method: 'POST',
+                body: JSON.stringify({
+                    maDon: maDon,
+                    phuongThuc: 'CHUYEN_KHOAN',
+                    maNv: nvIdToUse
+                })
+            });
+            await handleQrPaymentDetectedSuccess(currentPayingOrder);
+        } catch (err) {
+            // Nếu đơn đã được thanh toán trên ĐT rồi thì vẫn hiển thị thành công
+            if (String(err.message || '').includes('thanh toán')) {
+                await handleQrPaymentDetectedSuccess(currentPayingOrder);
+            } else {
+                showToast('Lỗi xác nhận QR: ' + err.message, 'error');
+            }
+        }
+    }
+
+    function startFiveSecDemoScanTimer() {
+        if (!currentPayingOrder || qrPaymentSuccessHandled) return;
+        if (qrDemoCountdownTimer) {
+            clearInterval(qrDemoCountdownTimer);
+            qrDemoCountdownTimer = null;
+        }
+        let sec = 5;
+        const timerBtn = $('qr-auto-timer-btn');
+        const statusTxt = $('qr-waiting-status-text');
+        if (timerBtn) {
+            timerBtn.disabled = true;
+            timerBtn.textContent = `⏳ Quét ĐT (${sec}s)...`;
+        }
+        if (statusTxt) {
+            statusTxt.textContent = `Đưa điện thoại lên quét mã QR (${sec}s)...`;
+        }
+        qrDemoCountdownTimer = setInterval(() => {
+            sec -= 1;
+            if (sec > 0) {
+                if (timerBtn) timerBtn.textContent = `⏳ Quét ĐT (${sec}s)...`;
+                if (statusTxt) statusTxt.textContent = `Đang nhận tín hiệu quét QR từ điện thoại (${sec}s)...`;
+            } else {
+                clearInterval(qrDemoCountdownTimer);
+                qrDemoCountdownTimer = null;
+                simulateMobileQrScanNow();
+            }
+        }, 1000);
     }
 
     function selectPayMethod(method, btn) {
@@ -5627,7 +5947,11 @@
         $('pay-cash-box').style.display = method === 'TIEN_MAT' ? 'block' : 'none';
         $('pay-qr-box').style.display = method === 'CHUYEN_KHOAN' ? 'block' : 'none';
         if (method === 'CHUYEN_KHOAN') {
+            resetQrModalVisualState();
             updateVietQrDisplay();
+            startQrPaymentPolling();
+        } else {
+            stopQrPaymentPolling();
         }
     }
 
@@ -6175,7 +6499,138 @@
     // ─────────────────────────────────────────────────────────────
     // INITIALIZATION
     // ─────────────────────────────────────────────────────────────
+    async function runMobileQrPaymentPage(urlParams) {
+        const rawQrPay = urlParams.get('qrpay') || '';
+        const maDon = Number((rawQrPay !== '1' && rawQrPay) ? rawQrPay : (urlParams.get('maDon') || 0));
+        const customAmt = Number(urlParams.get('amt') || urlParams.get('soTien') || 0);
+
+        document.title = `Thanh toán QR Đơn #${maDon} - Nhà hàng Ẩm Thực Việt`;
+        document.body.style.background = '#0f172a';
+        document.body.style.margin = '0';
+        document.body.style.padding = '16px';
+        document.body.style.minHeight = '100vh';
+        document.body.style.display = 'flex';
+        document.body.style.alignItems = 'center';
+        document.body.style.justifyContent = 'center';
+
+        document.body.innerHTML = `
+            <div style="width:100%; max-width:410px; background:#ffffff; border-radius:20px; overflow:hidden; box-shadow:0 20px 50px rgba(0,0,0,0.45); font-family:'Inter', system-ui, sans-serif;">
+                <div style="background:linear-gradient(135deg, #1d4ed8 0%, #1e40af 100%); color:#ffffff; padding:18px 20px; text-align:center;">
+                    <div style="font-size:11px; font-weight:800; letter-spacing:1px; text-transform:uppercase; opacity:0.9;">CỔNG THANH TOÁN VIETQR • NAPAS 247</div>
+                    <div style="font-size:18px; font-weight:800; margin-top:4px;">NHÀ HÀNG ẨM THỰC VIỆT</div>
+                </div>
+                <div id="mobile-qr-body" style="padding:24px 20px; text-align:center;">
+                    <div style="font-size:14px; font-weight:700; color:#334155; margin-bottom:8px;">⏳ Đang xác nhận giao dịch chuyển khoản QR...</div>
+                    <div style="font-size:12px; color:#64748b;">Đơn hàng #${maDon || '--'}</div>
+                </div>
+            </div>
+        `;
+
+        const bodyEl = document.getElementById('mobile-qr-body');
+        if (!maDon) {
+            bodyEl.innerHTML = `<div style="color:#dc2626; font-weight:700;">Mã đơn hàng không hợp lệ!</div>`;
+            return;
+        }
+
+        try {
+            let detail = null;
+            try {
+                detail = await apiFetch(`/api/don-hang/${maDon}/chi-tiet-hoa-don`);
+            } catch (e) {}
+
+            if (!detail || detail.trangThai !== 'DA_THANH_TOAN') {
+                try {
+                    await apiFetch('/api/thanh-toan/thuc-hien', {
+                        method: 'POST',
+                        body: JSON.stringify({
+                            maDon: maDon,
+                            phuongThuc: 'CHUYEN_KHOAN',
+                            maNv: 3
+                        })
+                    });
+                } catch (payErr) {
+                    // Nếu đã thanh toán rồi thì bỏ qua lỗi
+                }
+                try {
+                    detail = await apiFetch(`/api/don-hang/${maDon}/chi-tiet-hoa-don`);
+                } catch (e) {}
+            }
+
+            const paidAmount = customAmt > 0 ? customAmt : (detail ? Number(detail.tongTien || 0) : 0);
+            const tableName = (detail && detail.tenBan) ? detail.tenBan : 'Bàn khách';
+            const nowStr = new Date().toLocaleString('vi-VN');
+            const cleanBan = String(tableName)
+                .normalize('NFD').replace(/[̀-ͯ]/g, '')
+                .replace(/đ/g, 'd').replace(/Đ/g, 'D')
+                .replace(/[^a-zA-Z0-9 ]/g, '').toUpperCase().trim();
+
+            playQrPaymentSuccessChime();
+
+            bodyEl.innerHTML = `
+                <div style="width:76px; height:76px; margin:0 auto 14px; border-radius:50%; background:#16a34a; color:#ffffff; display:flex; align-items:center; justify-content:center; font-size:42px; font-weight:900; box-shadow:0 8px 22px rgba(22,163,74,0.35);">
+                    ✓
+                </div>
+                <div style="font-size:21px; font-weight:900; color:#15803d; letter-spacing:0.3px;">
+                    THANH TOÁN THÀNH CÔNG!
+                </div>
+                <div style="font-size:13px; color:#475569; margin-top:4px; font-weight:600;">
+                    Cảm ơn quý khách đã thanh toán chuyển khoản QR
+                </div>
+
+                <div style="font-size:28px; font-weight:900; color:#0f172a; margin:16px 0 14px;">
+                    ${formatVND(paidAmount)}
+                </div>
+
+                <div style="background:#f8fafc; border:1px solid #e2e8f0; border-radius:12px; padding:14px; text-align:left; font-size:13px; line-height:1.75;">
+                    <div style="display:flex; justify-content:space-between;">
+                        <span style="color:#64748b;">Trạng thái:</span>
+                        <strong style="color:#16a34a;">✓ Đã thanh toán hoàn tất</strong>
+                    </div>
+                    <div style="display:flex; justify-content:space-between;">
+                        <span style="color:#64748b;">Bàn phục vụ:</span>
+                        <strong style="color:#0f172a;">${escHtml(tableName)}</strong>
+                    </div>
+                    <div style="display:flex; justify-content:space-between;">
+                        <span style="color:#64748b;">Mã hóa đơn:</span>
+                        <strong style="color:#0f172a;">#${maDon}</strong>
+                    </div>
+                    <div style="display:flex; justify-content:space-between; border-top:1px dashed #cbd5e1; margin-top:6px; padding-top:6px;">
+                        <span style="color:#64748b;">Ngân hàng nhận:</span>
+                        <strong style="color:#1e293b;">MB Bank (Quân Đội)</strong>
+                    </div>
+                    <div style="display:flex; justify-content:space-between;">
+                        <span style="color:#64748b;">Chủ TK nhận:</span>
+                        <strong style="color:#1d4ed8;">NGUYEN MINH HOANG</strong>
+                    </div>
+                    <div style="display:flex; justify-content:space-between;">
+                        <span style="color:#64748b;">Nội dung CK:</span>
+                        <code style="background:#fef3c7; color:#b45309; padding:1px 6px; border-radius:4px; font-weight:700;">TT DON ${maDon} ${cleanBan}</code>
+                    </div>
+                    <div style="display:flex; justify-content:space-between;">
+                        <span style="color:#64748b;">Thời gian:</span>
+                        <span style="color:#334155; font-weight:600;">${nowStr}</span>
+                    </div>
+                </div>
+
+                <div style="margin-top:14px; padding:10px 12px; background:#ecfdf5; border:1px solid #86efac; border-radius:10px; font-size:12px; color:#166534; font-weight:700;">
+                    💻 Màn hình máy tính Thu ngân đã tự động hiện "Thanh toán thành công" và xuất phiếu in hóa đơn!
+                </div>
+            `;
+        } catch (err) {
+            bodyEl.innerHTML = `
+                <div style="color:#dc2626; font-weight:700; margin-bottom:8px;">Không thể kết nối máy chủ: ${escHtml(err.message)}</div>
+                <button onclick="window.location.reload()" style="padding:10px 18px; border-radius:8px; background:#1d4ed8; color:#fff; border:none; font-weight:700;">Thử lại</button>
+            `;
+        }
+    }
+
     async function initApp() {
+        const urlParams = new URLSearchParams(window.location.search);
+        if (urlParams.has('qrpay')) {
+            await runMobileQrPaymentPage(urlParams);
+            return;
+        }
+
         // Tự động làm mới Token JWT hợp lệ cho phiên hiện tại ngay khi tải trang
         if (sessionStorage.getItem('user_explicit_logout') !== '1') {
             const roleToUsername = {
