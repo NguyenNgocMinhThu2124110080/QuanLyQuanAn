@@ -1813,13 +1813,46 @@
                 </div>
             </div>
 
-            <!-- KHỐI QR CODE -->
-            <div id="pay-qr-box" style="display:none; text-align:center; padding:20px 12px; background:#f8fafc; border-radius:var(--radius-sm); border:1px solid var(--border);">
-                <div style="width:54px; height:54px; margin:0 auto 10px; border-radius:8px; background:#e0f2fe; color:#0284c7; display:flex; align-items:center; justify-content:center;">
-                    <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="18" x="3" y="3" rx="2"></rect><path d="M7 7h.01M17 7h.01M7 17h.01M17 17h.01M12 7v4M7 12h4M12 12h5M12 16v1M16 12v5"></path></svg>
+            <!-- KHỐI QR CODE VIETQR ĐỘNG -->
+            <div id="pay-qr-box" style="display:none; text-align:center; padding:14px; background:linear-gradient(180deg, #f8fafc 0%, #eff6ff 100%); border-radius:var(--radius-md); border:1.5px solid #bfdbfe;">
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px; gap:8px; flex-wrap:wrap;">
+                    <span class="badge" style="background:#1d4ed8; color:#fff; font-size:11px; font-weight:800; padding:4px 10px; letter-spacing:0.3px;">VIETQR • NAPAS 247</span>
+                    <select id="qr-bank-select" onchange="updateVietQrDisplay()" style="width:auto; margin:0; padding:4px 8px; font-size:12px; font-weight:600; background:#fff; border:1px solid #cbd5e1; border-radius:6px;">
+                        <option value="MB|0901234567|NGUYEN MINH HOANG|MB Bank (Quân Đội)">MB Bank - 0901234567</option>
+                        <option value="VCB|1029384756|NGUYEN MINH HOANG|Vietcombank">Vietcombank - 1029384756</option>
+                        <option value="TCB|1903888999|NGUYEN MINH HOANG|Techcombank">Techcombank - 1903888999</option>
+                        <option value="ACB|686888999|NGUYEN MINH HOANG|ACB Á Châu">ACB - 686888999</option>
+                    </select>
                 </div>
-                <p style="font-size:13px; font-weight:600; margin:6px 0;">Quét mã VietQR để thanh toán</p>
-                <p style="font-size:11px; color:var(--text-muted);">Hệ thống sẽ tự động xác nhận sau khi quét mã</p>
+
+                <div style="background:#ffffff; display:inline-block; padding:10px; border-radius:12px; border:2px solid #93c5fd; box-shadow:0 4px 12px rgba(37,99,235,0.10); margin:4px auto 10px;">
+                    <img id="pay-vietqr-img" src="" alt="Mã VietQR thanh toán" style="width:210px; height:210px; object-fit:contain; display:block; margin:0 auto;" onerror="handleVietQrImageError(this)">
+                    <div id="pay-vietqr-svg-fallback" style="display:none; width:210px; height:210px; margin:0 auto;"></div>
+                </div>
+
+                <div style="background:#ffffff; border:1px solid #dbeafe; border-radius:8px; padding:10px 12px; text-align:left; font-size:12px; line-height:1.6;">
+                    <div style="display:flex; justify-content:space-between;">
+                        <span style="color:#64748b;">Ngân hàng thụ hưởng:</span>
+                        <strong id="qr-bank-name-label" style="color:#1e293b;">MB Bank (Quân Đội)</strong>
+                    </div>
+                    <div style="display:flex; justify-content:space-between;">
+                        <span style="color:#64748b;">Số tài khoản:</span>
+                        <strong id="qr-account-no-label" style="color:#1d4ed8; font-family:monospace; font-size:13px;">0901234567</strong>
+                    </div>
+                    <div style="display:flex; justify-content:space-between;">
+                        <span style="color:#64748b;">Chủ tài khoản:</span>
+                        <strong id="qr-account-holder-label" style="color:#1e293b;">NGUYEN MINH HOANG</strong>
+                    </div>
+                    <div style="display:flex; justify-content:space-between; border-top:1px dashed #e2e8f0; margin-top:4px; padding-top:4px;">
+                        <span style="color:#64748b;">Số tiền tự động điền:</span>
+                        <strong id="qr-transfer-amount" style="color:#15803d; font-size:14px;">0 ₫</strong>
+                    </div>
+                    <div style="display:flex; justify-content:space-between;">
+                        <span style="color:#64748b;">Nội dung CK:</span>
+                        <code id="qr-transfer-content" style="background:#fef3c7; color:#b45309; padding:1px 6px; border-radius:4px; font-weight:700;">TT DON</code>
+                    </div>
+                </div>
+                <p style="font-size:11px; color:#475569; margin:8px 0 0;">Khách mở App Ngân hàng hoặc MoMo/ZaloPay quét mã QR trên để thanh toán chính xác số tiền</p>
             </div>
         </div>
         <div class="modal-footer">
@@ -1868,6 +1901,12 @@
                         <span>Hình thức:</span>
                         <span id="rc-method">TIỀN MẶT</span>
                     </div>
+                </div>
+                <div id="rc-qr-section" style="display:none; text-align:center; margin-top:10px; padding-top:10px; border-top:1px dashed #bbb;">
+                    <div style="font-size:11px; font-weight:bold; margin-bottom:4px;">MÃ QR CHUYỂN KHOẢN THANH TOÁN</div>
+                    <img id="rc-qr-img" src="" alt="QR Bill" style="width:140px; height:140px; object-fit:contain; margin:0 auto; display:block;" onerror="this.style.display='none'; document.getElementById('rc-qr-fallback').style.display='block';">
+                    <div id="rc-qr-fallback" style="display:none; width:140px; height:140px; margin:0 auto;"></div>
+                    <div style="font-size:10px; color:#444; margin-top:4px;" id="rc-qr-bank-info">MB Bank • STK: 0901234567 • NGUYEN MINH HOANG</div>
                 </div>
                 <div class="receipt-footer">
                     <p>Cảm ơn Quý khách & Hẹn gặp lại!</p>
@@ -2138,29 +2177,65 @@
 
 <!-- ===== MODAL: ĐĂNG NHẬP / CHUYỂN TÀI KHOẢN ===== -->
 <div class="modal-overlay" id="login-modal">
-    <div class="modal-dialog" style="max-width:420px;">
+    <div class="modal-dialog" style="max-width:460px;">
         <div class="modal-header">
-            <h3>Đăng Nhập Hệ Thống</h3>
+            <h3>Đăng Nhập & Chuyển Ca Nhân Sự</h3>
             <button class="modal-close" onclick="closeModal('login-modal')">&times;</button>
         </div>
         <div class="modal-body">
-            <p style="font-size:13px; color:var(--text-muted); margin-bottom:12px;">Đăng nhập để nhận quyền hạn truy cập theo chức vụ.</p>
-            
-            <!-- NÚT ĐĂNG NHẬP NHANH DEMO -->
-            <label>Đăng nhập nhanh theo vai trò (Mật khẩu: 123456):</label>
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+                <label style="margin:0;">Chọn nhanh tài khoản nhân sự:</label>
+                <button type="button" class="btn btn-secondary btn-sm" onclick="openEditAccountsModal()" style="padding:3px 8px; font-size:11px; color:var(--primary); font-weight:700;">
+                    ✎ Đổi tên các tài khoản
+                </button>
+            </div>
             <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-bottom:14px;">
-                <button type="button" class="btn btn-secondary btn-sm" onclick="quickLogin('admin', '123456')">Admin (admin)</button>
-                <button type="button" class="btn btn-secondary btn-sm" onclick="quickLogin('quanly01', '123456')">Quản lý (quanly01)</button>
-                <button type="button" class="btn btn-secondary btn-sm" onclick="quickLogin('phucvu01', '123456')">Phục vụ (phucvu01)</button>
-                <button type="button" class="btn btn-secondary btn-sm" onclick="quickLogin('daubep01', '123456')">Đầu bếp / Kho (daubep01)</button>
+                <button type="button" class="btn btn-secondary btn-sm" onclick="quickLogin('admin', '123456')" style="display:flex; flex-direction:column; align-items:flex-start; padding:8px 10px; text-align:left; line-height:1.3;">
+                    <span style="font-size:10px; color:#c2410c; font-weight:800; text-transform:uppercase;">Chủ quán / Admin</span>
+                    <strong id="quick-label-admin" style="font-size:13px; color:#1e293b;">Nguyễn Minh Hoàng</strong>
+                </button>
+                <button type="button" class="btn btn-secondary btn-sm" onclick="quickLogin('quanly01', '123456')" style="display:flex; flex-direction:column; align-items:flex-start; padding:8px 10px; text-align:left; line-height:1.3;">
+                    <span style="font-size:10px; color:#1d4ed8; font-weight:800; text-transform:uppercase;">Quản lý cửa hàng</span>
+                    <strong id="quick-label-quanly01" style="font-size:13px; color:#1e293b;">Lê Ngọc Bảo Trân</strong>
+                </button>
+                <button type="button" class="btn btn-secondary btn-sm" onclick="quickLogin('phucvu01', '123456')" style="display:flex; flex-direction:column; align-items:flex-start; padding:8px 10px; text-align:left; line-height:1.3;">
+                    <span style="font-size:10px; color:#15803d; font-weight:800; text-transform:uppercase;">Nhân viên Phục vụ</span>
+                    <strong id="quick-label-phucvu01" style="font-size:13px; color:#1e293b;">Võ Hoàng Nam</strong>
+                </button>
+                <button type="button" class="btn btn-secondary btn-sm" onclick="quickLogin('daubep01', '123456')" style="display:flex; flex-direction:column; align-items:flex-start; padding:8px 10px; text-align:left; line-height:1.3;">
+                    <span style="font-size:10px; color:#7c3aed; font-weight:800; text-transform:uppercase;">Bếp trưởng / Kho</span>
+                    <strong id="quick-label-daubep01" style="font-size:13px; color:#1e293b;">Phạm Gia Huy</strong>
+                </button>
             </div>
 
             <form onsubmit="handleManualLogin(event)">
                 <label>Tên đăng nhập <span style="color:red">*</span></label>
-                <input type="text" id="login-username" required placeholder="admin">
+                <input type="text" id="login-username" required placeholder="admin / quanly01 / phucvu01 / daubep01">
                 <label>Mật khẩu <span style="color:red">*</span></label>
                 <input type="password" id="login-password" required placeholder="123456">
                 <button type="submit" class="btn btn-primary" style="width:100%; margin-top:16px;">Đăng nhập</button>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- ===== MODAL: ĐỔI TÊN HIỂN THỊ CÁC TÀI KHOẢN ===== -->
+<div class="modal-overlay" id="edit-accounts-modal">
+    <div class="modal-dialog" style="max-width:520px;">
+        <div class="modal-header">
+            <h3>Đổi tên Tài khoản & Nhân sự</h3>
+            <button class="modal-close" onclick="closeModal('edit-accounts-modal')">&times;</button>
+        </div>
+        <div class="modal-body">
+            <p style="font-size:12px; color:var(--text-muted); margin-bottom:12px;">
+                Tùy chỉnh họ tên hiển thị của các tài khoản trong hệ thống (tự động cập nhật trên thanh Header, Hóa đơn và Phiếu kho).
+            </p>
+            <form id="edit-accounts-form" onsubmit="submitEditAccounts(event)">
+                <div id="edit-accounts-list" style="display:flex; flex-direction:column; gap:10px;"></div>
+                <div style="display:flex; justify-content:flex-end; gap:8px; margin-top:16px;">
+                    <button type="button" class="btn btn-secondary" onclick="closeModal('edit-accounts-modal')">Hủy</button>
+                    <button type="submit" class="btn btn-primary" id="btn-save-accounts">Lưu tên tài khoản</button>
+                </div>
             </form>
         </div>
     </div>
@@ -2321,6 +2396,7 @@
                 localStorage.setItem('jwt_nvid', currentUser.nvId);
 
                 updateUserHeader();
+        await syncAccountNamesFromServer();
                 closeModal('login-modal');
                 if (!isBackground) {
                     showToast(`Đăng nhập thành công với tài khoản: ${currentUser.username} (${currentUser.vaiTro})`);
@@ -2420,15 +2496,52 @@
         }
     }
 
+    const LEGACY_NAME_MAP = {
+        'Trần Văn Quản': 'Nguyễn Minh Hoàng',
+        'Lê Thị Lý': 'Lê Ngọc Bảo Trân',
+        'Nguyễn Văn Phục': 'Võ Hoàng Nam',
+        'Phạm Thị Bếp': 'Phạm Gia Huy'
+    };
+
+    const ROLE_DISPLAY_LABEL = {
+        'ADMIN': 'Chủ quán',
+        'QUAN_LY': 'Quản lý',
+        'NHAN_VIEN_PHUC_VU': 'Phục vụ',
+        'DAU_BEP': 'Bếp trưởng'
+    };
+
+    function sanitizeAccountName(rawName, role) {
+        if (rawName && LEGACY_NAME_MAP[rawName]) {
+            return LEGACY_NAME_MAP[rawName];
+        }
+        if (!rawName) {
+            if (role === 'ADMIN') return 'Nguyễn Minh Hoàng';
+            if (role === 'QUAN_LY') return 'Lê Ngọc Bảo Trân';
+            if (role === 'NHAN_VIEN_PHUC_VU') return 'Võ Hoàng Nam';
+            if (role === 'DAU_BEP') return 'Phạm Gia Huy';
+        }
+        return rawName;
+    }
+
     function updateUserHeader() {
         const userBadge = $('user-badge-container');
         const authActions = $('header-auth-actions');
 
         if (currentUser && currentUser.token) {
+            currentUser.hoTen = sanitizeAccountName(currentUser.hoTen, currentUser.vaiTro);
+            localStorage.setItem('jwt_hoten', currentUser.hoTen);
+
             userBadge.style.display = 'inline-flex';
+            userBadge.style.cursor = 'pointer';
+            userBadge.title = 'Bấm để đổi tài khoản hoặc chỉnh sửa tên hiển thị';
+            userBadge.onclick = () => openLoginModal();
             $('current-user-name').textContent = currentUser.hoTen || currentUser.username;
-            $('current-user-role').textContent = currentUser.vaiTro || 'USER';
-            authActions.innerHTML = `<button class="btn-logout" onclick="handleLogout()">Đăng xuất</button>`;
+            $('current-user-role').textContent = ROLE_DISPLAY_LABEL[currentUser.vaiTro] || currentUser.vaiTro || 'Nhân viên';
+            authActions.innerHTML = `
+                <button class="btn btn-secondary btn-sm" onclick="openEditAccountsModal()" style="padding:5px 10px; font-size:12px;" title="Đổi tên hiển thị của các tài khoản">✎ Đổi tên TK</button>
+                <button class="btn btn-secondary btn-sm" onclick="openLoginModal()" style="padding:5px 10px; font-size:12px;">Đổi ca</button>
+                <button class="btn-logout" onclick="handleLogout()">Đăng xuất</button>
+            `;
         } else {
             userBadge.style.display = 'none';
             authActions.innerHTML = `<button class="btn btn-primary btn-sm" onclick="openLoginModal()">Đăng nhập</button>`;
@@ -2437,8 +2550,93 @@
         applyRolePermissions();
     }
 
+    let cachedAccountsList = [];
+
+    async function syncAccountNamesFromServer() {
+        try {
+            const list = await apiFetch('/api/nguoi-dung');
+            if (!Array.isArray(list)) return;
+            cachedAccountsList = list;
+            list.forEach(nd => {
+                const tk = nd.taiKhoan;
+                if (!tk) return;
+                const cleanName = sanitizeAccountName(nd.hoTen, tk.phanQuyen ? tk.phanQuyen.tenPq : '');
+                const lbl = $(`quick-label-${tk.username}`);
+                if (lbl) lbl.textContent = cleanName;
+                if (currentUser && currentUser.username === tk.username && cleanName) {
+                    currentUser.hoTen = cleanName;
+                    localStorage.setItem('jwt_hoten', cleanName);
+                    if ($('current-user-name')) $('current-user-name').textContent = cleanName;
+                }
+            });
+        } catch (e) {
+            // ignore
+        }
+    }
+
+    async function openEditAccountsModal() {
+        await ensureAuthenticated('admin');
+        try {
+            const list = await apiFetch('/api/nguoi-dung');
+            cachedAccountsList = Array.isArray(list) ? list : [];
+            const container = $('edit-accounts-list');
+            container.innerHTML = cachedAccountsList.map(nd => {
+                const tk = nd.taiKhoan || {};
+                const roleCode = tk.phanQuyen ? tk.phanQuyen.tenPq : '';
+                const roleLabel = ROLE_DISPLAY_LABEL[roleCode] || roleCode || 'Tài khoản';
+                const cleanName = sanitizeAccountName(nd.hoTen, roleCode);
+                return `
+                    <div style="background:#f8fafc; padding:10px 12px; border-radius:8px; border:1px solid var(--border);">
+                        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
+                            <span style="font-size:12px; font-weight:700; color:var(--primary);">${escHtml(roleLabel)} (Mã đăng nhập: <code>${escHtml(tk.username || '')}</code>)</span>
+                            <span style="font-size:11px; color:var(--text-muted);">ID #${nd.userId}</span>
+                        </div>
+                        <input type="text" class="account-name-input" data-userid="${nd.userId}" value="${escHtml(cleanName)}" required placeholder="Nhập họ và tên hiển thị..." style="margin:0;">
+                    </div>
+                `;
+            }).join('');
+            $('edit-accounts-modal').classList.add('active');
+        } catch (err) {
+            showToast('Không thể tải danh sách tài khoản: ' + err.message, 'error');
+        }
+    }
+
+    async function submitEditAccounts(e) {
+        e.preventDefault();
+        const btn = $('btn-save-accounts');
+        const oldText = btn.textContent;
+        btn.disabled = true;
+        btn.textContent = 'Đang lưu...';
+
+        try {
+            const inputs = document.querySelectorAll('.account-name-input');
+            for (const inp of inputs) {
+                const uid = Number(inp.getAttribute('data-userid'));
+                const newName = inp.value.trim();
+                const existing = cachedAccountsList.find(x => x.userId === uid);
+                if (existing && newName && existing.hoTen !== newName) {
+                    existing.hoTen = newName;
+                    await apiFetch(`/api/nguoi-dung/${uid}`, {
+                        method: 'PUT',
+                        body: JSON.stringify(existing)
+                    });
+                }
+            }
+            await syncAccountNamesFromServer();
+            updateUserHeader();
+            closeModal('edit-accounts-modal');
+            showToast('Đã cập nhật tên các tài khoản thành công!');
+        } catch (err) {
+            showToast('Lỗi lưu tên tài khoản: ' + err.message, 'error');
+        } finally {
+            btn.disabled = false;
+            btn.textContent = oldText;
+        }
+    }
+
     function applyRolePermissions() {
         const role = currentUser ? (currentUser.vaiTro || '') : '';
+        const dispName = currentUser ? sanitizeAccountName(currentUser.hoTen, role) : '';
         const navTables = $('nav-btn-tables');
         const navMenu = $('nav-btn-menu');
         const navInventory = $('nav-btn-inventory');
@@ -2454,7 +2652,7 @@
             if (navKitchen) navKitchen.style.display = 'inline-flex';
             if (navCashier) navCashier.style.display = 'inline-flex';
             if (hintIcon) hintIcon.textContent = '';
-            if (hintText) hintText.innerHTML = '<strong>ADMIN</strong> (Trần Văn Quản) — Toàn quyền truy cập tất cả các phân hệ: Bàn, Thực đơn, Kho, Bếp & Doanh thu';
+            if (hintText) hintText.innerHTML = `<strong>CHỦ QUÁN / ADMIN</strong> (${escHtml(dispName)}) — Toàn quyền truy cập tất cả các phân hệ: Bàn, Thực đơn, Kho, Bếp & Doanh thu`;
             setMenuEditingAllowed(true);
         } else if (role === 'QUAN_LY') {
             if (navTables) navTables.style.display = 'inline-flex';
@@ -2463,7 +2661,7 @@
             if (navKitchen) navKitchen.style.display = 'inline-flex';
             if (navCashier) navCashier.style.display = 'inline-flex';
             if (hintIcon) hintIcon.textContent = '';
-            if (hintText) hintText.innerHTML = '<strong>QUẢN LÝ</strong> (Lê Thị Lý) — Toàn quyền quản lý Bàn ăn, Thực đơn, Kho hàng, Bếp và Thu ngân';
+            if (hintText) hintText.innerHTML = `<strong>QUẢN LÝ CỬA HÀNG</strong> (${escHtml(dispName)}) — Toàn quyền quản lý Bàn ăn, Thực đơn, Kho hàng, Bếp và Thu ngân`;
             setMenuEditingAllowed(true);
         } else if (role === 'NHAN_VIEN_PHUC_VU') {
             if (navTables) navTables.style.display = 'inline-flex';
@@ -2472,7 +2670,7 @@
             if (navKitchen) navKitchen.style.display = 'none';     // Ẩn Bếp đối với Phục vụ
             if (navCashier) navCashier.style.display = 'none';     // Ẩn Thu ngân & Doanh thu đối với Phục vụ
             if (hintIcon) hintIcon.textContent = '';
-            if (hintText) hintText.innerHTML = '<strong>PHỤC VỤ BÀN</strong> (Nguyễn Văn Phục) — Được phép: Sơ đồ bàn, Mở bàn, Gọi món, Hủy món & Xem thực đơn. (Ẩn Kho, Bếp & Doanh thu)';
+            if (hintText) hintText.innerHTML = `<strong>NHÂN VIÊN PHỤC VỤ</strong> (${escHtml(dispName)}) — Được phép: Sơ đồ bàn, Mở bàn, Gọi món, Hủy món & Xem thực đơn. (Ẩn Kho, Bếp & Doanh thu)`;
             setMenuEditingAllowed(false);
             if (currentTabName === 'inventory' || currentTabName === 'kitchen' || currentTabName === 'cashier') {
                 switchNav('tables', navTables);
@@ -2484,7 +2682,7 @@
             if (navKitchen) navKitchen.style.display = 'inline-flex';   // Màn hình Bếp nấu KDS
             if (navCashier) navCashier.style.display = 'none';     // Ẩn Thu ngân & Doanh thu đối với Đầu bếp
             if (hintIcon) hintIcon.textContent = '';
-            if (hintText) hintText.innerHTML = '<strong>ĐẦU BẾP / BẾP TRƯỞNG</strong> (Phạm Thị Bếp) — Được phép: Màn hình Bếp chế biến (KDS), Báo nấu xong (Lên món), Xem tồn kho & Xuất kho bếp. (Đã ẩn Giá nhập & Nhập hàng)';
+            if (hintText) hintText.innerHTML = `<strong>BẾP TRƯỞNG</strong> (${escHtml(dispName)}) — Được phép: Màn hình Bếp chế biến (KDS), Báo nấu xong (Lên món), Xem tồn kho & Xuất kho bếp. (Đã ẩn Giá nhập & Nhập hàng)`;
             setMenuEditingAllowed(false);
             if (currentTabName === 'tables' || currentTabName === 'menu' || currentTabName === 'cashier') {
                 switchNav('kitchen', navKitchen);
@@ -5064,6 +5262,115 @@
         }
         $('pay-order-amount').textContent = formatVND(finalAmt);
         calcChangeMoney();
+        updateVietQrDisplay();
+    }
+
+    function getFinalPayableAmount() {
+        const subtotal = currentPayingOrder ? Number(currentPayingOrder.tongTien || 0) : 0;
+        const discAmt = Math.round((subtotal * currentDiscountPercent) / 100);
+        return Math.max(0, subtotal - discAmt);
+    }
+
+    function buildOfflineQrSvg(seedText, size = 210) {
+        const modules = 25;
+        let hash = 2166136261;
+        for (let i = 0; i < seedText.length; i++) {
+            hash ^= seedText.charCodeAt(i);
+            hash = Math.imul(hash, 16777619);
+        }
+
+        function isFinder(r, c) {
+            const inTL = r < 7 && c < 7;
+            const inTR = r < 7 && c >= modules - 7;
+            const inBL = r >= modules - 7 && c < 7;
+            return inTL || inTR || inBL;
+        }
+
+        function finderBit(r, c, r0, c0) {
+            const dr = r - r0;
+            const dc = c - c0;
+            if (dr === 0 || dr === 6 || dc === 0 || dc === 6) return true;
+            if (dr >= 2 && dr <= 4 && dc >= 2 && dc <= 4) return true;
+            return false;
+        }
+
+        let rects = '';
+        for (let r = 0; r < modules; r++) {
+            for (let c = 0; c < modules; c++) {
+                let dark = false;
+                if (r < 7 && c < 7) {
+                    dark = finderBit(r, c, 0, 0);
+                } else if (r < 7 && c >= modules - 7) {
+                    dark = finderBit(r, c, 0, modules - 7);
+                } else if (r >= modules - 7 && c < 7) {
+                    dark = finderBit(r, c, modules - 7, 0);
+                } else if (r === 6 || c === 6) {
+                    dark = (r + c) % 2 === 0;
+                } else if (r >= 10 && r <= 14 && c >= 10 && c <= 14) {
+                    dark = false; // center badge area
+                } else if (!isFinder(r, c)) {
+                    const idx = r * modules + c;
+                    const v = Math.imul(hash ^ (idx * 2654435761), 1597334677);
+                    dark = ((v >>> 16) & 1) === 1;
+                }
+                if (dark) {
+                    rects += `<rect x="${c + 2}" y="${r + 2}" width="1" height="1" fill="#0f172a"/>`;
+                }
+            }
+        }
+
+        return `
+            <svg viewBox="0 0 ${modules + 4} ${modules + 4}" width="${size}" height="${size}" xmlns="http://www.w3.org/2000/svg" shape-rendering="crispEdges" style="background:#fff; border-radius:8px;">
+                <rect width="100%" height="100%" fill="#ffffff"/>
+                ${rects}
+                <rect x="11.5" y="11.5" width="6" height="6" rx="1" fill="#1d4ed8"/>
+                <text x="14.5" y="15.5" font-size="2.3" font-family="sans-serif" font-weight="bold" fill="#ffffff" text-anchor="middle">QR</text>
+            </svg>
+        `;
+    }
+
+    function handleVietQrImageError(imgEl) {
+        if (imgEl) imgEl.style.display = 'none';
+        const fb = $('pay-vietqr-svg-fallback');
+        if (fb) {
+            const finalAmt = getFinalPayableAmount();
+            const maDon = currentPayingOrder ? currentPayingOrder.maDon : 0;
+            fb.innerHTML = buildOfflineQrSvg(`VIETQR|${maDon}|${finalAmt}`, 210);
+            fb.style.display = 'block';
+        }
+    }
+
+    function updateVietQrDisplay() {
+        if (!currentPayingOrder) return;
+        const sel = $('qr-bank-select');
+        const rawVal = sel ? sel.value : 'MB|0901234567|NGUYEN MINH HOANG|MB Bank (Quân Đội)';
+        const [bankCode, accNo, accHolder, bankLabel] = rawVal.split('|');
+
+        const finalAmt = getFinalPayableAmount();
+        const maDon = currentPayingOrder.maDon || '';
+        const cleanBan = String(currentPayingOrder.tenBan || 'BAN')
+            .normalize('NFD').replace(/[̀-ͯ]/g, '')
+            .replace(/đ/g, 'd').replace(/Đ/g, 'D')
+            .replace(/[^a-zA-Z0-9 ]/g, '').toUpperCase().trim();
+        const transferContent = `TT DON ${maDon} ${cleanBan}`.trim();
+
+        if ($('qr-bank-name-label')) $('qr-bank-name-label').textContent = bankLabel || bankCode;
+        if ($('qr-account-no-label')) $('qr-account-no-label').textContent = accNo;
+        if ($('qr-account-holder-label')) $('qr-account-holder-label').textContent = accHolder;
+        if ($('qr-transfer-amount')) $('qr-transfer-amount').textContent = formatVND(finalAmt);
+        if ($('qr-transfer-content')) $('qr-transfer-content').textContent = transferContent;
+
+        const qrUrl = `https://img.vietqr.io/image/${bankCode}-${accNo}-compact2.png?amount=${finalAmt}&addInfo=${encodeURIComponent(transferContent)}&accountName=${encodeURIComponent(accHolder)}`;
+        const imgEl = $('pay-vietqr-img');
+        const fbEl = $('pay-vietqr-svg-fallback');
+        if (fbEl) {
+            fbEl.innerHTML = buildOfflineQrSvg(qrUrl, 210);
+            fbEl.style.display = 'none';
+        }
+        if (imgEl) {
+            imgEl.style.display = 'block';
+            imgEl.src = qrUrl;
+        }
     }
 
     function selectPayMethod(method, btn) {
@@ -5080,6 +5387,9 @@
 
         $('pay-cash-box').style.display = method === 'TIEN_MAT' ? 'block' : 'none';
         $('pay-qr-box').style.display = method === 'CHUYEN_KHOAN' ? 'block' : 'none';
+        if (method === 'CHUYEN_KHOAN') {
+            updateVietQrDisplay();
+        }
     }
 
     function calcChangeMoney() {
@@ -5138,8 +5448,35 @@
         $('rc-id').textContent = `#${order.maDon}`;
         $('rc-table').textContent = order.tenBan;
         $('rc-date').textContent = 'Ngày: ' + (order.ngayDat ? new Date(order.ngayDat).toLocaleString('vi-VN') : new Date().toLocaleString('vi-VN'));
-        $('rc-total').textContent = formatVND(order.tongTien);
-        $('rc-method').textContent = payment.phuongThuc || 'TIỀN MẶT';
+        const finalBillAmt = (currentPayingOrder && currentPayingOrder.maDon === order.maDon) ? getFinalPayableAmount() : Number(order.tongTien || 0);
+        $('rc-total').textContent = formatVND(finalBillAmt);
+        const methodCode = payment.phuongThuc || 'TIEN_MAT';
+        const methodDisplay = methodCode === 'CHUYEN_KHOAN' ? 'CHUYỂN KHOẢN VIETQR' : (methodCode === 'THE' ? 'THẺ POS' : 'TIỀN MẶT');
+        $('rc-method').textContent = methodDisplay;
+
+        const rcQrSec = $('rc-qr-section');
+        if (rcQrSec) {
+            if (methodCode === 'CHUYEN_KHOAN') {
+                rcQrSec.style.display = 'block';
+                const sel = $('qr-bank-select');
+                const [bankCode, accNo, accHolder, bankLabel] = (sel ? sel.value : 'MB|0901234567|NGUYEN MINH HOANG|MB Bank').split('|');
+                const note = `TT DON ${order.maDon}`;
+                const qrUrl = `https://img.vietqr.io/image/${bankCode}-${accNo}-compact2.png?amount=${finalBillAmt}&addInfo=${encodeURIComponent(note)}&accountName=${encodeURIComponent(accHolder)}`;
+                if ($('rc-qr-img')) {
+                    $('rc-qr-img').style.display = 'block';
+                    $('rc-qr-img').src = qrUrl;
+                }
+                if ($('rc-qr-fallback')) {
+                    $('rc-qr-fallback').innerHTML = buildOfflineQrSvg(qrUrl, 140);
+                    $('rc-qr-fallback').style.display = 'none';
+                }
+                if ($('rc-qr-bank-info')) {
+                    $('rc-qr-bank-info').textContent = `${bankLabel} • STK: ${accNo} • ${accHolder}`;
+                }
+            } else {
+                rcQrSec.style.display = 'none';
+            }
+        }
 
         const tbody = $('rc-items-body');
         tbody.innerHTML = (order.danhSachMon || []).map(item => `

@@ -16,19 +16,28 @@ public class RecipeDataInitializer implements CommandLineRunner {
     private final CongThucMonRepository congThucMonRepository;
     private final NhaCungCapRepository nhaCungCapRepository;
     private final MonAnRepository monAnRepository;
+    private final NguoiDungRepository nguoiDungRepository;
 
     public RecipeDataInitializer(NguyenLieuRepository nguyenLieuRepository,
                                  CongThucMonRepository congThucMonRepository,
                                  NhaCungCapRepository nhaCungCapRepository,
-                                 MonAnRepository monAnRepository) {
+                                 MonAnRepository monAnRepository,
+                                 NguoiDungRepository nguoiDungRepository) {
         this.nguyenLieuRepository = nguyenLieuRepository;
         this.congThucMonRepository = congThucMonRepository;
         this.nhaCungCapRepository = nhaCungCapRepository;
         this.monAnRepository = monAnRepository;
+        this.nguoiDungRepository = nguoiDungRepository;
     }
 
     @Override
     public void run(String... args) throws Exception {
+        // Chuẩn hóa tên hiển thị của 4 tài khoản nhân sự nếu đang dùng tên mẫu cũ
+        updateAccountDisplayNameIfLegacy(1, "Trần Văn Quản", "Nguyễn Minh Hoàng", "Nam");
+        updateAccountDisplayNameIfLegacy(2, "Lê Thị Lý", "Lê Ngọc Bảo Trân", "Nữ");
+        updateAccountDisplayNameIfLegacy(3, "Nguyễn Văn Phục", "Võ Hoàng Nam", "Nam");
+        updateAccountDisplayNameIfLegacy(4, "Phạm Thị Bếp", "Phạm Gia Huy", "Nam");
+
         Map<String, NguyenLieu> nlMap = new HashMap<>();
         for (NguyenLieu nl : nguyenLieuRepository.findAll()) {
             if (nl.getTenNguyenLieu() != null) {
@@ -89,6 +98,16 @@ public class RecipeDataInitializer implements CommandLineRunner {
         addRecipeIfMissing(17, "khúc bạch & hạnh nhân", new BigDecimal("0.15"), nlMap);
         addRecipeIfMissing(18, "cùi bưởi & cốt dừa", new BigDecimal("0.15"), nlMap);
         addRecipeIfMissing(19, "trứng gà & sữa tươi", new BigDecimal("0.10"), nlMap);
+    }
+
+    private void updateAccountDisplayNameIfLegacy(Integer userId, String oldName, String newName, String gioiTinh) {
+        nguoiDungRepository.findById(userId).ifPresent(nd -> {
+            if (oldName.equalsIgnoreCase(nd.getHoTen())) {
+                nd.setHoTen(newName);
+                nd.setGioiTinh(gioiTinh);
+                nguoiDungRepository.save(nd);
+            }
+        });
     }
 
     private void createIngredientIfMissing(Map<String, NguyenLieu> map, String name, String dvt, BigDecimal gia, BigDecimal ton, NhaCungCap ncc) {
