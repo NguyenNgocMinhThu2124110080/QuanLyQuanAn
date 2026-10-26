@@ -34,34 +34,20 @@
                 '<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">' +
                 '<title>Thanh toán thành công #' + maDon + '</title>' +
                 '<style>' +
-                'body{margin:0;padding:16px;min-height:100vh;background:#0f172a;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;display:flex;align-items:center;justify-content:center;box-sizing:border-box;}' +
-                '.card{width:100%;max-width:400px;background:#fff;border-radius:20px;overflow:hidden;box-shadow:0 20px 50px rgba(0,0,0,0.45);animation:pop 0.25s ease-out;}' +
+                'body{margin:0;padding:20px;min-height:100vh;background:#0f172a;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;display:flex;align-items:center;justify-content:center;box-sizing:border-box;}' +
+                '.card{width:100%;max-width:340px;background:#fff;border-radius:20px;padding:28px 20px;text-align:center;box-shadow:0 20px 50px rgba(0,0,0,0.45);animation:pop 0.2s ease-out;}' +
                 '@keyframes pop{0%{transform:scale(0.92);opacity:0}100%{transform:scale(1);opacity:1}}' +
-                '.hdr{background:linear-gradient(135deg,#15803d 0%,#166534 100%);color:#fff;padding:18px 20px;text-align:center;}' +
-                '.chk{width:74px;height:74px;margin:0 auto 12px;border-radius:50%;background:#16a34a;color:#fff;display:flex;align-items:center;justify-content:center;font-size:42px;font-weight:900;box-shadow:0 8px 20px rgba(22,163,74,0.35);}' +
-                '.row{display:flex;justify-content:space-between;padding:5px 0;font-size:13px;}' +
+                '.chk{width:68px;height:68px;margin:0 auto 14px;border-radius:50%;background:#16a34a;color:#fff;display:flex;align-items:center;justify-content:center;font-size:38px;font-weight:900;box-shadow:0 6px 18px rgba(22,163,74,0.35);}' +
                 '</style></head><body>' +
                 '<div class="card">' +
-                '<div class="hdr">' +
-                '<div style="font-size:11px;font-weight:800;letter-spacing:1px;opacity:0.9;">CỔNG THANH TOÁN VIETQR • NAPAS 247</div>' +
-                '<div style="font-size:18px;font-weight:800;margin-top:4px;">NHÀ HÀNG ẨM THỰC VIỆT</div>' +
-                '</div>' +
-                '<div style="padding:24px 20px;text-align:center;">' +
                 '<div class="chk">✓</div>' +
-                '<div style="font-size:22px;font-weight:900;color:#15803d;">THANH TOÁN THÀNH CÔNG!</div>' +
-                '<div style="font-size:13px;color:#475569;margin-top:4px;font-weight:600;">Cảm ơn quý khách đã chuyển khoản QR</div>' +
-                '<div id="m-amt" style="font-size:28px;font-weight:900;color:#0f172a;margin:14px 0;">' + fmtAmt + '</div>' +
-                '<div style="background:#f8fafc;border:1px solid #e2e8f0;border-radius:12px;padding:12px 14px;text-align:left;">' +
-                '<div class="row"><span style="color:#64748b;">Trạng thái:</span><strong style="color:#16a34a;">✓ Đã thanh toán hoàn tất</strong></div>' +
-                '<div class="row"><span style="color:#64748b;">Mã đơn / Bàn:</span><strong id="m-ban" style="color:#0f172a;">Đơn #' + maDon + (banParam ? ' (' + banParam + ')' : '') + '</strong></div>' +
-                '<div class="row" style="border-top:1px dashed #cbd5e1;margin-top:4px;padding-top:8px;"><span style="color:#64748b;">Ngân hàng nhận:</span><strong style="color:#1e293b;">MB Bank (Quân Đội)</strong></div>' +
-                '<div class="row"><span style="color:#64748b;">Chủ TK nhận:</span><strong style="color:#1d4ed8;">NGUYEN MINH HOANG</strong></div>' +
-                '<div class="row"><span style="color:#64748b;">Thời gian:</span><span style="color:#334155;font-weight:600;">' + nowStr + '</span></div>' +
+                '<div style="font-size:20px;font-weight:900;color:#15803d;">THANH TOÁN THÀNH CÔNG</div>' +
+                '<div style="font-size:28px;font-weight:900;color:#0f172a;margin:10px 0 14px;">' + fmtAmt + '</div>' +
+                '<div style="background:#f8fafc;border:1px solid #e2e8f0;border-radius:10px;padding:10px 12px;font-size:13px;color:#334155;line-height:1.6;">' +
+                '<div><strong>Đơn #' + maDon + '</strong> • MB Bank (0901234567)</div>' +
+                '<div style="color:#1d4ed8;font-weight:700;">NGUYEN MINH HOANG</div>' +
                 '</div>' +
-                '<div style="margin-top:14px;padding:10px 12px;background:#ecfdf5;border:1px solid #86efac;border-radius:10px;font-size:12px;color:#166534;font-weight:700;">' +
-                '💻 Màn hình máy tính Thu ngân đã tự động hiện "Thanh toán thành công" và xuất phiếu in hóa đơn!' +
                 '</div>' +
-                '</div></div>' +
                 '</body></html>');
             document.close();
             if (window.stop) { try { window.stop(); } catch (e) {} }
@@ -1959,107 +1945,51 @@
                 </div>
             </div>
 
-            <!-- KHỐI QR CODE VIETQR & QUÉT ĐIỆN THOẠI TỰ ĐỘNG BÁO THÀNH CÔNG -->
-            <div id="pay-qr-box" style="display:none; text-align:center; padding:14px; background:linear-gradient(180deg, #f8fafc 0%, #eff6ff 100%); border-radius:var(--radius-md); border:1.5px solid #bfdbfe;">
-                <!-- Chế độ hiển thị QR -->
-                <div style="display:grid; grid-template-columns:1fr 1fr; gap:6px; margin-bottom:10px; background:#e2e8f0; padding:4px; border-radius:8px;">
-                    <button type="button" id="qr-mode-btn-scan" class="btn btn-sm btn-primary" onclick="switchQrDisplayMode('MOBILE_SCAN')" style="padding:6px 8px; font-size:11px; font-weight:700;">
-                        📱 Quét ĐT báo Thành công
-                    </button>
-                    <button type="button" id="qr-mode-btn-vietqr" class="btn btn-sm btn-secondary" onclick="switchQrDisplayMode('VIETQR')" style="padding:6px 8px; font-size:11px; font-weight:700;">
-                        🏦 Mã VietQR Ngân hàng
-                    </button>
-                </div>
+            <!-- KHỐI QR CODE GỌN GÀNG -->
+            <div id="pay-qr-box" style="display:none; text-align:center; padding:10px 12px; background:#f8fafc; border-radius:var(--radius-md); border:1px solid #cbd5e1;">
+                <input type="hidden" id="qr-lan-host-input" value="192.168.21.207:9090">
 
-                <!-- KHUNG ĐANG CHỜ QUÉT QR -->
+                <!-- KHUNG QUÉT MÃ QR -->
                 <div id="qr-active-scan-view">
-                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px; gap:8px; flex-wrap:wrap;">
-                        <span id="qr-badge-mode-label" class="badge" style="background:#15803d; color:#fff; font-size:11px; font-weight:800; padding:4px 10px; letter-spacing:0.3px;">QUÉT QR TRÊN ĐT • TỰ ĐỘNG DUYỆT</span>
-                        <select id="qr-bank-select" onchange="updateVietQrDisplay()" style="width:auto; margin:0; padding:4px 8px; font-size:12px; font-weight:600; background:#fff; border:1px solid #cbd5e1; border-radius:6px;">
-                            <option value="MB|0901234567|NGUYEN MINH HOANG|MB Bank (Quân Đội)">MB Bank - 0901234567</option>
+                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px; gap:6px;">
+                        <select id="qr-bank-select" onchange="updateVietQrDisplay()" style="flex:1; margin:0; padding:5px 8px; font-size:12px; font-weight:600; background:#fff; border:1px solid #cbd5e1; border-radius:6px;">
+                            <option value="MB|0901234567|NGUYEN MINH HOANG|MB Bank">MB Bank - 0901234567</option>
                             <option value="VCB|1029384756|NGUYEN MINH HOANG|Vietcombank">Vietcombank - 1029384756</option>
                             <option value="TCB|1903888999|NGUYEN MINH HOANG|Techcombank">Techcombank - 1903888999</option>
-                            <option value="ACB|686888999|NGUYEN MINH HOANG|ACB Á Châu">ACB - 686888999</option>
+                            <option value="ACB|686888999|NGUYEN MINH HOANG|ACB">ACB - 686888999</option>
                         </select>
+                        <button type="button" id="qr-mode-btn-scan" class="btn btn-sm btn-primary" onclick="switchQrDisplayMode(currentQrDisplayMode === 'MOBILE_SCAN' ? 'VIETQR' : 'MOBILE_SCAN')" style="padding:5px 10px; font-size:11px; font-weight:700; white-space:nowrap;">
+                            QR Điện thoại
+                        </button>
                     </div>
 
-                    <div style="background:#ffffff; display:inline-block; padding:10px; border-radius:12px; border:2px solid #93c5fd; box-shadow:0 4px 12px rgba(37,99,235,0.10); margin:2px auto 8px; position:relative;">
-                        <img id="pay-vietqr-img" src="" alt="Mã QR thanh toán" style="width:215px; height:215px; object-fit:contain; display:block; margin:0 auto;" onerror="handleVietQrImageError(this)">
-                        <div id="pay-vietqr-svg-fallback" style="display:none; width:215px; height:215px; margin:0 auto;"></div>
+                    <div style="background:#ffffff; display:inline-block; padding:8px; border-radius:10px; border:1.5px solid #93c5fd; margin:0 auto 8px;">
+                        <img id="pay-vietqr-img" src="" alt="Mã QR" style="width:175px; height:175px; object-fit:contain; display:block; margin:0 auto;" onerror="handleVietQrImageError(this)">
+                        <div id="pay-vietqr-svg-fallback" style="display:none; width:175px; height:175px; margin:0 auto;"></div>
                     </div>
 
-                    <!-- Trạng thái lắng nghe điện thoại quét thời gian thực -->
-                    <div id="qr-scan-waiting-box" style="background:#ecfdf5; border:1px solid #86efac; border-radius:8px; padding:8px 10px; margin-bottom:8px; text-align:left;">
-                        <div style="display:flex; align-items:center; justify-content:space-between; gap:6px; flex-wrap:wrap;">
-                            <div style="display:flex; align-items:center; gap:6px; font-size:12px; font-weight:700; color:#166534;">
-                                <span style="display:inline-block; width:9px; height:9px; border-radius:50%; background:#16a34a; box-shadow:0 0 0 3px rgba(22,163,74,0.25);"></span>
-                                <span id="qr-waiting-status-text">Đang chờ điện thoại quét mã QR...</span>
-                            </div>
-                            <div style="display:flex; gap:4px;">
-                                <button type="button" id="qr-auto-timer-btn" class="btn btn-sm btn-secondary" onclick="startFiveSecDemoScanTimer()" style="padding:3px 8px; font-size:11px; font-weight:700;" title="Bấm rồi đưa điện thoại lên quét: sau 5 giây màn hình tự báo Thanh toán thành công!">
-                                    ⏱ Tự báo sau 5s
-                                </button>
-                                <button type="button" class="btn btn-sm btn-success" onclick="simulateMobileQrScanNow()" style="padding:3px 8px; font-size:11px; font-weight:700;" title="Mô phỏng điện thoại vừa quét xong mã QR">
-                                    ✓ ĐT vừa quét xong
-                                </button>
-                            </div>
+                    <div style="background:#ffffff; border:1px solid #e2e8f0; border-radius:8px; padding:7px 10px; font-size:12px; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:6px;">
+                        <div style="text-align:left;">
+                            <strong id="qr-account-holder-label" style="color:#0f172a;">NGUYEN MINH HOANG</strong>
+                            <div style="font-size:11px; color:#64748b;"><span id="qr-bank-name-label">MB Bank</span> • <strong id="qr-account-no-label" style="color:#1d4ed8;">0901234567</strong></div>
                         </div>
-                        <div id="qr-lan-config-row" style="display:flex; align-items:center; justify-content:space-between; gap:6px; margin-top:6px; padding-top:6px; border-top:1px dashed #bbf7d0; font-size:11px; color:#15803d;">
-                            <span>IP Wi-Fi máy tính (cùng mạng):</span>
-                            <div style="display:flex; align-items:center; gap:4px;">
-                                <input type="text" id="qr-lan-host-input" value="192.168.21.207:9090" onchange="onLanHostInputChange()" style="width:138px; margin:0; padding:2px 6px; font-size:11px; font-family:monospace; font-weight:700; height:24px; background:#fff; border:1px solid #86efac; border-radius:4px;">
-                                <a id="qr-open-mobile-preview-link" href="#" target="_blank" style="font-weight:700; color:#1d4ed8; text-decoration:underline; white-space:nowrap;">Mở trang ĐT</a>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div style="background:#ffffff; border:1px solid #dbeafe; border-radius:8px; padding:9px 12px; text-align:left; font-size:12px; line-height:1.55;">
-                        <div style="display:flex; justify-content:space-between;">
-                            <span style="color:#64748b;">Ngân hàng thụ hưởng:</span>
-                            <strong id="qr-bank-name-label" style="color:#1e293b;">MB Bank (Quân Đội)</strong>
-                        </div>
-                        <div style="display:flex; justify-content:space-between;">
-                            <span style="color:#64748b;">Số tài khoản:</span>
-                            <strong id="qr-account-no-label" style="color:#1d4ed8; font-family:monospace; font-size:13px;">0901234567</strong>
-                        </div>
-                        <div style="display:flex; justify-content:space-between;">
-                            <span style="color:#64748b;">Chủ tài khoản:</span>
-                            <strong id="qr-account-holder-label" style="color:#1e293b;">NGUYEN MINH HOANG</strong>
-                        </div>
-                        <div style="display:flex; justify-content:space-between; border-top:1px dashed #e2e8f0; margin-top:4px; padding-top:4px;">
-                            <span style="color:#64748b;">Số tiền thanh toán:</span>
+                        <div style="text-align:right;">
                             <strong id="qr-transfer-amount" style="color:#15803d; font-size:14px;">0 ₫</strong>
-                        </div>
-                        <div style="display:flex; justify-content:space-between;">
-                            <span style="color:#64748b;">Nội dung CK:</span>
-                            <code id="qr-transfer-content" style="background:#fef3c7; color:#b45309; padding:1px 6px; border-radius:4px; font-weight:700;">TT DON</code>
+                            <div><code id="qr-transfer-content" style="background:#fef3c7; color:#b45309; padding:1px 5px; border-radius:4px; font-size:11px; font-weight:700;">TT DON</code></div>
                         </div>
                     </div>
                 </div>
 
-                <!-- KHUNG HIỂN THỊ KHI ĐIỆN THOẠI QUÉT XONG: THANH TOÁN THÀNH CÔNG! -->
-                <div id="qr-scan-success-box" style="display:none; padding:22px 14px; background:linear-gradient(180deg, #ecfdf5 0%, #dcfce7 100%); border:2px solid #22c55e; border-radius:12px; text-align:center; box-shadow:0 8px 24px rgba(22,163,74,0.18);">
-                    <div style="width:68px; height:68px; margin:0 auto 12px; border-radius:50%; background:#16a34a; color:#ffffff; display:flex; align-items:center; justify-content:center; font-size:36px; font-weight:900; box-shadow:0 6px 16px rgba(22,163,74,0.35);">
+                <!-- KHUNG KHI QUÉT XONG: THANH TOÁN THÀNH CÔNG -->
+                <div id="qr-scan-success-box" style="display:none; padding:18px 12px; background:#ecfdf5; border:2px solid #22c55e; border-radius:10px; text-align:center;">
+                    <div style="width:54px; height:54px; margin:0 auto 8px; border-radius:50%; background:#16a34a; color:#ffffff; display:flex; align-items:center; justify-content:center; font-size:30px; font-weight:900;">
                         ✓
                     </div>
-                    <div style="font-size:19px; font-weight:900; color:#14532d; letter-spacing:0.3px; text-transform:uppercase;">
+                    <div style="font-size:17px; font-weight:900; color:#15803d;">
                         THANH TOÁN THÀNH CÔNG!
                     </div>
-                    <div style="font-size:13px; font-weight:600; color:#166534; margin-top:4px;">
-                        Điện thoại đã quét mã QR & xác nhận chuyển khoản hoàn tất
-                    </div>
-                    <div style="background:#ffffff; border:1px solid #86efac; border-radius:8px; padding:10px 14px; margin:12px auto 8px; max-width:320px; font-size:13px;">
-                        <div style="display:flex; justify-content:space-between; margin-bottom:4px;">
-                            <span style="color:#64748b;">Số tiền đã nhận:</span>
-                            <strong id="qr-success-paid-amount" style="color:#15803d; font-size:15px;">0 ₫</strong>
-                        </div>
-                        <div style="display:flex; justify-content:space-between;">
-                            <span style="color:#64748b;">Đơn hàng / Bàn:</span>
-                            <strong id="qr-success-paid-order" style="color:#0f172a;">#--</strong>
-                        </div>
-                    </div>
-                    <div style="font-size:12px; color:#15803d; font-weight:700; margin-top:6px;">
-                        🖨 Đang tự động xuất Phiếu Thanh Toán & giải phóng bàn...
+                    <div style="font-size:14px; font-weight:800; color:#0f172a; margin-top:4px;">
+                        <span id="qr-success-paid-amount" style="color:#15803d;">0 ₫</span> • <span id="qr-success-paid-order">#--</span>
                     </div>
                 </div>
             </div>
@@ -5746,27 +5676,9 @@
     function switchQrDisplayMode(mode) {
         currentQrDisplayMode = mode === 'VIETQR' ? 'VIETQR' : 'MOBILE_SCAN';
         const btnScan = $('qr-mode-btn-scan');
-        const btnViet = $('qr-mode-btn-vietqr');
-        const badge = $('qr-badge-mode-label');
-        const lanRow = $('qr-lan-config-row');
-
         if (btnScan) {
+            btnScan.textContent = currentQrDisplayMode === 'MOBILE_SCAN' ? 'QR Điện thoại' : 'Mã VietQR';
             btnScan.className = currentQrDisplayMode === 'MOBILE_SCAN' ? 'btn btn-sm btn-primary' : 'btn btn-sm btn-secondary';
-        }
-        if (btnViet) {
-            btnViet.className = currentQrDisplayMode === 'VIETQR' ? 'btn btn-sm btn-primary' : 'btn btn-sm btn-secondary';
-        }
-        if (badge) {
-            if (currentQrDisplayMode === 'MOBILE_SCAN') {
-                badge.textContent = 'QUÉT QR TRÊN ĐT • TỰ ĐỘNG DUYỆT';
-                badge.style.background = '#15803d';
-            } else {
-                badge.textContent = 'VIETQR • NAPAS 247';
-                badge.style.background = '#1d4ed8';
-            }
-        }
-        if (lanRow) {
-            lanRow.style.display = currentQrDisplayMode === 'MOBILE_SCAN' ? 'flex' : 'none';
         }
         updateVietQrDisplay();
     }
