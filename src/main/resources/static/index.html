@@ -6,7 +6,7 @@
     <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
     <meta http-equiv="Pragma" content="no-cache">
     <meta http-equiv="Expires" content="0">
-    <title>Hệ Thống Quản Lý Quán Ăn — Nhóm 10</title>
+    <title>Hệ Thống Quản Lý Quán Ăn</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -764,10 +764,14 @@
 <!-- ===== HEADER ===== -->
 <header>
     <div class="header-brand">
-        <div class="logo-icon">🍽️</div>
+        <div class="logo-icon">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M18 2v20M6 2v20M2 7h20M2 17h20"/>
+            </svg>
+        </div>
         <div>
             <h1>QUẢN LÝ QUÁN ĂN</h1>
-            <p>Đồ án Nhóm 10 • Spring Boot 4 + MySQL + Spring Security JWT</p>
+            <p>Hệ thống Quản lý Bán hàng & Điểm bán POS</p>
         </div>
     </div>
     <div class="header-user-bar">
@@ -776,45 +780,33 @@
             <span class="role-pill" id="current-user-role"></span>
         </div>
         <div id="header-auth-actions">
-            <button class="btn btn-primary btn-sm" onclick="openLoginModal()">🔐 Đăng nhập</button>
+            <button class="btn btn-primary btn-sm" onclick="openLoginModal()">Đăng nhập</button>
         </div>
     </div>
 </header>
 
-<!-- ===== ROLE PERMISSION BANNER ===== -->
-<div id="role-permission-hint" style="background:#f8fafc; padding:8px 28px; font-size:12px; border-bottom:1px solid var(--border); display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:8px;">
-    <div>
-        <span id="role-hint-icon">🛎️</span> 
-        <strong>Phân quyền truy cập:</strong> 
-        <span id="role-hint-text">Đang tải quyền hạn...</span>
-    </div>
-    <div style="color:var(--text-muted); font-size:11px; display:flex; align-items:center; gap:6px;">
-        <span style="display:inline-block; width:8px; height:8px; background:#10b981; border-radius:50%;"></span>
-        <span>Spring Security RBAC</span>
-    </div>
+<!-- ===== ROLE PERMISSION BANNER (HIDDEN) ===== -->
+<div id="role-permission-hint" style="display:none !important;">
+    <span id="role-hint-icon"></span> 
+    <span id="role-hint-text"></span>
 </div>
 
 <!-- ===== NAVIGATION ===== -->
 <nav class="main-nav" id="main-nav-bar">
     <button id="nav-btn-tables" class="active" onclick="switchNav('tables', this)">
-        🪑 Sơ đồ Bàn & Gọi món
-        <span class="badge-member">Quý</span>
+        Sơ đồ bàn
     </button>
     <button id="nav-btn-menu" onclick="switchNav('menu', this)">
-        🍲 Thực đơn & Món ăn
-        <span class="badge-member">Quý</span>
+        Thực đơn
     </button>
     <button id="nav-btn-inventory" onclick="switchNav('inventory', this)">
-        📦 Kho & Nguyên liệu
-        <span class="badge-member">Thư</span>
+        Kho nguyên liệu
     </button>
     <button id="nav-btn-kitchen" onclick="switchNav('kitchen', this)">
-        🍳 Bếp & Chế biến
-        <span class="badge-member">Bếp</span>
+        Bếp chế biến
     </button>
     <button id="nav-btn-cashier" onclick="switchNav('cashier', this)">
-        💰 Thu ngân & Doanh thu
-        <span class="badge-member">Phát</span>
+        Thu ngân & Báo cáo
     </button>
 </nav>
 
@@ -822,16 +814,16 @@
 <main>
 
     <!-- ========================================================
-         TAB 1: SƠ ĐỒ BÀN ĂN & GỌI MÓN (NGUYỄN XUÂN QUÝ)
+         TAB 1: SƠ ĐỒ BÀN ĂN & GỌI MÓN
     ======================================================== -->
     <div id="tab-tables" class="tab-panel active">
         <div class="table-filter-bar">
             <div class="filter-group">
-                <button class="btn btn-secondary btn-sm active-filter" onclick="filterTables('ALL', this)">Tất cả bàn (<span id="count-all-tables">0</span>)</button>
-                <button class="btn btn-secondary btn-sm" onclick="filterTables('TRONG', this)">🟢 Bàn trống (<span id="count-empty-tables">0</span>)</button>
-                <button class="btn btn-secondary btn-sm" onclick="filterTables('CO_KHACH', this)">🔴 Đang phục vụ (<span id="count-busy-tables">0</span>)</button>
+                <button class="btn btn-secondary btn-sm active-filter" onclick="filterTables('ALL', this)">Tất cả (<span id="count-all-tables">0</span>)</button>
+                <button class="btn btn-secondary btn-sm" onclick="filterTables('TRONG', this)">Bàn trống (<span id="count-empty-tables">0</span>)</button>
+                <button class="btn btn-secondary btn-sm" onclick="filterTables('CO_KHACH', this)">Đang dùng (<span id="count-busy-tables">0</span>)</button>
             </div>
-            <button class="btn btn-primary btn-sm" onclick="openAddTableModal()">➕ Thêm bàn mới</button>
+            <button class="btn btn-primary btn-sm" onclick="openAddTableModal()">+ Thêm bàn</button>
         </div>
 
         <div class="grid-table-order">
@@ -847,15 +839,20 @@
                 <div class="card order-panel" id="order-panel-box">
                     <div class="card-header">
                         <div class="card-title" id="order-panel-title">
-                            🪑 Chọn bàn để xem đơn
+                            Chi tiết bàn ăn
                         </div>
                         <span class="badge" id="order-table-status-badge">--</span>
                     </div>
 
                     <!-- KHI CHƯA CHỌN BÀN HOẶC BÀN TRỐNG -->
-                    <div id="order-empty-state" style="text-align: center; padding: 30px 10px; color: var(--text-muted);">
-                        <div style="font-size: 42px; margin-bottom: 12px;">🍽️</div>
-                        <p id="empty-state-text">Vui lòng nhấp vào một bàn ăn trên sơ đồ để quản lý gọi món.</p>
+                    <div id="order-empty-state" style="text-align: center; padding: 36px 12px; color: var(--text-muted);">
+                        <div style="width:48px; height:48px; margin:0 auto 12px; border-radius:50%; background:#f1f5f9; display:flex; align-items:center; justify-content:center; color:#94a3b8;">
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/>
+                                <rect x="8" y="2" width="8" height="4" rx="1" ry="1"/>
+                            </svg>
+                        </div>
+                        <p id="empty-state-text" style="font-size:13px;">Chọn một bàn trên sơ đồ để quản lý gọi món.</p>
                         <div style="margin-top: 16px;" id="empty-state-actions"></div>
                     </div>
 
@@ -869,14 +866,14 @@
                         <!-- THÊM MÓN NHANH VÀO ĐƠN -->
                         <div style="background:#f8fafc; padding:12px; border-radius:var(--radius-sm); border:1px solid var(--border); margin-bottom:14px;">
                             <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
-                                <label style="margin:0; font-weight:700;">➕ Gọi món cho bàn:</label>
+                                <label style="margin:0; font-weight:700;">Thêm món vào bàn:</label>
                                 <span id="dish-filter-count" style="font-size:11px; color:var(--text-muted);">19 món</span>
                             </div>
 
                             <!-- Ô TÌM KIẾM MÓN ĂN NHANH -->
                             <div style="position:relative; margin-bottom:6px;">
                                 <input type="text" id="order-search-dish" 
-                                       placeholder="🔍 Gõ tìm nhanh món (vd: cơm, phở, bún, chè, trà...)" 
+                                       placeholder="Tìm kiếm món ăn..." 
                                        oninput="filterDishDropdown(this.value)" 
                                        style="width:100%; padding:6px 28px 6px 10px; font-size:12px; border:1px solid #cbd5e1; border-radius:6px; background:#fff;">
                                 <span onclick="clearOrderDishSearch()" style="position:absolute; right:8px; top:6px; cursor:pointer; color:#94a3b8; font-size:12px; display:none;" id="btn-clear-dish-search">&times;</span>
@@ -898,7 +895,7 @@
                                 <input type="number" id="input-food-qty" value="1" min="1" max="50" style="width:65px;">
                                 <button class="btn btn-primary" onclick="addDishToCurrentOrder()">Thêm</button>
                             </div>
-                            <small style="color:var(--text-muted); font-size:11px; display:block; margin-top:4px;">* Tự động kiểm tra và trừ tồn kho nguyên liệu theo công thức</small>
+                            <small style="color:var(--text-muted); font-size:11px; display:block; margin-top:4px;">* Tự động kiểm tra và trừ tồn kho nguyên liệu</small>
                         </div>
 
                         <!-- DANH SÁCH MÓN ĐÃ GỌI -->
@@ -914,8 +911,8 @@
                             </div>
                             <div class="total-amount-display" id="current-order-total">0 ₫</div>
                             <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-top:10px;">
-                                <button class="btn btn-danger btn-sm" onclick="cancelCurrentOrder()">❌ Hủy đơn</button>
-                                <button class="btn btn-success" onclick="openPaymentForCurrentOrder()">💳 Thanh toán</button>
+                                <button class="btn btn-danger btn-sm" onclick="cancelCurrentOrder()">Hủy đơn</button>
+                                <button class="btn btn-success" onclick="openPaymentForCurrentOrder()">Thanh toán</button>
                             </div>
                         </div>
                     </div>
@@ -925,19 +922,19 @@
     </div>
 
     <!-- ========================================================
-         TAB 2: THỰC ĐƠN & DANH MỤC MÓN (NGUYỄN XUÂN QUÝ)
+         TAB 2: THỰC ĐƠN & DANH MỤC MÓN
     ======================================================== -->
     <div id="tab-menu" class="tab-panel">
         <div class="grid-2">
             <!-- CỘT 1: QUẢN LÝ MÓN ĂN -->
             <div class="card">
                 <div class="card-header">
-                    <div class="card-title">🍲 Quản lý Thực đơn món ăn</div>
-                    <button class="btn btn-primary btn-sm" onclick="resetFoodForm()">➕ Thêm món</button>
+                    <div class="card-title">Thực đơn món ăn</div>
+                    <button class="btn btn-primary btn-sm" onclick="resetFoodForm()">+ Thêm món</button>
                 </div>
 
                 <div id="menu-waiter-notice" style="display:none; background:#eff6ff; color:#1e40af; padding:8px 12px; border-radius:6px; font-size:12px; margin-bottom:12px; border:1px solid #bfdbfe;">
-                    ℹ️ Bạn đang đăng nhập quyền <strong>Phục vụ</strong>: Chỉ được xem thực đơn & đơn giá để tư vấn khách. Quyền tạo mới / chỉnh sửa món ăn dành cho <strong>Quản lý / Đầu bếp</strong>.
+                    Bạn đang đăng nhập quyền <strong>Phục vụ</strong>: Chỉ được xem thực đơn & đơn giá để tư vấn khách. Quyền tạo mới / chỉnh sửa món ăn dành cho <strong>Quản lý / Đầu bếp</strong>.
                 </div>
 
                 <!-- FORM THÊM / SỬA MÓN ĂN -->
@@ -965,14 +962,14 @@
                     </div>
                     <div style="display:flex; justify-content:flex-end; gap:8px; margin-top:12px;">
                         <button type="button" class="btn btn-secondary btn-sm" onclick="resetFoodForm()">Hủy</button>
-                        <button type="submit" class="btn btn-primary btn-sm" id="btn-save-food">💾 Lưu món ăn</button>
+                        <button type="submit" class="btn btn-primary btn-sm" id="btn-save-food">Lưu món ăn</button>
                     </div>
                 </form>
 
                 <!-- TÌM KIẾM MÓN ĂN TRONG BẢNG THỰC ĐƠN -->
                 <div style="margin-bottom:10px;">
                     <input type="text" id="menu-table-search" 
-                           placeholder="🔍 Gõ tìm món trong thực đơn (vd: cơm, phở, bún, lẩu, nước...)" 
+                           placeholder="Tìm kiếm món trong thực đơn..." 
                            oninput="renderFoodList(this.value)" 
                            style="width:100%; padding:8px 12px; font-size:13px; border:1px solid var(--border); border-radius:var(--radius-sm); background:#fff;">
                 </div>
@@ -998,8 +995,8 @@
             <!-- CỘT 2: QUẢN LÝ DANH MỤC MÓN ĂN -->
             <div class="card">
                 <div class="card-header">
-                    <div class="card-title">📁 Danh mục món ăn</div>
-                    <button class="btn btn-primary btn-sm" onclick="resetCategoryForm()">➕ Thêm danh mục</button>
+                    <div class="card-title">Danh mục món ăn</div>
+                    <button class="btn btn-primary btn-sm" onclick="resetCategoryForm()">+ Thêm danh mục</button>
                 </div>
 
                 <!-- FORM DANH MỤC -->
@@ -1011,7 +1008,7 @@
                     <input type="text" id="cat-desc-input" placeholder="Mô tả danh mục...">
                     <div style="display:flex; justify-content:flex-end; gap:8px; margin-top:12px;">
                         <button type="button" class="btn btn-secondary btn-sm" onclick="resetCategoryForm()">Hủy</button>
-                        <button type="submit" class="btn btn-primary btn-sm" id="btn-save-cat">💾 Lưu danh mục</button>
+                        <button type="submit" class="btn btn-primary btn-sm" id="btn-save-cat">Lưu danh mục</button>
                     </div>
                 </form>
 
@@ -1036,41 +1033,51 @@
     </div>
 
     <!-- ========================================================
-         TAB 3: KHO & NGUYÊN LIỆU (NGUYỄN NGỌC MINH THƯ)
+         TAB 3: KHO & NGUYÊN LIỆU
     ======================================================== -->
     <div id="tab-inventory" class="tab-panel">
         <!-- KPI KHO -->
         <div class="grid-4" style="margin-bottom:20px;">
             <div class="kpi-card">
-                <div class="kpi-icon" style="background:#e0f2fe; color:#0284c7;">📦</div>
+                <div class="kpi-icon" style="background:#e0f2fe; color:#0284c7;">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path><polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline><line x1="12" y1="22.08" x2="12" y2="12"></line></svg>
+                </div>
                 <div>
                     <div class="kpi-title">Tổng nguyên liệu</div>
                     <div class="kpi-value" id="kpi-total-ingredients">0</div>
                 </div>
             </div>
             <div class="kpi-card">
-                <div class="kpi-icon" style="background:#fef3c7; color:#d97706;">⚠️</div>
+                <div class="kpi-icon" style="background:#fef3c7; color:#d97706;">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>
+                </div>
                 <div>
                     <div class="kpi-title">Sắp hết hàng (&le;5)</div>
                     <div class="kpi-value" id="kpi-warning-ingredients" style="color:#d97706;">0</div>
                 </div>
             </div>
             <div class="kpi-card">
-                <div class="kpi-icon" style="background:#fee2e2; color:#dc2626;">🚨</div>
+                <div class="kpi-icon" style="background:#fee2e2; color:#dc2626;">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="15" y1="9" x2="9" y2="15"></line><line x1="9" y1="9" x2="15" y2="15"></line></svg>
+                </div>
                 <div>
                     <div class="kpi-title">Đã hết hàng (=0)</div>
                     <div class="kpi-value" id="kpi-out-of-stock" style="color:#dc2626;">0</div>
                 </div>
             </div>
             <div class="kpi-card" id="kpi-card-total-import">
-                <div class="kpi-icon" style="background:#d1fae5; color:#059669;">📊</div>
+                <div class="kpi-icon" style="background:#d1fae5; color:#059669;">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"></line><line x1="12" y1="20" x2="12" y2="4"></line><line x1="6" y1="20" x2="6" y2="14"></line></svg>
+                </div>
                 <div>
                     <div class="kpi-title">Tổng tiền nhập kho</div>
                     <div class="kpi-value" id="kpi-total-import-val" style="font-size:16px;">0 ₫</div>
                 </div>
             </div>
             <div class="kpi-card" id="kpi-card-chef-safe" style="display:none;">
-                <div class="kpi-icon" style="background:#d1fae5; color:#059669;">🟢</div>
+                <div class="kpi-icon" style="background:#d1fae5; color:#059669;">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>
+                </div>
                 <div>
                     <div class="kpi-title">Nguyên liệu an toàn</div>
                     <div class="kpi-value" id="kpi-safe-ingredients" style="color:#059669;">0</div>
@@ -1082,8 +1089,8 @@
             <!-- DANH SÁCH TỒN KHO NGUYÊN LIỆU -->
             <div class="card">
                 <div class="card-header">
-                    <div class="card-title">📋 Báo cáo Tồn kho & Cảnh báo nguyên liệu</div>
-                    <button class="btn btn-secondary btn-sm" onclick="loadInventoryReport()">🔄 Làm mới</button>
+                    <div class="card-title">Báo cáo tồn kho & Cảnh báo nguyên liệu</div>
+                    <button class="btn btn-secondary btn-sm" onclick="loadInventoryReport()">Làm mới</button>
                 </div>
                 <div class="table-responsive" style="max-height:500px; overflow-y:auto;">
                     <table class="app-table">
@@ -1108,16 +1115,16 @@
             <!-- FORM LẬP PHIẾU NHẬP / XUẤT KHO -->
             <div class="card">
                 <div class="card-header">
-                    <div class="card-title" id="stock-form-title">📝 Lập phiếu Nhập / Xuất kho</div>
+                    <div class="card-title" id="stock-form-title">Lập phiếu nhập / xuất kho</div>
                 </div>
                 <div id="chef-inventory-notice" style="display:none; background:#eff6ff; color:#1e40af; padding:8px 12px; border-radius:6px; font-size:12px; margin-bottom:12px; border:1px solid #bfdbfe;">
-                    👨‍🍳 <strong>Quyền Đầu bếp:</strong> Chỉ lập phiếu Xuất kho lấy nguyên liệu chế biến. Quyền nhập hàng mới & xem giá vốn nhà cung cấp dành riêng cho Quản lý.
+                    <strong>Quyền Đầu bếp:</strong> Chỉ lập phiếu Xuất kho lấy nguyên liệu chế biến. Quyền nhập hàng mới & xem giá vốn nhà cung cấp dành riêng cho Quản lý.
                 </div>
                 <form id="stock-movement-form" onsubmit="submitStockMovement(event)">
                     <label>Loại phiếu <span style="color:red">*</span></label>
                     <select id="movement-type" onchange="toggleMovementFields()">
-                        <option value="NHAP">🟢 NHẬP KHO (Tăng tồn kho)</option>
-                        <option value="XUAT">🔴 XUẤT KHO (Giảm tồn kho)</option>
+                        <option value="NHAP">Nhập kho (Tăng tồn kho)</option>
+                        <option value="XUAT">Xuất kho (Giảm tồn kho)</option>
                     </select>
 
                     <label>Nguyên liệu <span style="color:red">*</span></label>
@@ -1147,50 +1154,58 @@
                     <label>Ghi chú</label>
                     <input type="text" id="movement-note" placeholder="VD: Xuất chế biến tiệc / Xuất nấu bữa trưa...">
 
-                    <button type="submit" class="btn btn-primary" id="btn-submit-stock" style="width:100%; margin-top:16px;">💾 Xác nhận lập phiếu</button>
+                    <button type="submit" class="btn btn-primary" id="btn-submit-stock" style="width:100%; margin-top:16px;">Xác nhận lập phiếu</button>
                 </form>
             </div>
         </div>
     </div>
 
     <!-- ========================================================
-         TAB 4: THU NGÂN & DOANH THU (ĐẶNG VŨ THANH PHÁT)
+         TAB 4: THU NGÂN & DOANH THU
     ======================================================== -->
     <div id="tab-cashier" class="tab-panel">
         <!-- DOANH THU KPI THEO NGÀY -->
         <div class="card" style="margin-bottom:20px;">
             <div class="card-header">
-                <div class="card-title">📈 Thống kê Doanh thu theo ngày</div>
+                <div class="card-title">Thống kê doanh thu theo ngày</div>
                 <div style="display:flex; align-items:center; gap:8px;">
                     <label style="margin:0; font-size:13px;">Chọn ngày:</label>
                     <input type="date" id="revenue-date-picker" onchange="loadDailyRevenue()" style="width:auto; padding:6px 10px;">
-                    <button class="btn btn-secondary btn-sm" onclick="loadDailyRevenue()">🔄 Làm mới</button>
+                    <button class="btn btn-secondary btn-sm" onclick="loadDailyRevenue()">Làm mới</button>
                 </div>
             </div>
             <div class="grid-4">
                 <div class="kpi-card">
-                    <div class="kpi-icon" style="background:#d1fae5; color:#059669;">💵</div>
+                    <div class="kpi-icon" style="background:#d1fae5; color:#059669;">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="20" height="12" x="2" y="6" rx="2"></rect><circle cx="12" cy="12" r="2"></circle><path d="M6 12h.01M18 12h.01"></path></svg>
+                    </div>
                     <div>
                         <div class="kpi-title">Tổng doanh thu</div>
                         <div class="kpi-value" id="kpi-rev-total" style="color:#059669;">0 ₫</div>
                     </div>
                 </div>
                 <div class="kpi-card">
-                    <div class="kpi-icon" style="background:#e0f2fe; color:#0284c7;">🧾</div>
+                    <div class="kpi-icon" style="background:#e0f2fe; color:#0284c7;">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 2v20l2-1 2 1 2-1 2 1 2-1 2 1 2-1 2 1V2l-2 1-2-1-2 1-2-1-2 1-2-1-2 1Z"></path><path d="M8 7h8M8 11h8M8 15h5"></path></svg>
+                    </div>
                     <div>
                         <div class="kpi-title">Số hóa đơn</div>
                         <div class="kpi-value" id="kpi-rev-count">0</div>
                     </div>
                 </div>
                 <div class="kpi-card">
-                    <div class="kpi-icon" style="background:#fef3c7; color:#d97706;">💵</div>
+                    <div class="kpi-icon" style="background:#fef3c7; color:#d97706;">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="20" height="12" x="2" y="6" rx="2"></rect><circle cx="12" cy="12" r="2"></circle><path d="M6 12h.01M18 12h.01"></path></svg>
+                    </div>
                     <div>
                         <div class="kpi-title">Tiền mặt</div>
                         <div class="kpi-value" id="kpi-rev-cash" style="font-size:18px;">0 ₫</div>
                     </div>
                 </div>
                 <div class="kpi-card">
-                    <div class="kpi-icon" style="background:#f3e8ff; color:#9333ea;">📱</div>
+                    <div class="kpi-icon" style="background:#f3e8ff; color:#9333ea;">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="20" height="14" x="2" y="5" rx="2"></rect><line x1="2" x2="22" y1="10" y2="10"></line></svg>
+                    </div>
                     <div>
                         <div class="kpi-title">Chuyển khoản / Thẻ</div>
                         <div class="kpi-value" id="kpi-rev-transfer" style="font-size:18px;">0 ₫</div>
@@ -1203,8 +1218,8 @@
             <!-- ĐƠN HÀNG CHỜ THANH TOÁN -->
             <div class="card">
                 <div class="card-header">
-                    <div class="card-title">⏳ Đơn hàng đang chờ thanh toán</div>
-                    <button class="btn btn-secondary btn-sm" onclick="loadPendingOrders()">🔄 Làm mới</button>
+                    <div class="card-title">Đơn hàng đang chờ thanh toán</div>
+                    <button class="btn btn-secondary btn-sm" onclick="loadPendingOrders()">Làm mới</button>
                 </div>
                 <div class="table-responsive" style="max-height:450px; overflow-y:auto;">
                     <table class="app-table">
@@ -1227,8 +1242,8 @@
             <!-- LỊCH SỬ GIAO DỊCH GẦN NHẤT -->
             <div class="card">
                 <div class="card-header">
-                    <div class="card-title">📜 Lịch sử thanh toán thành công</div>
-                    <button class="btn btn-secondary btn-sm" onclick="loadRecentPayments()">🔄 Làm mới</button>
+                    <div class="card-title">Lịch sử thanh toán gần nhất</div>
+                    <button class="btn btn-secondary btn-sm" onclick="loadRecentPayments()">Làm mới</button>
                 </div>
                 <div class="table-responsive" style="max-height:450px; overflow-y:auto;">
                     <table class="app-table">
@@ -1251,30 +1266,30 @@
     </div>
 
     <!-- ========================================================
-         TAB 5: BẾP & CHẾ BIẾN (DÀNH CHO ĐẦU BẾP - PHẠM THỊ BẾP)
+         TAB 5: BẾP & CHẾ BIẾN (KDS)
     ======================================================== -->
     <div id="tab-kitchen" class="tab-panel">
         <div class="card" style="margin-bottom:20px;">
             <div class="card-header" style="flex-wrap:wrap; gap:10px;">
                 <div>
-                    <div class="card-title">🍳 Màn hình Bếp Chế biến món ăn (KDS)</div>
+                    <div class="card-title">Màn hình Bếp chế biến (KDS)</div>
                     <p style="font-size:12px; color:var(--text-muted); margin-top:2px;">
-                        Theo dõi trực tiếp các món ăn khách vừa gọi tại từng bàn. Bấm "Nấu xong" để báo phục vụ lên món cho khách.
+                        Theo dõi danh sách món ăn từ từng bàn và cập nhật trạng thái chế biến theo thời gian thực.
                     </p>
                 </div>
                 <div style="display:flex; gap:8px;">
-                    <button class="btn btn-secondary btn-sm" onclick="loadKitchenOrders()">🔄 Làm mới danh sách món</button>
+                    <button class="btn btn-secondary btn-sm" onclick="loadKitchenOrders()">Làm mới</button>
                 </div>
             </div>
 
             <!-- TỔNG QUAN BẾP -->
             <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(200px, 1fr)); gap:12px; margin-bottom:20px;">
                 <div style="background:#fef3c7; border:1px solid #fde68a; border-radius:var(--radius-sm); padding:12px 16px;">
-                    <div style="font-size:12px; color:#92400e; font-weight:600;">⏳ Đang chờ chế biến / Đang nấu</div>
+                    <div style="font-size:12px; color:#92400e; font-weight:600;">Chờ chế biến / Đang nấu</div>
                     <div style="font-size:24px; font-weight:800; color:#b45309;" id="count-kitchen-cooking">0 đơn</div>
                 </div>
                 <div style="background:#dcfce7; border:1px solid #bbf7d0; border-radius:var(--radius-sm); padding:12px 16px;">
-                    <div style="font-size:12px; color:#166534; font-weight:600;">✅ Đã nấu xong (Sẵn sàng phục vụ)</div>
+                    <div style="font-size:12px; color:#166534; font-weight:600;">Đã nấu xong (Sẵn sàng phục vụ)</div>
                     <div style="font-size:24px; font-weight:800; color:#15803d;" id="count-kitchen-completed">0 đơn</div>
                 </div>
             </div>
@@ -1289,12 +1304,12 @@
         <div class="card">
             <div class="card-header">
                 <div>
-                    <div class="card-title">📜 Bảng Công thức & Định lượng Nguyên liệu (Phần bạn Thư)</div>
+                    <div class="card-title">Bảng định lượng nguyên liệu món ăn</div>
                     <p style="font-size:12px; color:var(--text-muted); margin-top:2px;">
-                        Định lượng nguyên liệu tiêu hao khi bán 1 suất món ăn (hệ thống tự động trừ kho nguyên liệu theo công thức)
+                        Định lượng nguyên liệu tiêu hao khi bán 1 suất món ăn (hệ thống tự động trừ kho nguyên liệu)
                     </p>
                 </div>
-                <button class="btn btn-secondary btn-sm" onclick="loadRecipesTable()">🔄 Tải lại công thức</button>
+                <button class="btn btn-secondary btn-sm" onclick="loadRecipesTable()">Tải lại công thức</button>
             </div>
             <div class="table-responsive">
                 <table class="app-table">
@@ -1321,7 +1336,7 @@
 <div class="modal-overlay" id="payment-modal">
     <div class="modal-dialog">
         <div class="modal-header">
-            <h3>💳 Thanh toán Hóa đơn</h3>
+            <h3>Thanh toán Hóa đơn</h3>
             <button class="modal-close" onclick="closeModal('payment-modal')">&times;</button>
         </div>
         <div class="modal-body">
@@ -1339,9 +1354,9 @@
 
             <label>Phương thức thanh toán <span style="color:red">*</span></label>
             <div style="display:grid; grid-template-columns:repeat(3, 1fr); gap:8px; margin-bottom:14px;">
-                <button type="button" class="btn btn-secondary pay-method-btn active" data-method="TIEN_MAT" onclick="selectPayMethod('TIEN_MAT', this)">💵 Tiền mặt</button>
-                <button type="button" class="btn btn-secondary pay-method-btn" data-method="CHUYEN_KHOAN" onclick="selectPayMethod('CHUYEN_KHOAN', this)">📱 Chuyển khoản QR</button>
-                <button type="button" class="btn btn-secondary pay-method-btn" data-method="THE" onclick="selectPayMethod('THE', this)">💳 Thẻ POS</button>
+                <button type="button" class="btn btn-secondary pay-method-btn active" data-method="TIEN_MAT" onclick="selectPayMethod('TIEN_MAT', this)">Tiền mặt</button>
+                <button type="button" class="btn btn-secondary pay-method-btn" data-method="CHUYEN_KHOAN" onclick="selectPayMethod('CHUYEN_KHOAN', this)">Chuyển khoản QR</button>
+                <button type="button" class="btn btn-secondary pay-method-btn" data-method="THE" onclick="selectPayMethod('THE', this)">Thẻ POS</button>
             </div>
 
             <!-- KHỐI TIỀN MẶT -->
@@ -1355,15 +1370,17 @@
             </div>
 
             <!-- KHỐI QR CODE -->
-            <div id="pay-qr-box" style="display:none; text-align:center; padding:12px; background:#f8fafc; border-radius:var(--radius-sm); border:1px solid var(--border);">
-                <div style="font-size:48px;">📱</div>
+            <div id="pay-qr-box" style="display:none; text-align:center; padding:20px 12px; background:#f8fafc; border-radius:var(--radius-sm); border:1px solid var(--border);">
+                <div style="width:54px; height:54px; margin:0 auto 10px; border-radius:8px; background:#e0f2fe; color:#0284c7; display:flex; align-items:center; justify-content:center;">
+                    <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="18" x="3" y="3" rx="2"></rect><path d="M7 7h.01M17 7h.01M7 17h.01M17 17h.01M12 7v4M7 12h4M12 12h5M12 16v1M16 12v5"></path></svg>
+                </div>
                 <p style="font-size:13px; font-weight:600; margin:6px 0;">Quét mã VietQR để thanh toán</p>
                 <p style="font-size:11px; color:var(--text-muted);">Hệ thống sẽ tự động xác nhận sau khi quét mã</p>
             </div>
         </div>
         <div class="modal-footer">
             <button class="btn btn-secondary" onclick="closeModal('payment-modal')">Đóng</button>
-            <button class="btn btn-success" onclick="confirmPayment()">✅ Xác nhận thanh toán</button>
+            <button class="btn btn-success" onclick="confirmPayment()">Xác nhận thanh toán</button>
         </div>
     </div>
 </div>
@@ -1372,14 +1389,14 @@
 <div class="modal-overlay" id="receipt-modal">
     <div class="modal-dialog">
         <div class="modal-header">
-            <h3>🧾 Hoá Đơn Thanh Toán</h3>
+            <h3>Phiếu Thanh Toán</h3>
             <button class="modal-close" onclick="closeModal('receipt-modal')">&times;</button>
         </div>
         <div class="modal-body">
             <div class="receipt-ticket" id="receipt-print-area">
                 <div class="receipt-header">
-                    <h4>QUÁN ĂN NHÓM 10</h4>
-                    <p style="font-size:11px; color:#666;">ĐC: Đại học Sài Gòn • ĐT: 0988.xxx.xxx</p>
+                    <h4>HỆ THỐNG NHÀ HÀNG & QUÁN ĂN</h4>
+                    <p style="font-size:11px; color:#666;">Địa chỉ: TP. Hồ Chí Minh • Hotline: 1900 xxxx</p>
                     <p style="font-size:12px; margin-top:6px; font-weight:bold;">PHIẾU THANH TOÁN</p>
                     <p style="font-size:11px; color:#666;" id="rc-date">Ngày: --/--/---- --:--</p>
                 </div>
@@ -1423,19 +1440,19 @@
 <div class="modal-overlay" id="login-modal">
     <div class="modal-dialog" style="max-width:420px;">
         <div class="modal-header">
-            <h3>🔐 Đăng Nhập Hệ Thống</h3>
+            <h3>Đăng Nhập Hệ Thống</h3>
             <button class="modal-close" onclick="closeModal('login-modal')">&times;</button>
         </div>
         <div class="modal-body">
-            <p style="font-size:13px; color:var(--text-muted); margin-bottom:12px;">Đăng nhập để nhận JWT Token xác thực theo phân quyền Spring Security.</p>
+            <p style="font-size:13px; color:var(--text-muted); margin-bottom:12px;">Đăng nhập để nhận quyền hạn truy cập theo chức vụ.</p>
             
             <!-- NÚT ĐĂNG NHẬP NHANH DEMO -->
-            <label>Đăng nhập nhanh theo vai trò (Mật khẩu chung: 123456):</label>
+            <label>Đăng nhập nhanh theo vai trò (Mật khẩu: 123456):</label>
             <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-bottom:14px;">
-                <button type="button" class="btn btn-secondary btn-sm" onclick="quickLogin('admin', '123456')">👑 Admin (admin)</button>
-                <button type="button" class="btn btn-secondary btn-sm" onclick="quickLogin('quanly01', '123456')">👔 Quản lý (quanly01)</button>
-                <button type="button" class="btn btn-secondary btn-sm" onclick="quickLogin('phucvu01', '123456')">🛎️ Phục vụ (phucvu01)</button>
-                <button type="button" class="btn btn-secondary btn-sm" onclick="quickLogin('daubep01', '123456')">🍳 Đầu bếp / Kho (daubep01)</button>
+                <button type="button" class="btn btn-secondary btn-sm" onclick="quickLogin('admin', '123456')">Admin (admin)</button>
+                <button type="button" class="btn btn-secondary btn-sm" onclick="quickLogin('quanly01', '123456')">Quản lý (quanly01)</button>
+                <button type="button" class="btn btn-secondary btn-sm" onclick="quickLogin('phucvu01', '123456')">Phục vụ (phucvu01)</button>
+                <button type="button" class="btn btn-secondary btn-sm" onclick="quickLogin('daubep01', '123456')">Đầu bếp / Kho (daubep01)</button>
             </div>
 
             <form onsubmit="handleManualLogin(event)">
@@ -1453,7 +1470,7 @@
 <div class="modal-overlay" id="add-table-modal">
     <div class="modal-dialog" style="max-width:400px;">
         <div class="modal-header">
-            <h3>➕ Thêm Bàn Ăn Mới</h3>
+            <h3>Thêm Bàn Ăn Mới</h3>
             <button class="modal-close" onclick="closeModal('add-table-modal')">&times;</button>
         </div>
         <form onsubmit="submitAddTable(event)">
@@ -1476,12 +1493,8 @@
 
 <!-- FOOTER -->
 <footer>
-    <div>Hệ Thống Quản Lý Quán Ăn — Đồ Án Nhóm 10 • Học phần Lập trình Java Web</div>
-    <div class="member-tags">
-        <span class="member-tag">👨‍💻 Nguyễn Xuân Quý: Món ăn, Bàn, Đơn hàng</span>
-        <span class="member-tag">👩‍💻 Nguyễn Ngọc Minh Thư: Kho, Nguyên liệu, Nhập xuất</span>
-        <span class="member-tag">👨‍💻 Đặng Vũ Thanh Phát: Bảo mật, JWT, Thanh toán, Doanh thu</span>
-    </div>
+    <div>© 2026 Hệ Thống Quản Lý Quán Ăn & Bán Hàng POS</div>
+    <div style="color:var(--text-muted); font-size:12px; margin-top:4px;">Phiên bản 2.0 • Hoạt động ổn định</div>
 </footer>
 
 <!-- ===== JAVASCRIPT APP LOGIC ===== -->
@@ -1523,7 +1536,7 @@
 
     function showToast(message, type = 'success') {
         const t = $('toast');
-        t.textContent = (type === 'success' ? '✅ ' : '❌ ') + message;
+        t.textContent = message;
         t.className = `show ${type}`;
         setTimeout(() => { t.className = ''; }, 4000);
     }
@@ -1658,7 +1671,7 @@
         e.preventDefault();
         const btn = e.target.querySelector('button[type="submit"]');
         const oldText = btn ? btn.textContent : '';
-        if (btn) { btn.disabled = true; btn.textContent = '⏳ Đang xác thực...'; }
+        if (btn) { btn.disabled = true; btn.textContent = 'Đang xác thực...'; }
         const u = $('login-username').value.trim();
         const p = $('login-password').value.trim();
         try {
@@ -1676,10 +1689,10 @@
             userBadge.style.display = 'inline-flex';
             $('current-user-name').textContent = currentUser.hoTen || currentUser.username;
             $('current-user-role').textContent = currentUser.vaiTro || 'USER';
-            authActions.innerHTML = `<button class="btn-logout" onclick="handleLogout()">🚪 Đăng xuất</button>`;
+            authActions.innerHTML = `<button class="btn-logout" onclick="handleLogout()">Đăng xuất</button>`;
         } else {
             userBadge.style.display = 'none';
-            authActions.innerHTML = `<button class="btn btn-primary btn-sm" onclick="openLoginModal()">🔐 Đăng nhập</button>`;
+            authActions.innerHTML = `<button class="btn btn-primary btn-sm" onclick="openLoginModal()">Đăng nhập</button>`;
         }
 
         applyRolePermissions();
@@ -1701,7 +1714,7 @@
             if (navInventory) navInventory.style.display = 'inline-flex';
             if (navKitchen) navKitchen.style.display = 'inline-flex';
             if (navCashier) navCashier.style.display = 'inline-flex';
-            if (hintIcon) hintIcon.textContent = '👑';
+            if (hintIcon) hintIcon.textContent = '';
             if (hintText) hintText.innerHTML = '<strong>ADMIN</strong> (Trần Văn Quản) — Toàn quyền truy cập tất cả các phân hệ: Bàn, Thực đơn, Kho, Bếp & Doanh thu';
             setMenuEditingAllowed(true);
         } else if (role === 'QUAN_LY') {
@@ -1710,7 +1723,7 @@
             if (navInventory) navInventory.style.display = 'inline-flex';
             if (navKitchen) navKitchen.style.display = 'inline-flex';
             if (navCashier) navCashier.style.display = 'inline-flex';
-            if (hintIcon) hintIcon.textContent = '👔';
+            if (hintIcon) hintIcon.textContent = '';
             if (hintText) hintText.innerHTML = '<strong>QUẢN LÝ</strong> (Lê Thị Lý) — Toàn quyền quản lý Bàn ăn, Thực đơn, Kho hàng, Bếp và Thu ngân';
             setMenuEditingAllowed(true);
         } else if (role === 'NHAN_VIEN_PHUC_VU') {
@@ -1719,7 +1732,7 @@
             if (navInventory) navInventory.style.display = 'none'; // Ẩn Kho đối với Phục vụ
             if (navKitchen) navKitchen.style.display = 'none';     // Ẩn Bếp đối với Phục vụ
             if (navCashier) navCashier.style.display = 'none';     // Ẩn Thu ngân & Doanh thu đối với Phục vụ
-            if (hintIcon) hintIcon.textContent = '🛎️';
+            if (hintIcon) hintIcon.textContent = '';
             if (hintText) hintText.innerHTML = '<strong>PHỤC VỤ BÀN</strong> (Nguyễn Văn Phục) — Được phép: Sơ đồ bàn, Mở bàn, Gọi món, Hủy món & Xem thực đơn. (Ẩn Kho, Bếp & Doanh thu)';
             setMenuEditingAllowed(false);
             if (currentTabName === 'inventory' || currentTabName === 'kitchen' || currentTabName === 'cashier') {
@@ -1731,7 +1744,7 @@
             if (navInventory) navInventory.style.display = 'inline-flex'; // Đầu bếp xem tồn kho nguyên liệu
             if (navKitchen) navKitchen.style.display = 'inline-flex';   // Màn hình Bếp nấu KDS
             if (navCashier) navCashier.style.display = 'none';     // Ẩn Thu ngân & Doanh thu đối với Đầu bếp
-            if (hintIcon) hintIcon.textContent = '🍳';
+            if (hintIcon) hintIcon.textContent = '';
             if (hintText) hintText.innerHTML = '<strong>ĐẦU BẾP / BẾP TRƯỞNG</strong> (Phạm Thị Bếp) — Được phép: Màn hình Bếp chế biến (KDS), Báo nấu xong (Lên món), Xem tồn kho & Xuất kho bếp. (Đã ẩn Giá nhập & Nhập hàng)';
             setMenuEditingAllowed(false);
             if (currentTabName === 'tables' || currentTabName === 'menu' || currentTabName === 'cashier') {
@@ -1744,7 +1757,7 @@
             if (navInventory) navInventory.style.display = 'none';
             if (navKitchen) navKitchen.style.display = 'none';
             if (navCashier) navCashier.style.display = 'none';
-            if (hintIcon) hintIcon.textContent = '👤';
+            if (hintIcon) hintIcon.textContent = '';
             if (hintText) hintText.innerHTML = '<strong>CHƯA ĐĂNG NHẬP</strong> — Chế độ khách: Xem sơ đồ bàn trống và thực đơn. Bấm Đăng nhập để sử dụng các quyền nghiệp vụ';
             setMenuEditingAllowed(false);
             if (currentTabName === 'inventory' || currentTabName === 'kitchen' || currentTabName === 'cashier') {
@@ -1770,12 +1783,12 @@
             if (cardImport) cardImport.style.display = 'none';
             if (cardChefSafe) cardChefSafe.style.display = 'flex';
             if (notice) notice.style.display = 'block';
-            if (formTitle) formTitle.textContent = '📝 Lập phiếu Xuất kho nguyên liệu bếp';
+            if (formTitle) formTitle.textContent = 'Lập phiếu Xuất kho nguyên liệu bếp';
             if (priceBox) priceBox.style.display = 'none';
             if (supplierBox) supplierBox.style.display = 'none';
-            if (btnSubmit) btnSubmit.textContent = '💾 Xác nhận xuất kho';
+            if (btnSubmit) btnSubmit.textContent = 'Xác nhận xuất kho';
             if (movementTypeSel) {
-                movementTypeSel.innerHTML = '<option value="XUAT">🔴 XUẤT KHO (Lấy nguyên liệu chế biến)</option>';
+                movementTypeSel.innerHTML = '<option value="XUAT">Xuất kho (Lấy nguyên liệu chế biến)</option>';
                 movementTypeSel.value = 'XUAT';
             }
             document.querySelectorAll('.inv-price-col').forEach(el => el.style.display = 'none');
@@ -1783,13 +1796,13 @@
             if (cardImport) cardImport.style.display = 'flex';
             if (cardChefSafe) cardChefSafe.style.display = 'none';
             if (notice) notice.style.display = 'none';
-            if (formTitle) formTitle.textContent = '📝 Lập phiếu Nhập / Xuất kho';
+            if (formTitle) formTitle.textContent = 'Lập phiếu Nhập / Xuất kho';
             if (priceBox) priceBox.style.display = 'block';
-            if (btnSubmit) btnSubmit.textContent = '💾 Xác nhận lập phiếu';
+            if (btnSubmit) btnSubmit.textContent = 'Xác nhận lập phiếu';
             if (movementTypeSel && movementTypeSel.options.length < 2) {
                 movementTypeSel.innerHTML = `
-                    <option value="NHAP">🟢 NHẬP KHO (Tăng tồn kho)</option>
-                    <option value="XUAT">🔴 XUẤT KHO (Giảm tồn kho)</option>
+                    <option value="NHAP">Nhập kho (Tăng tồn kho)</option>
+                    <option value="XUAT">Xuất kho (Giảm tồn kho)</option>
                 `;
             }
             document.querySelectorAll('.inv-price-col').forEach(el => el.style.display = '');
@@ -1902,10 +1915,10 @@
             allTables = [];
             container.innerHTML = `
                 <div class="ui-error-box" style="grid-column: 1 / -1;">
-                    <div class="error-icon">⚠️</div>
+                    <div class="error-icon" style="font-size:24px;">!</div>
                     <div class="error-title">Lỗi kết nối khi tải sơ đồ bàn</div>
                     <div class="error-desc">${escHtml(e.message)}</div>
-                    <button class="btn btn-secondary btn-sm" onclick="loadTables()">🔄 Thử lại (Retry)</button>
+                    <button class="btn btn-secondary btn-sm" onclick="loadTables()">Thử lại</button>
                 </div>
             `;
         }
@@ -1932,10 +1945,9 @@
         if (total === 0) {
             container.innerHTML = `
                 <div class="ui-empty-box" style="grid-column: 1 / -1;">
-                    <div class="empty-icon">🪑</div>
                     <div class="empty-title">Chưa có bàn ăn nào trong sơ đồ</div>
                     <div class="empty-desc">Nhấn vào nút bên dưới để thêm bàn ăn đầu tiên cho quán.</div>
-                    <button class="btn btn-primary btn-sm" onclick="openAddTableModal()">➕ Thêm bàn mới</button>
+                    <button class="btn btn-primary btn-sm" onclick="openAddTableModal()">+ Thêm bàn mới</button>
                 </div>
             `;
             return;
@@ -1950,10 +1962,9 @@
         if (filtered.length === 0) {
             container.innerHTML = `
                 <div class="ui-empty-box" style="grid-column: 1 / -1;">
-                    <div class="empty-icon">🔍</div>
                     <div class="empty-title">Không tìm thấy bàn nào</div>
-                    <div class="empty-desc">Không có bàn ăn nào ở trạng thái "${tableFilter === 'TRONG' ? 'Trống' : 'Có khách'}".</div>
-                    <button class="btn btn-secondary btn-sm" onclick="filterTables('ALL', document.querySelector('.filter-group button'))">👉 Xem tất cả bàn</button>
+                    <div class="empty-desc">Không có bàn ăn nào ở trạng thái "${tableFilter === 'TRONG' ? 'Trống' : 'Đang dùng'}".</div>
+                    <button class="btn btn-secondary btn-sm" onclick="filterTables('ALL', document.querySelector('.filter-group button'))">Xem tất cả bàn</button>
                 </div>
             `;
             return;
@@ -1962,7 +1973,7 @@
         $('tables-container').innerHTML = filtered.map(t => {
             const isSelected = selectedTable && selectedTable.maBan === t.maBan;
             const statusClass = `status-${t.trangThai}`;
-            const badgeText = t.trangThai === 'TRONG' ? '🟢 Trống' : (t.trangThai === 'CO_KHACH' ? '🔴 Có khách' : '🔵 Đặt trước');
+            const badgeText = t.trangThai === 'TRONG' ? 'Trống' : (t.trangThai === 'CO_KHACH' ? 'Có khách' : 'Đặt trước');
 
             return `
             <div class="table-card ${statusClass} ${isSelected ? 'selected' : ''}" onclick="selectTable(${t.maBan})">
@@ -1970,9 +1981,9 @@
                     <span class="table-name">${escHtml(t.tenBan)}</span>
                     <span class="badge ${t.trangThai === 'TRONG' ? 'badge-success' : 'badge-danger'}">${badgeText}</span>
                 </div>
-                <div class="table-capacity">🪑 Sức chứa: ${t.sucChua || 4} khách</div>
+                <div class="table-capacity">${t.sucChua || 4} chỗ ngồi</div>
                 <div class="table-order-preview">
-                    ${t.trangThai === 'CO_KHACH' ? '👉 Đang dùng bữa' : '✨ Sẵn sàng đón khách'}
+                    ${t.trangThai === 'CO_KHACH' ? 'Đang phục vụ' : 'Sẵn sàng'}
                 </div>
             </div>`;
         }).join('');
@@ -1984,7 +1995,7 @@
 
         if (!selectedTable) return;
 
-        $('order-panel-title').innerHTML = `🪑 ${escHtml(selectedTable.tenBan)}`;
+        $('order-panel-title').textContent = selectedTable.tenBan;
         const statusBadge = $('order-table-status-badge');
         statusBadge.textContent = selectedTable.trangThai === 'TRONG' ? 'BÀN TRỐNG' : 'ĐANG DÙNG';
         statusBadge.className = `badge ${selectedTable.trangThai === 'TRONG' ? 'badge-success' : 'badge-danger'}`;
@@ -1995,7 +2006,7 @@
             $('empty-state-text').textContent = 'Bàn này hiện đang trống. Hãy mở bàn để bắt đầu phục vụ!';
             $('empty-state-actions').innerHTML = `
                 <button class="btn btn-primary" onclick="openTableAndCreateOrder(${selectedTable.maBan})">
-                    🛎️ Mở bàn & Tạo đơn mới
+                    Mở bàn phục vụ
                 </button>
             `;
         } else {
@@ -2034,8 +2045,8 @@
                 $('order-active-state').style.display = 'none';
                 $('empty-state-text').textContent = 'Bàn đang ghi nhận có khách nhưng chưa có đơn hàng hoạt động.';
                 $('empty-state-actions').innerHTML = `
-                    <button class="btn btn-primary btn-sm" onclick="openTableAndCreateOrder(${maBan})">🛎️ Tạo đơn mới cho bàn</button>
-                    <button class="btn btn-secondary btn-sm" style="margin-left:8px;" onclick="resetTableStatus(${maBan})">🔄 Đặt lại bàn trống</button>
+                    <button class="btn btn-primary btn-sm" onclick="openTableAndCreateOrder(${maBan})">Tạo đơn mới cho bàn</button>
+                    <button class="btn btn-secondary btn-sm" style="margin-left:8px;" onclick="resetTableStatus(${maBan})">Đặt lại bàn trống</button>
                 `;
                 return;
             }
@@ -2100,7 +2111,7 @@
         if (countEl) countEl.textContent = `${filtered.length}/${allDishes.length} món`;
 
         if (filtered.length === 0) {
-            sel.innerHTML = '<option value="">❌ Không tìm thấy món phù hợp</option>';
+            sel.innerHTML = '<option value="">Không tìm thấy món phù hợp</option>';
         } else {
             sel.innerHTML = '<option value="">-- Chọn món ăn (' + filtered.length + ' món) --</option>' +
                 filtered.map(d => `<option value="${d.maMon}">${escHtml(d.tenMon)} (${formatVND(d.gia)})</option>`).join('');
@@ -2155,7 +2166,7 @@
 
         const btn = document.querySelector('#order-active-state button.btn-primary');
         const oldText = btn ? btn.textContent : '';
-        if (btn) { btn.disabled = true; btn.textContent = '⏳ Thêm...'; }
+        if (btn) { btn.disabled = true; btn.textContent = 'Thêm...'; }
 
         try {
             await apiFetch('/api/don-hang/them-mon', {
@@ -2217,7 +2228,7 @@
         e.preventDefault();
         const btn = e.target.querySelector('button[type="submit"]');
         const oldText = btn ? btn.textContent : '';
-        if (btn) { btn.disabled = true; btn.textContent = '⏳ Đang lưu bàn...'; }
+        if (btn) { btn.disabled = true; btn.textContent = 'Đang lưu bàn...'; }
 
         const tenBan = $('new-table-name').value.trim();
         const sucChua = Number($('new-table-capacity').value) || 4;
@@ -2239,7 +2250,7 @@
     }
 
     // ─────────────────────────────────────────────────────────────
-    // TAB 2: THỰC ĐƠN & DANH MỤC (NGUYỄN XUÂN QUÝ)
+    // TAB 2: THỰC ĐƠN & DANH MỤC
     // ─────────────────────────────────────────────────────────────
     async function loadDishes() {
         const tbody = $('food-list-tbody');
@@ -2254,10 +2265,9 @@
             tbody.innerHTML = `
                 <tr><td colspan="4">
                     <div class="ui-error-box">
-                        <div class="error-icon">⚠️</div>
                         <div class="error-title">Lỗi tải danh sách món ăn</div>
                         <div class="error-desc">${escHtml(e.message)}</div>
-                        <button class="btn btn-secondary btn-sm" onclick="loadDishes()">🔄 Thử lại (Retry)</button>
+                        <button class="btn btn-secondary btn-sm" onclick="loadDishes()">Thử lại</button>
                     </div>
                 </td></tr>
             `;
@@ -2270,10 +2280,9 @@
             tbody.innerHTML = `
                 <tr><td colspan="4">
                     <div class="ui-empty-box">
-                        <div class="empty-icon">🍽️</div>
                         <div class="empty-title">Thực đơn chưa có món ăn nào</div>
                         <div class="empty-desc">Sử dụng form bên trái để thêm món ăn đầu tiên vào thực đơn.</div>
-                        <button class="btn btn-primary btn-sm" onclick="$('food-name').focus()">➕ Nhập món ngay</button>
+                        <button class="btn btn-primary btn-sm" onclick="$('food-name').focus()">Nhập món ngay</button>
                     </div>
                 </td></tr>
             `;
@@ -2289,7 +2298,7 @@
         });
 
         if (displayDishes.length === 0) {
-            tbody.innerHTML = `<tr><td colspan="4" style="text-align:center; padding:24px; color:var(--text-muted);">❌ Không tìm thấy món ăn nào khớp với từ khóa "${escHtml(filterKw)}"</td></tr>`;
+            tbody.innerHTML = `<tr><td colspan="4" style="text-align:center; padding:24px; color:var(--text-muted);">Không tìm thấy món ăn nào khớp với từ khóa "${escHtml(filterKw)}"</td></tr>`;
             return;
         }
 
@@ -2305,9 +2314,9 @@
                 <td style="font-weight:700; color:var(--primary);">${formatVND(d.gia)}</td>
                 <td>
                     ${isChefOrAdmin ? `
-                    <button class="btn btn-secondary btn-sm food-action-btn" onclick="editFood(${d.maMon})">✏️</button>
-                    <button class="btn btn-danger btn-sm food-action-btn" onclick="deleteFood(${d.maMon})">🗑️</button>
-                    ` : '<span style="color:var(--text-muted); font-size:11px;">👁️ Chỉ xem</span>'}
+                    <button class="btn btn-secondary btn-sm food-action-btn" onclick="editFood(${d.maMon})">Sửa</button>
+                    <button class="btn btn-danger btn-sm food-action-btn" onclick="deleteFood(${d.maMon})">Xóa</button>
+                    ` : '<span style="color:var(--text-muted); font-size:11px;">Chỉ xem</span>'}
                 </td>
             </tr>
         `).join('');
@@ -2322,7 +2331,7 @@
         }
         const btn = $('btn-save-food');
         const oldText = btn ? btn.textContent : '';
-        if (btn) { btn.disabled = true; btn.textContent = '⏳ Đang lưu món...'; }
+        if (btn) { btn.disabled = true; btn.textContent = 'Đang lưu món...'; }
 
         const id = $('food-id').value;
         const body = {
@@ -2355,7 +2364,7 @@
         $('food-price').value = dish.gia;
         $('food-desc').value = dish.moTa || '';
         $('food-category').value = dish.danhMuc ? dish.danhMuc.maDanhmuc : '';
-        $('btn-save-food').textContent = '💾 Cập nhật món';
+        $('btn-save-food').textContent = 'Cập nhật món';
     }
 
     async function deleteFood(id) {
@@ -2377,7 +2386,7 @@
     function resetFoodForm() {
         $('food-form').reset();
         $('food-id').value = '';
-        $('btn-save-food').textContent = '💾 Lưu món ăn';
+        $('btn-save-food').textContent = 'Lưu món ăn';
     }
 
     // CATEGORY CRUD
@@ -2394,10 +2403,9 @@
             tbody.innerHTML = `
                 <tr><td colspan="4">
                     <div class="ui-error-box">
-                        <div class="error-icon">⚠️</div>
                         <div class="error-title">Lỗi tải danh mục món</div>
                         <div class="error-desc">${escHtml(e.message)}</div>
-                        <button class="btn btn-secondary btn-sm" onclick="loadCategories()">🔄 Thử lại (Retry)</button>
+                        <button class="btn btn-secondary btn-sm" onclick="loadCategories()">Thử lại</button>
                     </div>
                 </td></tr>
             `;
@@ -2416,10 +2424,9 @@
             tbody.innerHTML = `
                 <tr><td colspan="4">
                     <div class="ui-empty-box">
-                        <div class="empty-icon">📂</div>
                         <div class="empty-title">Chưa có danh mục nào</div>
                         <div class="empty-desc">Điền thông tin vào form bên dưới để tạo danh mục phân loại món ăn.</div>
-                        <button class="btn btn-primary btn-sm" onclick="$('cat-name-input').focus()">➕ Thêm danh mục</button>
+                        <button class="btn btn-primary btn-sm" onclick="$('cat-name-input').focus()">Thêm danh mục</button>
                     </div>
                 </td></tr>
             `;
@@ -2432,8 +2439,8 @@
                 <td><strong>${escHtml(c.tenDanhmuc)}</strong></td>
                 <td style="color:var(--text-muted); font-size:12px;">${escHtml(c.moTa || '—')}</td>
                 <td>
-                    <button class="btn btn-secondary btn-sm" onclick="editCategory(${c.maDanhmuc})">✏️</button>
-                    <button class="btn btn-danger btn-sm" onclick="deleteCategory(${c.maDanhmuc})">🗑️</button>
+                    <button class="btn btn-secondary btn-sm" onclick="editCategory(${c.maDanhmuc})">Sửa</button>
+                    <button class="btn btn-danger btn-sm" onclick="deleteCategory(${c.maDanhmuc})">Xóa</button>
                 </td>
             </tr>
         `).join('');
@@ -2448,7 +2455,7 @@
         }
         const btn = $('btn-save-cat');
         const oldText = btn ? btn.textContent : '';
-        if (btn) { btn.disabled = true; btn.textContent = '⏳ Đang lưu...'; }
+        if (btn) { btn.disabled = true; btn.textContent = 'Đang lưu...'; }
 
         const id = $('cat-id').value;
         const body = {
@@ -2477,7 +2484,7 @@
         $('cat-id').value = c.maDanhmuc;
         $('cat-name-input').value = c.tenDanhmuc;
         $('cat-desc-input').value = c.moTa || '';
-        $('btn-save-cat').textContent = '💾 Cập nhật danh mục';
+        $('btn-save-cat').textContent = 'Cập nhật danh mục';
     }
 
     async function deleteCategory(id) {
@@ -2499,11 +2506,11 @@
     function resetCategoryForm() {
         $('category-form').reset();
         $('cat-id').value = '';
-        $('btn-save-cat').textContent = '💾 Lưu danh mục';
+        $('btn-save-cat').textContent = 'Lưu danh mục';
     }
 
     // ─────────────────────────────────────────────────────────────
-    // TAB 3: QUẢN LÝ KHO & NGUYÊN LIỆU (NGUYỄN NGỌC MINH THƯ)
+    // TAB 3: QUẢN LÝ KHO & NGUYÊN LIỆU
     // ─────────────────────────────────────────────────────────────
     async function loadInventoryReport() {
         const tbody = $('inventory-tbody');
@@ -2518,10 +2525,9 @@
             tbody.innerHTML = `
                 <tr><td colspan="7">
                     <div class="ui-error-box">
-                        <div class="error-icon">⚠️</div>
                         <div class="error-title">Lỗi tải dữ liệu tồn kho</div>
                         <div class="error-desc">${escHtml(e.message)}</div>
-                        <button class="btn btn-secondary btn-sm" onclick="loadInventoryReport()">🔄 Thử lại (Retry)</button>
+                        <button class="btn btn-secondary btn-sm" onclick="loadInventoryReport()">Thử lại</button>
                     </div>
                 </td></tr>
             `;
@@ -2556,7 +2562,6 @@
             tbody.innerHTML = `
                 <tr><td colspan="7">
                     <div class="ui-empty-box">
-                        <div class="empty-icon">📦</div>
                         <div class="empty-title">Kho chưa có nguyên liệu nào</div>
                         <div class="empty-desc">Chưa có dữ liệu nguyên liệu trong hệ thống.</div>
                     </div>
@@ -2566,11 +2571,11 @@
         }
 
         tbody.innerHTML = allIngredients.map(i => {
-            let badgeHtml = '<span class="badge badge-success">🟢 An toàn</span>';
+            let badgeHtml = '<span class="badge badge-success">An toàn</span>';
             if (i.mucDoCanhBao === 'SAP_HET') {
-                badgeHtml = '<span class="badge badge-warning">⚠️ Sắp hết</span>';
+                badgeHtml = '<span class="badge badge-warning">Sắp hết</span>';
             } else if (i.mucDoCanhBao === 'HET_HANG') {
-                badgeHtml = '<span class="badge badge-danger">🚨 Hết hàng</span>';
+                badgeHtml = '<span class="badge badge-danger">Hết hàng</span>';
             }
 
             return `
@@ -2641,7 +2646,7 @@
         }
         const btn = e.target.querySelector('button[type="submit"]');
         const oldText = btn ? btn.textContent : '';
-        if (btn) { btn.disabled = true; btn.textContent = '⏳ Đang lập phiếu...'; }
+        if (btn) { btn.disabled = true; btn.textContent = 'Đang lập phiếu...'; }
 
         const isChef = currentUser && currentUser.vaiTro === 'DAU_BEP';
         const type = isChef ? 'XUAT' : $('stock-movement-form')['movement-type'].value;
@@ -2685,7 +2690,7 @@
     }
 
     // ─────────────────────────────────────────────────────────────
-    // TAB 4: THU NGÂN & BÁO CÁO DOANH THU (ĐẶNG VŨ THANH PHÁT)
+    // TAB 4: THU NGÂN & BÁO CÁO DOANH THU
     // ─────────────────────────────────────────────────────────────
     let pendingOrdersList = [];
 
@@ -2702,10 +2707,9 @@
                 tbody.innerHTML = `
                     <tr><td colspan="5">
                         <div class="ui-empty-box">
-                            <div class="empty-icon">🧾</div>
                             <div class="empty-title">Không có đơn hàng nào chờ thanh toán</div>
                             <div class="empty-desc">Tất cả bàn ăn đã hoàn tất thanh toán hoặc chưa có khách gọi món.</div>
-                            <button class="btn btn-secondary btn-sm" onclick="switchNav('tables', document.querySelectorAll('nav.main-nav button')[0])">👉 Xem sơ đồ bàn ăn</button>
+                            <button class="btn btn-secondary btn-sm" onclick="switchNav('tables', document.querySelectorAll('nav.main-nav button')[0])">Xem sơ đồ bàn ăn</button>
                         </div>
                     </td></tr>
                 `;
@@ -2719,8 +2723,8 @@
                     <td>${o.ngayDat ? new Date(o.ngayDat).toLocaleTimeString('vi-VN') : '--:--'}</td>
                     <td style="font-weight:700; color:var(--primary);">${formatVND(o.tongTien)}</td>
                     <td>
-                        <button class="btn btn-success btn-sm" onclick="openPaymentForOrder(${o.maDon})">💳 Thanh toán</button>
-                        ${Number(o.tongTien) === 0 ? `<button class="btn btn-secondary btn-sm" style="margin-left:4px;" onclick="cancelEmptyOrder(${o.maDon})" title="Hủy đơn trống">🗑️ Hủy</button>` : ''}
+                        <button class="btn btn-success btn-sm" onclick="openPaymentForOrder(${o.maDon})">Thanh toán</button>
+                        ${Number(o.tongTien) === 0 ? `<button class="btn btn-secondary btn-sm" style="margin-left:4px;" onclick="cancelEmptyOrder(${o.maDon})" title="Hủy đơn trống">Hủy</button>` : ''}
                     </td>
                 </tr>
             `).join('');
@@ -2729,10 +2733,9 @@
             tbody.innerHTML = `
                 <tr><td colspan="5">
                     <div class="ui-error-box">
-                        <div class="error-icon">⚠️</div>
                         <div class="error-title">Lỗi tải danh sách đơn chờ thanh toán</div>
                         <div class="error-desc">${escHtml(e.message)}</div>
-                        <button class="btn btn-secondary btn-sm" onclick="loadPendingOrders()">🔄 Thử lại (Retry)</button>
+                        <button class="btn btn-secondary btn-sm" onclick="loadPendingOrders()">Thử lại</button>
                     </div>
                 </td></tr>
             `;
@@ -2762,7 +2765,6 @@
                 tbody.innerHTML = `
                     <tr><td colspan="5">
                         <div class="ui-empty-box">
-                            <div class="empty-icon">💳</div>
                             <div class="empty-title">Chưa có giao dịch thanh toán nào</div>
                             <div class="empty-desc">Các giao dịch thanh toán thành công sẽ được ghi nhận và hiển thị tại đây.</div>
                         </div>
@@ -2793,10 +2795,9 @@
             tbody.innerHTML = `
                 <tr><td colspan="5">
                     <div class="ui-error-box">
-                        <div class="error-icon">⚠️</div>
                         <div class="error-title">Lỗi tải lịch sử giao dịch</div>
                         <div class="error-desc">${escHtml(e.message)}</div>
-                        <button class="btn btn-secondary btn-sm" onclick="loadRecentPayments()">🔄 Thử lại (Retry)</button>
+                        <button class="btn btn-secondary btn-sm" onclick="loadRecentPayments()">Thử lại</button>
                     </div>
                 </td></tr>
             `;
@@ -2887,7 +2888,7 @@
 
         const btn = document.querySelector('#payment-modal .modal-footer .btn-success');
         const oldText = btn ? btn.textContent : '';
-        if (btn) { btn.disabled = true; btn.textContent = '⏳ Đang thanh toán...'; }
+        if (btn) { btn.disabled = true; btn.textContent = 'Đang thanh toán...'; }
 
         try {
             const nvIdToUse = (currentUser && currentUser.nvId) ? currentUser.nvId : 3;
@@ -2941,7 +2942,7 @@
     }
 
     // ─────────────────────────────────────────────────────────────
-    // TAB 5: BẾP & CHẾ BIẾN (DÀNH CHO ĐẦU BẾP - PHẠM THỊ BẾP)
+    // TAB 5: BẾP & CHẾ BIẾN (KDS)
     // ─────────────────────────────────────────────────────────────
     async function loadKitchenOrders() {
         const container = $('kitchen-orders-container');
@@ -2970,7 +2971,6 @@
             if (activeOrders.length === 0) {
                 container.innerHTML = `
                     <div style="grid-column: 1 / -1; text-align:center; padding:50px 20px; background:#fff; border-radius:var(--radius-md); border:1px dashed var(--border);">
-                        <div style="font-size:48px; margin-bottom:12px;">👨‍🍳</div>
                         <h4 style="font-size:16px; font-weight:700; color:var(--text-main); margin-bottom:6px;">Hiện không có đơn món nào đang chờ chế biến</h4>
                         <p style="font-size:13px; color:var(--text-muted); max-width:480px; margin:0 auto;">
                             Khi nhân viên phục vụ gọi món tại bàn ăn, các món cần nấu sẽ tự động hiển thị tại đây theo thời gian thực.
@@ -2999,10 +2999,10 @@
                 const isCompleted = order.trangThai === 'HOAN_THANH';
                 const isCooking = order.trangThai === 'DANG_CHE_BIEN';
                 const statusBadge = isCompleted 
-                    ? `<span class="badge" style="background:#dcfce7; color:#15803d; font-size:12px;">✅ Đã nấu xong</span>`
+                    ? `<span class="badge" style="background:#dcfce7; color:#15803d; font-size:12px;">Đã nấu xong</span>`
                     : (isCooking 
-                        ? `<span class="badge" style="background:#fee2e2; color:#b91c1c; font-size:12px;">🔥 Đang nấu</span>`
-                        : `<span class="badge" style="background:#fef3c7; color:#92400e; font-size:12px;">⏳ Chờ nấu</span>`);
+                        ? `<span class="badge" style="background:#fee2e2; color:#b91c1c; font-size:12px;">Đang nấu</span>`
+                        : `<span class="badge" style="background:#fef3c7; color:#92400e; font-size:12px;">Chờ nấu</span>`);
 
                 const timeStr = order.ngayDat ? new Date(order.ngayDat).toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' }) : '--:--';
 
@@ -3010,7 +3010,7 @@
                     ? order.danhSachMon.map(item => `
                         <div style="display:flex; justify-content:space-between; align-items:center; padding:8px 0; border-bottom:1px dashed #e2e8f0;">
                             <div style="font-weight:600; font-size:14px; color:#1e293b;">
-                                🍲 ${escHtml(item.tenMon)}
+                                ${escHtml(item.tenMon)}
                             </div>
                             <div style="background:#fff7ed; border:1px solid #fed7aa; color:#c2410c; font-weight:800; font-size:14px; padding:2px 8px; border-radius:6px;">
                                 x${item.soLuong}
@@ -3023,16 +3023,16 @@
                     ? `
                         <div style="display:flex; gap:8px; margin-top:14px;">
                             <div style="flex:1; background:#f0fdf4; color:#15803d; font-size:13px; font-weight:700; text-align:center; padding:10px; border-radius:8px; border:1px solid #bbf7d0;">
-                                🚀 Đã lên món cho khách
+                                Đã lên món cho khách
                             </div>
                             <button class="btn btn-secondary btn-sm" onclick="chefUpdateOrderStatus(${order.maDon}, 'DANG_CHE_BIEN')" title="Chuyển về trạng thái đang nấu nếu cần nấu bổ sung">
-                                🔄 Nấu lại
+                                Nấu lại
                             </button>
                         </div>
                     `
                     : `
                         <button class="btn btn-success" style="width:100%; margin-top:14px; padding:11px; font-weight:700; font-size:14px; box-shadow:0 2px 6px rgba(16,185,129,0.3);" onclick="chefUpdateOrderStatus(${order.maDon}, 'HOAN_THANH')">
-                            ✅ Báo nấu xong (Lên món)
+                            Báo nấu xong (Lên món)
                         </button>
                     `;
 
@@ -3045,7 +3045,7 @@
                             <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px; border-bottom:1px solid #f1f5f9; padding-bottom:10px;">
                                 <div>
                                     <h4 style="margin:0; font-size:16px; font-weight:800; color:var(--primary);">
-                                        🪑 ${escHtml(order.tenBan || 'Bàn ăn')}
+                                        ${escHtml(order.tenBan || 'Bàn ăn')}
                                     </h4>
                                     <span style="font-size:11px; color:var(--text-muted);">Mã đơn: #${order.maDon} • Giờ gọi: ${timeStr}</span>
                                 </div>
@@ -3064,10 +3064,9 @@
         } catch (e) {
             container.innerHTML = `
                 <div class="ui-error-box" style="grid-column: 1 / -1;">
-                    <div class="error-icon">⚠️</div>
                     <div class="error-title">Lỗi tải danh sách món bếp</div>
                     <div class="error-desc">${escHtml(e.message)}</div>
-                    <button class="btn btn-secondary btn-sm" onclick="loadKitchenOrders()">🔄 Thử lại (Retry)</button>
+                    <button class="btn btn-secondary btn-sm" onclick="loadKitchenOrders()">Thử lại</button>
                 </div>
             `;
         }
@@ -3107,17 +3106,17 @@
                 const tonKho = r.nguyenLieu ? Number(r.nguyenLieu.soLuongTon || 0) : 0;
                 const soLuongDung = Number(r.soLuongDung || 0);
 
-                let statusBadge = '<span class="badge" style="background:#dcfce7; color:#15803d;">🟢 Dồi dào</span>';
+                let statusBadge = '<span class="badge" style="background:#dcfce7; color:#15803d;">Dồi dào</span>';
                 if (tonKho <= 0) {
-                    statusBadge = '<span class="badge" style="background:#fee2e2; color:#b91c1c;">🔴 Hết hàng</span>';
+                    statusBadge = '<span class="badge" style="background:#fee2e2; color:#b91c1c;">Hết hàng</span>';
                 } else if (tonKho < 20) {
-                    statusBadge = '<span class="badge" style="background:#fef3c7; color:#b45309;">🟡 Sắp hết</span>';
+                    statusBadge = '<span class="badge" style="background:#fef3c7; color:#b45309;">Sắp hết</span>';
                 }
 
                 return `
                     <tr>
-                        <td style="font-weight:700; color:#1e293b;">🍲 ${escHtml(monName)}</td>
-                        <td style="font-weight:600;">📦 ${escHtml(nlName)}</td>
+                        <td style="font-weight:700; color:#1e293b;">${escHtml(monName)}</td>
+                        <td style="font-weight:600;">${escHtml(nlName)}</td>
                         <td style="font-weight:700; color:var(--primary);">${soLuongDung} ${escHtml(dvt)} / suất</td>
                         <td style="font-weight:600;">${tonKho} ${escHtml(dvt)}</td>
                         <td>${statusBadge}</td>
