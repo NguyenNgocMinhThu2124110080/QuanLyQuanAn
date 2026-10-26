@@ -143,6 +143,149 @@
             border-color: var(--danger);
         }
 
+        /* NOTIFICATION BELL */
+        .notification-bell-wrapper {
+            position: relative;
+            display: inline-flex;
+            align-items: center;
+        }
+        .btn-bell {
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            color: white;
+            width: 38px;
+            height: 38px;
+            border-radius: 50%;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            position: relative;
+            transition: all 0.2s ease;
+        }
+        .btn-bell:hover {
+            background: rgba(255, 255, 255, 0.22);
+            border-color: rgba(255, 255, 255, 0.4);
+            transform: scale(1.05);
+        }
+        .bell-badge {
+            position: absolute;
+            top: -2px;
+            right: -2px;
+            background: #ef4444;
+            color: white;
+            font-size: 10px;
+            font-weight: 800;
+            min-width: 18px;
+            height: 18px;
+            line-height: 18px;
+            padding: 0 4px;
+            border-radius: 10px;
+            border: 2px solid #0f172a;
+            text-align: center;
+            box-shadow: 0 2px 6px rgba(239, 68, 68, 0.5);
+            animation: bounce-badge 0.5s ease-in-out;
+        }
+        @keyframes bounce-badge {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.3); }
+        }
+        .notification-dropdown {
+            position: absolute;
+            top: calc(100% + 12px);
+            right: 0;
+            width: 360px;
+            background: white;
+            border: 1px solid var(--border);
+            border-radius: var(--radius-md);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.18);
+            z-index: 1100;
+            overflow: hidden;
+            animation: fadeIn 0.15s ease-in-out;
+        }
+        .notification-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 16px;
+            background: #f8fafc;
+            border-bottom: 1px solid var(--border);
+        }
+        .notification-header h4 {
+            margin: 0;
+            font-size: 13px;
+            font-weight: 700;
+            color: var(--text-main);
+        }
+        .notification-header .mark-read-link {
+            font-size: 11px;
+            color: var(--primary);
+            cursor: pointer;
+            font-weight: 600;
+        }
+        .notification-header .mark-read-link:hover {
+            text-decoration: underline;
+        }
+        .notification-list {
+            max-height: 360px;
+            overflow-y: auto;
+        }
+        .notification-item {
+            padding: 12px 16px;
+            border-bottom: 1px solid #f1f5f9;
+            cursor: pointer;
+            transition: background 0.15s ease;
+            display: flex;
+            gap: 10px;
+            align-items: flex-start;
+            text-align: left;
+        }
+        .notification-item:hover {
+            background: #f8fafc;
+        }
+        .notification-item.unread {
+            background: #f0fdf4;
+        }
+        .notification-item.unread:hover {
+            background: #e7f9ed;
+        }
+        .notification-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: #10b981;
+            margin-top: 5px;
+            flex-shrink: 0;
+        }
+        .notification-dot.read {
+            background: transparent;
+        }
+        .notification-content {
+            flex: 1;
+        }
+        .notification-title {
+            font-size: 13px;
+            font-weight: 700;
+            color: #0f172a;
+            margin-bottom: 2px;
+        }
+        .notification-desc {
+            font-size: 11px;
+            color: #475569;
+            line-height: 1.4;
+        }
+        .notification-time {
+            font-size: 10px;
+            color: #94a3b8;
+            margin-top: 4px;
+        }
+        .notification-empty {
+            text-align: center;
+            padding: 32px 16px;
+            color: var(--text-muted);
+            font-size: 12px;
+        }
+
         /* NAVIGATION TABS */
         nav.main-nav {
             background: var(--surface);
@@ -785,13 +928,33 @@
             <p>Hệ thống Quản lý Bán hàng & Điểm bán POS</p>
         </div>
     </div>
-    <div class="header-user-bar">
-        <div class="user-badge" id="user-badge-container" style="display:none;">
-            <span id="current-user-name"></span>
-            <span class="role-pill" id="current-user-role"></span>
+    <div style="display:flex; align-items:center; gap:12px;">
+        <!-- CHUÔNG THÔNG BÁO TỪ BẾP -->
+        <div class="notification-bell-wrapper">
+            <button id="btn-notification-bell" class="btn-bell" onclick="toggleNotificationDropdown()" title="Thông báo món từ bếp">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path>
+                    <path d="M13.73 21a2 2 0 0 1-3.46 0"></path>
+                </svg>
+                <span id="notification-badge" class="bell-badge" style="display:none;">0</span>
+            </button>
+            <div id="notification-dropdown" class="notification-dropdown" style="display:none;">
+                <div class="notification-header">
+                    <h4>Thông báo Bếp chế biến</h4>
+                    <span class="mark-read-link" onclick="markAllNotificationsRead()">Đã đọc tất cả</span>
+                </div>
+                <div id="notification-list" class="notification-list"></div>
+            </div>
         </div>
-        <div id="header-auth-actions">
-            <button class="btn btn-primary btn-sm" onclick="openLoginModal()">Đăng nhập</button>
+
+        <div class="header-user-bar">
+            <div class="user-badge" id="user-badge-container" style="display:none;">
+                <span id="current-user-name"></span>
+                <span class="role-pill" id="current-user-role"></span>
+            </div>
+            <div id="header-auth-actions">
+                <button class="btn btn-primary btn-sm" onclick="openLoginModal()">Đăng nhập</button>
+            </div>
         </div>
     </div>
 </header>
@@ -1991,6 +2154,93 @@
         }
     }
 
+    // ─────────────────────────────────────────────────────────────
+    // HỆ THỐNG CHUÔNG THÔNG BÁO TỪ BẾP (NOTIFICATION BELL)
+    // ─────────────────────────────────────────────────────────────
+    let notificationsStore = [];
+
+    function toggleNotificationDropdown() {
+        const dd = $('notification-dropdown');
+        if (!dd) return;
+        const isHidden = (dd.style.display === 'none' || dd.style.display === '');
+        dd.style.display = isHidden ? 'block' : 'none';
+        if (isHidden) {
+            renderNotificationList();
+        }
+    }
+
+    function renderNotificationList() {
+        const listEl = $('notification-list');
+        const badgeEl = $('notification-badge');
+        if (!listEl) return;
+
+        const unreadCount = notificationsStore.filter(n => n.unread).length;
+        if (badgeEl) {
+            if (unreadCount > 0) {
+                badgeEl.style.display = 'inline-block';
+                badgeEl.textContent = unreadCount > 9 ? '9+' : unreadCount;
+            } else {
+                badgeEl.style.display = 'none';
+            }
+        }
+
+        if (notificationsStore.length === 0) {
+            listEl.innerHTML = `
+                <div class="notification-empty">
+                    <div style="font-weight:700; margin-bottom:4px; color:var(--text-main);">Không có thông báo mới</div>
+                    <div style="font-size:11px; color:var(--text-muted);">Khi đầu bếp báo nấu xong, chuông sẽ hiển thị danh sách tại đây.</div>
+                </div>
+            `;
+            return;
+        }
+
+        listEl.innerHTML = notificationsStore.map(n => `
+            <div class="notification-item ${n.unread ? 'unread' : ''}" onclick="handleClickNotification(${n.id})">
+                <div class="notification-dot ${n.unread ? '' : 'read'}"></div>
+                <div class="notification-content">
+                    <div class="notification-title">${escHtml(n.title)}</div>
+                    <div class="notification-desc">${escHtml(n.message)}</div>
+                    <div class="notification-time">${escHtml(n.time)}</div>
+                </div>
+            </div>
+        `).join('');
+    }
+
+    async function handleClickNotification(id) {
+        const item = notificationsStore.find(n => n.id === id);
+        if (item) {
+            item.unread = false;
+            renderNotificationList();
+
+            // Đóng dropdown chuông
+            const dd = $('notification-dropdown');
+            if (dd) dd.style.display = 'none';
+
+            // Chuyển tới sơ đồ bàn
+            const navTables = $('nav-btn-tables');
+            if (navTables) switchNav('tables', navTables);
+
+            // Mở bàn tương ứng để phục vụ lên món
+            if (item.maBan) {
+                await selectTable(item.maBan);
+            }
+        }
+    }
+
+    function markAllNotificationsRead() {
+        notificationsStore.forEach(n => n.unread = false);
+        renderNotificationList();
+    }
+
+    // Đóng chuông thông báo khi bấm ra ngoài
+    document.addEventListener('click', (e) => {
+        const wrapper = document.querySelector('.notification-bell-wrapper');
+        const dd = $('notification-dropdown');
+        if (wrapper && dd && !wrapper.contains(e.target)) {
+            dd.style.display = 'none';
+        }
+    });
+
     // Kiểm tra định kỳ và bắn thông báo khi có món nấu xong
     async function checkCookedOrdersNotification() {
         try {
@@ -2010,11 +2260,27 @@
                 }
             });
 
-            // Lần đầu tải trang -> khởi tạo danh sách để tránh spam toast thông báo cũ
+            // Lần đầu tải trang -> nạp các đơn đã nấu xong vào chuông thông báo
             if (isFirstCookedCheck) {
                 knownCookedOrderIds = new Set(currentCooked.map(o => o.maDon));
                 isFirstCookedCheck = false;
                 tablesWithCookedOrders = newTablesWithCooked;
+
+                currentCooked.forEach(o => {
+                    const tableName = o.ban ? o.ban.tenBan : `Bàn #${o.maBan}`;
+                    const timeStr = o.ngayDat ? new Date(o.ngayDat).toLocaleTimeString('vi-VN', { hour:'2-digit', minute:'2-digit' }) : 'Vừa xong';
+                    notificationsStore.push({
+                        id: o.maDon,
+                        maDon: o.maDon,
+                        maBan: o.ban ? o.ban.maBan : null,
+                        tenBan: tableName,
+                        title: `${tableName} — Món đã nấu xong!`,
+                        message: `Đơn #${o.maDon} đã được bếp chế biến xong. Sẵn sàng lên món phục vụ khách.`,
+                        time: timeStr,
+                        unread: true
+                    });
+                });
+                renderNotificationList();
                 return;
             }
 
@@ -2024,6 +2290,18 @@
                 newlyCooked.forEach(o => {
                     knownCookedOrderIds.add(o.maDon);
                     const tableName = o.ban ? o.ban.tenBan : `Bàn #${o.maBan}`;
+                    const timeStr = new Date().toLocaleTimeString('vi-VN', { hour:'2-digit', minute:'2-digit' });
+
+                    notificationsStore.unshift({
+                        id: o.maDon,
+                        maDon: o.maDon,
+                        maBan: o.ban ? o.ban.maBan : null,
+                        tenBan: tableName,
+                        title: `${tableName} — Món đã nấu xong!`,
+                        message: `Đơn #${o.maDon} vừa được bếp báo hoàn thành. Nhân viên vui lòng lên món cho khách.`,
+                        time: timeStr,
+                        unread: true
+                    });
 
                     // Phát chuông báo âm thanh
                     playKitchenNotificationChime();
@@ -2032,6 +2310,7 @@
                     showToast(`Bếp đã nấu xong món cho ${tableName} (Đơn #${o.maDon})! Nhân viên vui lòng lên món cho khách.`, 'success');
                 });
 
+                renderNotificationList();
                 tablesWithCookedOrders = newTablesWithCooked;
 
                 // Cập nhật lại giao diện bàn ăn nếu đang ở tab sơ đồ bàn
@@ -3350,6 +3629,7 @@
 
         // Tải các tài nguyên khởi tạo tuần tự
         await loadTables();
+        await checkCookedOrdersNotification();
         await loadDishes();
         await loadCategories();
         await loadInventoryReport();
