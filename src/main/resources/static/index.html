@@ -148,6 +148,7 @@
             gap: 6px;
             font-size: 13px;
             font-weight: 600;
+            white-space: nowrap;
         }
         .role-pill {
             background: var(--primary);
@@ -157,6 +158,8 @@
             font-size: 10px;
             text-transform: uppercase;
             font-weight: 700;
+            white-space: nowrap;
+            flex-shrink: 0;
         }
         .btn-switch-user {
             background: transparent;
@@ -176,12 +179,14 @@
             background: rgba(239, 68, 68, 0.2);
             color: #fca5a5;
             border: 1px solid rgba(239, 68, 68, 0.4);
-            padding: 4px 12px;
+            padding: 4px 10px;
             border-radius: 16px;
             font-size: 11px;
             cursor: pointer;
             transition: all 0.2s;
             font-weight: 600;
+            white-space: nowrap;
+            flex-shrink: 0;
         }
         .btn-logout:hover {
             background: var(--danger);
@@ -692,34 +697,140 @@
         }
         @media (max-width: 768px) {
             header {
-                flex-direction: column;
-                align-items: flex-start;
-                padding: 12px 16px;
-                gap: 12px;
+                flex-direction: row;
+                align-items: center;
+                justify-content: space-between;
+                padding: 10px 12px;
+                gap: 8px;
             }
-            .header-user-bar {
+            .header-brand {
+                gap: 8px;
+            }
+            .header-brand .logo-icon {
+                width: 34px;
+                height: 34px;
+                font-size: 18px;
+            }
+            .header-brand h1 {
+                font-size: 15px;
+            }
+            .header-right-group {
                 width: 100%;
                 justify-content: space-between;
+                gap: 8px !important;
+            }
+            .header-user-bar {
+                flex: 1;
+                min-width: 0;
+                justify-content: space-between;
+                padding: 5px 10px;
+                gap: 6px;
+            }
+            .user-badge {
+                min-width: 0;
+                flex: 1;
+                gap: 6px;
+            }
+            #current-user-name {
+                font-size: 12px;
+                white-space: nowrap;
+                overflow: hidden;
+                text-overflow: ellipsis;
+            }
+            .btn-bell {
+                width: 34px;
+                height: 34px;
+                flex-shrink: 0;
+            }
+            /* Cố định hộp chuông thông báo nằm gọn giữa màn hình di động, không bao giờ tràn trái */
+            .notification-dropdown {
+                position: fixed !important;
+                top: 96px !important;
+                left: 10px !important;
+                right: 10px !important;
+                width: auto !important;
+                max-width: calc(100vw - 20px) !important;
             }
             nav.main-nav {
-                padding: 0 12px;
+                padding: 0 8px;
+                gap: 2px;
             }
             nav.main-nav button {
-                padding: 10px 12px;
-                font-size: 13px;
+                padding: 10px 10px;
+                font-size: 12px;
             }
             main {
-                padding: 14px;
+                padding: 10px;
+            }
+            .card {
+                padding: 12px;
+            }
+            .card-header {
+                margin-bottom: 12px;
+                padding-bottom: 8px;
+                gap: 6px;
+                flex-wrap: wrap;
+            }
+            .card-title {
+                font-size: 14px;
             }
             .grid-2, .grid-3, .grid-4, .grid-table-order {
                 grid-template-columns: 1fr !important;
+                gap: 10px !important;
+            }
+            /* Sơ đồ bàn 2 cột gọn đẹp trên di động */
+            .table-filter-bar {
+                gap: 6px;
+                margin-bottom: 10px;
+            }
+            .table-filter-bar .btn-sm {
+                padding: 5px 8px;
+                font-size: 11px;
+                white-space: nowrap;
             }
             .table-grid {
-                grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+                grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+                gap: 10px !important;
+            }
+            .table-card {
+                padding: 12px !important;
+                gap: 5px !important;
+            }
+            .table-name {
+                font-size: 14px !important;
+            }
+            .kpi-card {
+                padding: 12px !important;
+                gap: 10px !important;
+            }
+            .kpi-icon {
+                width: 38px !important;
+                height: 38px !important;
+                flex-shrink: 0;
+            }
+            .kpi-value {
+                font-size: 17px !important;
+            }
+            .modal-overlay {
+                padding: 8px;
             }
             .modal-dialog {
-                width: 95%;
-                margin: 10px;
+                width: 100%;
+                margin: 0;
+            }
+            .modal-header, .modal-footer {
+                padding: 12px 14px;
+            }
+            .modal-body {
+                padding: 14px;
+                max-height: 82vh;
+            }
+            #toast {
+                left: 12px;
+                right: 12px;
+                bottom: 14px;
+                font-size: 12px;
+                padding: 10px 14px;
             }
         }
 
@@ -1094,7 +1205,7 @@
             <h1>QUẢN LÝ QUÁN ĂN</h1>
         </div>
     </div>
-    <div style="display:flex; align-items:center; gap:12px;">
+    <div class="header-right-group" style="display:flex; align-items:center; gap:10px;">
         <!-- CHUÔNG THÔNG BÁO TỪ BẾP -->
         <div class="notification-bell-wrapper">
             <button id="btn-notification-bell" class="btn-bell" onclick="toggleNotificationDropdown()" title="Thông báo món từ bếp">
