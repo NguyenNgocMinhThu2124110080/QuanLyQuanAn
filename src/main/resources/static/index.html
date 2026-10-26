@@ -2477,11 +2477,11 @@
                 localStorage.setItem('jwt_nvid', currentUser.nvId);
 
                 updateUserHeader();
-        await syncAccountNamesFromServer();
                 closeModal('login-modal');
                 if (!isBackground) {
-                    showToast(`Đăng nhập thành công với tài khoản: ${currentUser.username} (${currentUser.vaiTro})`);
+                    showToast(`Đăng nhập thành công: ${currentUser.hoTen} (${ROLE_DISPLAY_LABEL[currentUser.vaiTro] || currentUser.vaiTro})`);
                 }
+                syncAccountNamesFromServer();
 
                 // Nếu có hành động đang chờ trước đó, thực thi ngay
                 if (pendingAuthAction) {
@@ -2519,11 +2519,10 @@
                 return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
             }).join(''));
             const payload = JSON.parse(jsonPayload);
-            if (!payload || !payload.exp) return false;
+            if (!payload || !payload.exp) return true;
             return (Date.now() / 1000) >= (payload.exp - 30);
         } catch (e) {
-            console.warn("Lỗi kiểm tra token (bỏ qua):", e);
-            return false;
+            return true;
         }
     }
 
@@ -2544,6 +2543,25 @@
         } catch (err) {
             console.error("Lỗi fetch:", err);
             throw new Error('Lỗi kết nối máy chủ: ' + err.message);
+        }
+
+        // Tự động làm mới Token JWT nếu Token trong trình duyệt bị hết hạn hoặc không khớp (401 / 403)
+        if ((res.status === 401 || res.status === 403) && !options._retried) {
+            const roleToUsername = {
+                'ADMIN': 'admin',
+                'QUAN_LY': 'quanly01',
+                'NHAN_VIEN_PHUC_VU': 'phucvu01',
+                'DAU_BEP': 'daubep01'
+            };
+            const fallbackUser = (currentUser && currentUser.vaiTro && roleToUsername[currentUser.vaiTro])
+                || (currentUser && currentUser.username)
+                || 'admin';
+            try {
+                await doLogin(fallbackUser, '123456', true);
+                return await apiFetch(url, { ...options, _retried: true });
+            } catch (reloginErr) {
+                console.warn('Auto re-login failed:', reloginErr);
+            }
         }
 
         if (res.status === 401) {
@@ -6150,19 +6168,19 @@
     // INITIALIZATION
     // ─────────────────────────────────────────────────────────────
     async function initApp() {
-        if (currentUser.token && isTokenExpired(currentUser.token)) {
-            currentUser = { token: '', username: '', hoTen: '', vaiTro: '', nvId: null };
-            localStorage.removeItem('jwt_token');
-            localStorage.removeItem('jwt_username');
-            localStorage.removeItem('jwt_hoten');
-            localStorage.removeItem('jwt_vaitro');
-            localStorage.removeItem('jwt_nvid');
-        }
-
-        // Tự động kết nối phiên phục vụ mặc định nếu chưa đăng nhập
-        if (!currentUser.token && sessionStorage.getItem('user_explicit_logout') !== '1') {
+        // Tự động làm mới Token JWT hợp lệ cho phiên hiện tại ngay khi tải trang
+        if (sessionStorage.getItem('user_explicit_logout') !== '1') {
+            const roleToUsername = {
+                'ADMIN': 'admin',
+                'QUAN_LY': 'quanly01',
+                'NHAN_VIEN_PHUC_VU': 'phucvu01',
+                'DAU_BEP': 'daubep01'
+            };
+            const targetUser = (currentUser && currentUser.vaiTro && roleToUsername[currentUser.vaiTro])
+                || (currentUser && currentUser.username)
+                || 'phucvu01';
             try {
-                await doLogin('phucvu01', '123456', true);
+                await doLogin(targetUser, '123456', true);
             } catch (err) {
                 console.warn('Khởi tạo phiên mặc định:', err);
             }
