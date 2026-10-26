@@ -888,16 +888,19 @@
             font-size: 12px;
         }
 
-        /* PRINT STYLES CHO HÓA ĐƠN & XUẤT BILL */
+        /* PRINT STYLES CHO HÓA ĐƠN & BIÊN LAI NHẬP KHO */
         @media print {
             body * {
                 visibility: hidden !important;
             }
             #receipt-modal,
-            #receipt-modal * {
+            #receipt-modal *,
+            #goods-receipt-modal,
+            #goods-receipt-modal * {
                 visibility: visible !important;
             }
-            #receipt-modal {
+            #receipt-modal,
+            #goods-receipt-modal {
                 position: fixed !important;
                 left: 0 !important;
                 top: 0 !important;
@@ -910,10 +913,11 @@
                 padding-top: 10px !important;
                 z-index: 999999 !important;
             }
-            #receipt-modal .modal-dialog {
+            #receipt-modal .modal-dialog,
+            #goods-receipt-modal .modal-dialog {
                 box-shadow: none !important;
                 border: none !important;
-                max-width: 360px !important;
+                max-width: 440px !important;
                 width: 100% !important;
                 margin: 0 auto !important;
                 padding: 0 !important;
@@ -921,7 +925,10 @@
             }
             #receipt-modal .modal-header,
             #receipt-modal .modal-footer,
-            #receipt-modal .modal-close {
+            #receipt-modal .modal-close,
+            #goods-receipt-modal .modal-header,
+            #goods-receipt-modal .modal-footer,
+            #goods-receipt-modal .modal-close {
                 display: none !important;
             }
             .receipt-ticket {
@@ -1402,57 +1409,115 @@
                 </form>
             </div>
         </div>
+
+        <!-- LỊCH SỬ NHẬP XUẤT KHO & BIÊN LAI -->
+        <div class="card" style="margin-top:20px;">
+            <div class="card-header" style="flex-wrap:wrap; gap:10px;">
+                <div>
+                    <div class="card-title">Lịch sử nhập xuất kho & Biên lai</div>
+                    <p style="font-size:12px; color:var(--text-muted); margin-top:2px;">
+                        Theo dõi toàn bộ các lần nhập nguyên liệu từ nhà cung cấp và xuất kho chế biến (hỗ trợ in lại biên lai)
+                    </p>
+                </div>
+                <button class="btn btn-secondary btn-sm" onclick="loadInventoryHistory()">Làm mới lịch sử</button>
+            </div>
+            <div class="table-responsive" style="max-height:400px; overflow-y:auto;">
+                <table class="app-table">
+                    <thead>
+                        <tr>
+                            <th>Mã phiếu</th>
+                            <th>Thời gian</th>
+                            <th>Loại phiếu</th>
+                            <th>Nguyên liệu</th>
+                            <th>Số lượng</th>
+                            <th>Đơn giá</th>
+                            <th>Thành tiền</th>
+                            <th>Nhà cung cấp / Ghi chú</th>
+                            <th style="text-align:center;">Thao tác</th>
+                        </tr>
+                    </thead>
+                    <tbody id="inventory-history-tbody">
+                        <tr><td colspan="9" style="text-align:center; color:var(--text-muted);">Đang tải lịch sử nhập xuất...</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
     </div>
 
     <!-- ========================================================
-         TAB 4: THU NGÂN & DOANH THU
+         TAB 4: THU NGÂN & BÁO CÁO TÀI CHÍNH (THU - CHI - LỢI NHUẬN)
     ======================================================== -->
     <div id="tab-cashier" class="tab-panel">
-        <!-- DOANH THU KPI THEO NGÀY -->
+        <!-- BÁO CÁO TÀI CHÍNH: THU - CHI - LỢI NHUẬN -->
         <div class="card" style="margin-bottom:20px;">
-            <div class="card-header">
-                <div class="card-title">Thống kê doanh thu theo ngày</div>
-                <div style="display:flex; align-items:center; gap:8px;">
-                    <label style="margin:0; font-size:13px;">Chọn ngày:</label>
-                    <input type="date" id="revenue-date-picker" onchange="loadDailyRevenue()" style="width:auto; padding:6px 10px;">
-                    <button class="btn btn-secondary btn-sm" onclick="loadDailyRevenue()">Làm mới</button>
+            <div class="card-header" style="flex-wrap:wrap; gap:12px;">
+                <div>
+                    <div class="card-title">Báo cáo tài chính: Thu - Chi & Lợi nhuận</div>
+                    <p style="font-size:12px; color:var(--text-muted); margin-top:2px;">
+                        Đối soát tổng doanh thu bán món (Thu), chi phí nhập nguyên liệu kho (Chi) và lợi nhuận ròng
+                    </p>
+                </div>
+                <div style="display:flex; align-items:center; gap:8px; flex-wrap:wrap;">
+                    <div class="filter-group" style="display:inline-flex;">
+                        <button type="button" id="finance-filter-today" class="btn btn-sm btn-primary" onclick="setFinanceTimeFilter('today')">Hôm nay</button>
+                        <button type="button" id="finance-filter-all" class="btn btn-sm btn-secondary" onclick="setFinanceTimeFilter('all')">Tất cả</button>
+                    </div>
+                    <input type="date" id="revenue-date-picker" onchange="onCustomDateChange()" style="width:auto; padding:5px 8px; font-size:13px;">
+                    <button class="btn btn-secondary btn-sm" onclick="loadFinancialReport()">Làm mới</button>
                 </div>
             </div>
             <div class="grid-4">
+                <!-- THẺ 1: TỔNG THU (DOANH THU BÁN) -->
                 <div class="kpi-card">
-                    <div class="kpi-icon" style="background:#d1fae5; color:#059669;">
-                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="20" height="12" x="2" y="6" rx="2"></rect><circle cx="12" cy="12" r="2"></circle><path d="M6 12h.01M18 12h.01"></path></svg>
+                    <div class="kpi-icon" style="background:#dcfce7; color:#15803d;">
+                        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path></svg>
                     </div>
                     <div>
-                        <div class="kpi-title">Tổng doanh thu</div>
-                        <div class="kpi-value" id="kpi-rev-total" style="color:#059669;">0 ₫</div>
+                        <div class="kpi-title">Tổng Thu (Doanh thu)</div>
+                        <div class="kpi-value" id="kpi-finance-income" style="color:#15803d;">0 ₫</div>
+                        <div style="font-size:11px; color:var(--text-muted); margin-top:2px;" id="kpi-finance-income-sub">0 đơn thanh toán</div>
                     </div>
                 </div>
+
+                <!-- THẺ 2: TỔNG CHI (NHẬP KHO NGUYÊN LIỆU) -->
                 <div class="kpi-card">
-                    <div class="kpi-icon" style="background:#e0f2fe; color:#0284c7;">
-                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 2v20l2-1 2 1 2-1 2 1 2-1 2 1 2-1 2 1V2l-2 1-2-1-2 1-2-1-2 1-2-1-2 1Z"></path><path d="M8 7h8M8 11h8M8 15h5"></path></svg>
+                    <div class="kpi-icon" style="background:#fee2e2; color:#b91c1c;">
+                        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 16v1a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V7a2 2 0 0 1 2-2h11a2 2 0 0 1 2 2v1"></path><path d="M18 8h4a2 2 0 0 1 2 2v7a2 2 0 0 1-2 2h-4"></path><circle cx="6" cy="19" r="2"></circle><circle cx="18" cy="19" r="2"></circle></svg>
                     </div>
                     <div>
-                        <div class="kpi-title">Số hóa đơn</div>
-                        <div class="kpi-value" id="kpi-rev-count">0</div>
+                        <div class="kpi-title">Tổng Chi (Nhập kho)</div>
+                        <div class="kpi-value" id="kpi-finance-expense" style="color:#b91c1c;">0 ₫</div>
+                        <div style="font-size:11px; color:var(--text-muted); margin-top:2px;" id="kpi-finance-expense-sub">0 phiếu nhập kho</div>
                     </div>
                 </div>
-                <div class="kpi-card">
-                    <div class="kpi-icon" style="background:#fef3c7; color:#d97706;">
-                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="20" height="12" x="2" y="6" rx="2"></rect><circle cx="12" cy="12" r="2"></circle><path d="M6 12h.01M18 12h.01"></path></svg>
+
+                <!-- THẺ 3: LỢI NHUẬN RÒNG -->
+                <div class="kpi-card" style="border: 2px solid #e0e7ff; background:#fbfbfe;">
+                    <div class="kpi-icon" style="background:#ede9fe; color:#6d28d9;">
+                        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="1" x2="12" y2="23"></line><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path></svg>
                     </div>
                     <div>
-                        <div class="kpi-title">Tiền mặt</div>
-                        <div class="kpi-value" id="kpi-rev-cash" style="font-size:18px;">0 ₫</div>
+                        <div class="kpi-title">Lợi nhuận ròng (Thu - Chi)</div>
+                        <div class="kpi-value" id="kpi-finance-profit" style="color:#4338ca;">0 ₫</div>
+                        <div style="margin-top:4px;" id="kpi-finance-profit-badge">
+                            <span class="badge" style="background:#e0e7ff; color:#4338ca; font-size:10px;">Hòa vốn</span>
+                        </div>
                     </div>
                 </div>
+
+                <!-- THẺ 4: HÌNH THỨC DÒNG TIỀN -->
                 <div class="kpi-card">
-                    <div class="kpi-icon" style="background:#f3e8ff; color:#9333ea;">
-                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="20" height="14" x="2" y="5" rx="2"></rect><line x1="2" x2="22" y1="10" y2="10"></line></svg>
+                    <div class="kpi-icon" style="background:#fef3c7; color:#b45309;">
+                        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="20" height="14" x="2" y="5" rx="2"></rect><line x1="2" x2="22" y1="10" y2="10"></line></svg>
                     </div>
                     <div>
-                        <div class="kpi-title">Chuyển khoản / Thẻ</div>
-                        <div class="kpi-value" id="kpi-rev-transfer" style="font-size:18px;">0 ₫</div>
+                        <div class="kpi-title">Dòng tiền thanh toán</div>
+                        <div style="font-size:13px; font-weight:700; color:#1e293b; margin-top:2px;">
+                            TM: <span id="kpi-rev-cash" style="color:#059669;">0 ₫</span>
+                        </div>
+                        <div style="font-size:11px; color:var(--text-muted); margin-top:2px;">
+                            CK/Thẻ: <span id="kpi-rev-transfer" style="color:#0284c7; font-weight:600;">0 ₫</span>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -1506,6 +1571,44 @@
                         </tbody>
                     </table>
                 </div>
+            </div>
+        </div>
+
+        <!-- SỔ QUỸ THU - CHI DÒNG TIỀN -->
+        <div class="card" style="margin-top:20px;">
+            <div class="card-header" style="flex-wrap:wrap; gap:10px;">
+                <div>
+                    <div class="card-title">Sổ quỹ Thu - Chi dòng tiền</div>
+                    <p style="font-size:12px; color:var(--text-muted); margin-top:2px;">
+                        Ghi chép liên thông toàn bộ các khoản Thu (Bán hàng) và Chi (Nhập kho nguyên liệu) kèm chứng từ in ấn
+                    </p>
+                </div>
+                <div style="display:flex; align-items:center; gap:8px;">
+                    <label style="margin:0; font-size:12px;">Lọc loại:</label>
+                    <select id="cash-flow-filter-type" onchange="renderCashFlowTable()" style="width:auto; padding:5px 10px; font-size:12px;">
+                        <option value="ALL">Tất cả (Thu & Chi)</option>
+                        <option value="THU">Chỉ dòng Thu (+)</option>
+                        <option value="CHI">Chỉ dòng Chi (-)</option>
+                    </select>
+                </div>
+            </div>
+            <div class="table-responsive" style="max-height:480px; overflow-y:auto;">
+                <table class="app-table">
+                    <thead>
+                        <tr>
+                            <th>Mã GD / Phiếu</th>
+                            <th>Thời gian</th>
+                            <th>Phân loại</th>
+                            <th>Nội dung giao dịch</th>
+                            <th>Hình thức</th>
+                            <th style="text-align:right;">Số tiền</th>
+                            <th style="text-align:center;">Chứng từ</th>
+                        </tr>
+                    </thead>
+                    <tbody id="cash-flow-tbody">
+                        <tr><td colspan="7" style="text-align:center; color:var(--text-muted);">Đang tải sổ quỹ dòng tiền...</td></tr>
+                    </tbody>
+                </table>
             </div>
         </div>
     </div>
@@ -1681,6 +1784,76 @@
                 In hoá đơn (Xuất bill)
             </button>
             <button class="btn btn-primary" onclick="closeModal('receipt-modal')">Đóng</button>
+        </div>
+    </div>
+</div>
+
+<!-- ===== MODAL: BIÊN LAI NHẬP HÀNG (GOODS RECEIPT) ===== -->
+<div class="modal-overlay" id="goods-receipt-modal">
+    <div class="modal-dialog" style="max-width:520px;">
+        <div class="modal-header">
+            <h3>Biên Lai Nhập Kho</h3>
+            <button class="modal-close" onclick="closeModal('goods-receipt-modal')">&times;</button>
+        </div>
+        <div class="modal-body">
+            <div class="receipt-ticket" id="goods-receipt-print-area">
+                <div class="receipt-header">
+                    <h4>HỆ THỐNG NHÀ HÀNG & QUÁN ĂN</h4>
+                    <p style="font-size:11px; color:#666;">Địa chỉ: TP. Hồ Chí Minh • Hotline: 1900 xxxx</p>
+                    <p style="font-size:13px; margin-top:6px; font-weight:bold; letter-spacing:0.5px;">BIÊN LAI NHẬP HÀNG / PHIẾU NHẬP KHO</p>
+                    <p style="font-size:11px; color:#666;" id="gr-date">Ngày nhập: --/--/---- --:--</p>
+                </div>
+                <div style="font-size:12px; margin-bottom:8px; display:flex; justify-content:space-between; flex-wrap:wrap; gap:4px;">
+                    <span>Số phiếu: <strong id="gr-id">#PN--</strong></span>
+                    <span>Kho lưu trữ: <strong id="gr-warehouse">Kho chính</strong></span>
+                </div>
+                <div style="font-size:12px; margin-bottom:10px; background:#f9fafb; padding:8px 10px; border-radius:6px; border:1px solid #e5e7eb;">
+                    <div style="margin-bottom:3px;">Nhà cung cấp: <strong id="gr-supplier">--</strong></div>
+                    <div style="margin-bottom:3px; font-size:11px; color:#666;">Điện thoại: <span id="gr-supplier-phone">--</span> • Đ/c: <span id="gr-supplier-address">--</span></div>
+                    <div style="font-size:11px; color:#666;">Người lập phiếu: <span id="gr-creator">--</span></div>
+                </div>
+                <table class="receipt-items">
+                    <thead>
+                        <tr style="border-bottom:1px solid #ddd; text-align:left;">
+                            <th>Nguyên liệu</th>
+                            <th style="text-align:center;">ĐVT</th>
+                            <th style="text-align:center;">SL</th>
+                            <th style="text-align:right;">Đơn giá</th>
+                            <th style="text-align:right;">Thành tiền</th>
+                        </tr>
+                    </thead>
+                    <tbody id="gr-items-body"></tbody>
+                </table>
+                <div style="border-top:1px dashed #bbb; padding-top:8px;">
+                    <div style="display:flex; justify-content:space-between; font-weight:bold; font-size:14px;">
+                        <span>TỔNG TIỀN THANH TOÁN:</span>
+                        <span id="gr-total" style="color:#c2410c;">0 ₫</span>
+                    </div>
+                    <div style="font-size:11px; color:#666; margin-top:4px;" id="gr-note-box">
+                        Ghi chú: <span id="gr-note">Nhập kho bổ sung</span>
+                    </div>
+                </div>
+                <div style="display:flex; justify-content:space-between; margin-top:20px; font-size:11px; text-align:center; padding-top:10px; border-top:1px dashed #e5e7eb;">
+                    <div>
+                        <div style="font-weight:bold;">Người giao hàng</div>
+                        <div style="font-size:10px; color:#888; margin-top:24px;">(Ký & ghi rõ họ tên)</div>
+                    </div>
+                    <div>
+                        <div style="font-weight:bold;">Thủ kho / Người nhận</div>
+                        <div style="font-size:10px; color:#888; margin-top:24px;">(Ký & ghi rõ họ tên)</div>
+                    </div>
+                </div>
+                <div class="receipt-footer" style="margin-top:12px;">
+                    <p>Biên lai có giá trị xác nhận nhập kho và đối soát thanh toán chi phí.</p>
+                </div>
+            </div>
+        </div>
+        <div class="modal-footer" style="display:flex; justify-content:space-between; align-items:center; gap:10px;">
+            <button class="btn btn-secondary" onclick="printGoodsReceiptTicket()" style="display:inline-flex; align-items:center; gap:6px; font-weight:600;">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 6 2 18 2 18 9"></polyline><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"></path><rect x="6" y="14" width="12" height="8"></rect></svg>
+                In biên lai (Xuất PDF)
+            </button>
+            <button class="btn btn-primary" onclick="closeModal('goods-receipt-modal')">Đóng</button>
         </div>
     </div>
 </div>
@@ -2177,9 +2350,9 @@
     function refreshCurrentTab() {
         if (currentTabName === 'tables') loadTables();
         if (currentTabName === 'menu') { loadDishes(); loadCategories(); }
-        if (currentTabName === 'inventory') { loadInventoryReport(); loadInventoryDropdowns(); }
+        if (currentTabName === 'inventory') { loadInventoryReport(); loadInventoryDropdowns(); loadInventoryHistory(); }
         if (currentTabName === 'kitchen') { loadKitchenOrders(); loadRecipesTable(); }
-        if (currentTabName === 'cashier') { loadPendingOrders(); loadRecentPayments(); loadDailyRevenue(); }
+        if (currentTabName === 'cashier') { loadPendingOrders(); loadRecentPayments(); loadFinancialReport(); }
     }
 
     // ─────────────────────────────────────────────────────────────
@@ -3266,7 +3439,7 @@
         };
 
         try {
-            await apiFetch('/api/phieu-nhap-xuat/lap-phieu', {
+            const pnx = await apiFetch('/api/phieu-nhap-xuat/lap-phieu', {
                 method: 'POST',
                 body: JSON.stringify(body)
             });
@@ -3274,10 +3447,144 @@
             $('stock-movement-form').reset();
             $('movement-unit').value = '';
             await loadInventoryReport();
+            await loadInventoryHistory();
+
+            // Nếu là nhập kho, tự động mở Biên lai nhập hàng ngay lập tức
+            if (type === 'NHAP' && pnx) {
+                showGoodsReceipt(pnx);
+            }
         } catch (e) {
             showToast('Lỗi lập phiếu: ' + e.message, 'error');
         } finally {
             if (btn) { btn.disabled = false; btn.textContent = oldText; }
+        }
+    }
+
+    // ─────────────────────────────────────────────────────────────
+    // BIÊN LAI NHẬP HÀNG & LỊCH SỬ NHẬP XUẤT KHO
+    // ─────────────────────────────────────────────────────────────
+    let allInventoryHistory = [];
+
+    function showGoodsReceipt(pnx) {
+        if (!pnx) return;
+        $('gr-id').textContent = `#PN-${pnx.pnId || '--'}`;
+        $('gr-date').textContent = 'Ngày nhập: ' + (pnx.ngayNhapXuat ? new Date(pnx.ngayNhapXuat).toLocaleString('vi-VN') : new Date().toLocaleString('vi-VN'));
+        $('gr-warehouse').textContent = (pnx.kho && pnx.kho.tenKho) ? pnx.kho.tenKho : 'Kho chính';
+
+        const ncc = pnx.nhaCungCap;
+        $('gr-supplier').textContent = ncc ? ncc.tenNcc : 'Nhà cung cấp tự do / Chợ đầu mối';
+        $('gr-supplier-phone').textContent = (ncc && ncc.soDienThoai) ? ncc.soDienThoai : '—';
+        $('gr-supplier-address').textContent = (ncc && ncc.diaChi) ? ncc.diaChi : '—';
+
+        const nv = pnx.nhanVien;
+        $('gr-creator').textContent = nv ? nv.hoTen : ((currentUser && currentUser.hoTen) ? currentUser.hoTen : 'Thủ kho');
+
+        const nl = pnx.nguyenLieu;
+        const nlName = nl ? (nl.tenNguyenLieu || nl.tenNl || `Nguyên liệu #${nl.nlId}`) : 'Nguyên liệu';
+        const dvt = nl ? (nl.donViTinh || nl.dvt || '') : '';
+        const qty = Number(pnx.soLuong || 0);
+        const price = Number(pnx.donGia || 0);
+        const total = Number(pnx.tongTien != null ? pnx.tongTien : (qty * price));
+
+        const tbody = $('gr-items-body');
+        tbody.innerHTML = `
+            <tr>
+                <td><strong>${escHtml(nlName)}</strong></td>
+                <td style="text-align:center;">${escHtml(dvt)}</td>
+                <td style="text-align:center; font-weight:700;">${qty}</td>
+                <td style="text-align:right;">${formatVND(price)}</td>
+                <td style="text-align:right; font-weight:bold; color:#c2410c;">${formatVND(total)}</td>
+            </tr>
+        `;
+
+        $('gr-total').textContent = formatVND(total);
+        $('gr-note').textContent = pnx.ghiChu || 'Nhập kho bổ sung';
+
+        $('goods-receipt-modal').classList.add('active');
+    }
+
+    function printGoodsReceiptTicket() {
+        window.print();
+    }
+
+    async function viewGoodsReceiptById(pnId) {
+        if (!pnId) {
+            showToast('Không tìm thấy mã phiếu nhập kho!', 'error');
+            return;
+        }
+        try {
+            const pnx = await apiFetch(`/api/phieu-nhap-xuat/${pnId}`);
+            showGoodsReceipt(pnx);
+        } catch (e) {
+            showToast('Lỗi tải chi tiết biên lai: ' + e.message, 'error');
+        }
+    }
+
+    async function loadInventoryHistory() {
+        const tbody = $('inventory-history-tbody');
+        if (!tbody) return;
+        tbody.innerHTML = `<tr><td colspan="9"><div class="ui-loading-box"><div class="spinner"></div><span>Đang tải lịch sử nhập xuất...</span></div></td></tr>`;
+
+        try {
+            const data = await apiFetch('/api/phieu-nhap-xuat');
+            allInventoryHistory = Array.isArray(data) ? data : [];
+
+            if (allInventoryHistory.length === 0) {
+                tbody.innerHTML = `
+                    <tr><td colspan="9">
+                        <div class="ui-empty-box">
+                            <div class="empty-title">Chưa có lịch sử nhập xuất kho</div>
+                            <div class="empty-desc">Các phiếu nhập nguyên liệu hoặc xuất kho chế biến sẽ hiển thị tại đây.</div>
+                        </div>
+                    </td></tr>
+                `;
+                return;
+            }
+
+            allInventoryHistory.sort((a, b) => (b.pnId || 0) - (a.pnId || 0));
+
+            tbody.innerHTML = allInventoryHistory.map(p => {
+                const isNhap = p.loaiPhieu === 'NHAP';
+                const badge = isNhap 
+                    ? '<span class="badge" style="background:#dcfce7; color:#15803d; font-weight:700;">Nhập kho</span>'
+                    : '<span class="badge" style="background:#fef3c7; color:#b45309; font-weight:700;">Xuất kho</span>';
+
+                const nlName = p.nguyenLieu ? (p.nguyenLieu.tenNguyenLieu || p.nguyenLieu.tenNl || `NL #${p.nguyenLieu.nlId}`) : '—';
+                const dvt = p.nguyenLieu ? (p.nguyenLieu.donViTinh || p.nguyenLieu.dvt || '') : '';
+                const timeStr = p.ngayNhapXuat ? new Date(p.ngayNhapXuat).toLocaleString('vi-VN') : '—';
+                const nccStr = p.nhaCungCap ? p.nhaCungCap.tenNcc : (p.ghiChu || '—');
+
+                const actionHtml = isNhap ? `
+                    <button class="btn btn-secondary btn-sm" onclick="viewGoodsReceiptById(${p.pnId})" style="padding:4px 8px; font-size:12px; display:inline-flex; align-items:center; gap:4px;" title="Xem và in lại biên lai nhập kho">
+                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 6 2 18 2 18 9"></polyline><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"></path><rect x="6" y="14" width="12" height="8"></rect></svg>
+                        In biên lai
+                    </button>
+                ` : '<span style="color:#94a3b8; font-size:12px;">Xuất bếp</span>';
+
+                return `
+                    <tr>
+                        <td><strong>#PN-${p.pnId}</strong></td>
+                        <td style="font-size:12px; color:var(--text-muted);">${timeStr}</td>
+                        <td>${badge}</td>
+                        <td><strong>${escHtml(nlName)}</strong></td>
+                        <td style="font-weight:700;">${p.soLuong} ${escHtml(dvt)}</td>
+                        <td>${formatVND(p.donGia)}</td>
+                        <td style="font-weight:bold; color:${isNhap ? '#c2410c' : 'inherit'};">${formatVND(p.tongTien)}</td>
+                        <td style="font-size:12px; color:var(--text-muted);">${escHtml(nccStr)}</td>
+                        <td style="text-align:center;">${actionHtml}</td>
+                    </tr>
+                `;
+            }).join('');
+        } catch (e) {
+            tbody.innerHTML = `
+                <tr><td colspan="9">
+                    <div class="ui-error-box">
+                        <div class="error-title">Lỗi tải lịch sử kho</div>
+                        <div class="error-desc">${escHtml(e.message)}</div>
+                        <button class="btn btn-secondary btn-sm" onclick="loadInventoryHistory()">Thử lại</button>
+                    </div>
+                </td></tr>
+            `;
         }
     }
 
@@ -3405,32 +3712,278 @@
         }
     }
 
-    async function loadDailyRevenue() {
+    // ─────────────────────────────────────────────────────────────
+    // BÁO CÁO TÀI CHÍNH: THU - CHI & LỢI NHUẬN + SỔ QUỸ DÒNG TIỀN
+    // ─────────────────────────────────────────────────────────────
+    let financeTimeFilter = 'today';
+    let rawCashFlowData = [];
+
+    function setFinanceTimeFilter(mode) {
+        financeTimeFilter = mode;
+        const btnToday = $('finance-filter-today');
+        const btnAll = $('finance-filter-all');
         const dateInput = $('revenue-date-picker');
-        let selectedDate = '';
-        if (dateInput && dateInput.value) {
-            selectedDate = dateInput.value;
-        } else {
+
+        if (mode === 'today') {
+            if (btnToday) { btnToday.className = 'btn btn-sm btn-primary'; }
+            if (btnAll) { btnAll.className = 'btn btn-sm btn-secondary'; }
             const today = new Date();
             const yyyy = today.getFullYear();
             const mm = String(today.getMonth() + 1).padStart(2, '0');
             const dd = String(today.getDate()).padStart(2, '0');
-            selectedDate = `${yyyy}-${mm}-${dd}`;
-            if (dateInput) dateInput.value = selectedDate;
+            if (dateInput) dateInput.value = `${yyyy}-${mm}-${dd}`;
+        } else if (mode === 'all') {
+            if (btnToday) { btnToday.className = 'btn btn-sm btn-secondary'; }
+            if (btnAll) { btnAll.className = 'btn btn-sm btn-primary'; }
+            if (dateInput) dateInput.value = '';
+        }
+        loadFinancialReport();
+    }
+
+    function onCustomDateChange() {
+        const dateInput = $('revenue-date-picker');
+        if (dateInput && dateInput.value) {
+            financeTimeFilter = 'custom';
+            const btnToday = $('finance-filter-today');
+            const btnAll = $('finance-filter-all');
+            if (btnToday) btnToday.className = 'btn btn-sm btn-secondary';
+            if (btnAll) btnAll.className = 'btn btn-sm btn-secondary';
+        } else {
+            setFinanceTimeFilter('all');
+            return;
+        }
+        loadFinancialReport();
+    }
+
+    async function loadFinancialReport() {
+        const dateInput = $('revenue-date-picker');
+        const today = new Date();
+        const yyyy = today.getFullYear();
+        const mm = String(today.getMonth() + 1).padStart(2, '0');
+        const dd = String(today.getDate()).padStart(2, '0');
+        const todayStr = `${yyyy}-${mm}-${dd}`;
+
+        if (financeTimeFilter === 'today' && dateInput && !dateInput.value) {
+            dateInput.value = todayStr;
+        }
+
+        const customDateStr = dateInput ? dateInput.value : '';
+
+        function toDateString(val) {
+            if (!val) return '';
+            const d = new Date(val);
+            if (isNaN(d.getTime())) return '';
+            const y = d.getFullYear();
+            const m = String(d.getMonth() + 1).padStart(2, '0');
+            const day = String(d.getDate()).padStart(2, '0');
+            return `${y}-${m}-${day}`;
         }
 
         try {
-            const data = await apiFetch(`/api/thanh-toan/doanh-thu-theo-ngay?ngay=${selectedDate}`);
-            if (data) {
-                if ($('kpi-rev-total')) $('kpi-rev-total').textContent = formatVND(data.tongDoanhThu);
-                if ($('kpi-rev-count')) $('kpi-rev-count').textContent = data.tongSoDonThanhToan || 0;
-                if ($('kpi-rev-cash')) $('kpi-rev-cash').textContent = formatVND(data.tienMat);
-                if ($('kpi-rev-transfer')) $('kpi-rev-transfer').textContent = formatVND((data.chuyenKhoan || 0) + (data.the || 0));
+            // Lấy đồng thời lịch sử thanh toán và phiếu nhập xuất kho
+            const [paymentsData, pnxData] = await Promise.all([
+                apiFetch('/api/thanh-toan').catch(() => []),
+                apiFetch('/api/phieu-nhap-xuat').catch(() => [])
+            ]);
+
+            const allPayments = Array.isArray(paymentsData) ? paymentsData : [];
+            const allPnx = Array.isArray(pnxData) ? pnxData : [];
+
+            // Lọc theo chế độ thời gian
+            const filteredPayments = allPayments.filter(p => {
+                if (financeTimeFilter === 'all') return true;
+                const pDate = toDateString(p.thoiGian);
+                if (financeTimeFilter === 'today') return pDate === todayStr;
+                if (financeTimeFilter === 'custom') return pDate === customDateStr;
+                return true;
+            });
+
+            // Chỉ lấy phiếu NHẬP kho (Chi mua nguyên liệu)
+            const filteredImports = allPnx.filter(p => {
+                if (p.loaiPhieu !== 'NHAP') return false;
+                if (financeTimeFilter === 'all') return true;
+                const pDate = toDateString(p.ngayNhapXuat);
+                if (financeTimeFilter === 'today') return pDate === todayStr;
+                if (financeTimeFilter === 'custom') return pDate === customDateStr;
+                return true;
+            });
+
+            // TÍNH TOÁN CÁC CHỈ SỐ TÀI CHÍNH
+            let totalIncome = 0;
+            let cashIncome = 0;
+            let transferIncome = 0;
+            filteredPayments.forEach(p => {
+                const amt = Number(p.soTien || 0);
+                totalIncome += amt;
+                if (p.phuongThuc === 'TIEN_MAT') {
+                    cashIncome += amt;
+                } else {
+                    transferIncome += amt;
+                }
+            });
+
+            let totalExpense = 0;
+            filteredImports.forEach(p => {
+                const amt = Number(p.tongTien != null ? p.tongTien : ((p.soLuong || 0) * (p.donGia || 0)));
+                totalExpense += amt;
+            });
+
+            const netProfit = totalIncome - totalExpense;
+
+            // HIỂN THỊ CÁC THẺ KPI TÀI CHÍNH
+            if ($('kpi-finance-income')) $('kpi-finance-income').textContent = formatVND(totalIncome);
+            if ($('kpi-finance-income-sub')) $('kpi-finance-income-sub').textContent = `${filteredPayments.length} đơn thanh toán`;
+
+            if ($('kpi-finance-expense')) $('kpi-finance-expense').textContent = formatVND(totalExpense);
+            if ($('kpi-finance-expense-sub')) $('kpi-finance-expense-sub').textContent = `${filteredImports.length} phiếu nhập kho`;
+
+            if ($('kpi-finance-profit')) $('kpi-finance-profit').textContent = formatVND(netProfit);
+            if ($('kpi-rev-cash')) $('kpi-rev-cash').textContent = formatVND(cashIncome);
+            if ($('kpi-rev-transfer')) $('kpi-rev-transfer').textContent = formatVND(transferIncome);
+
+            // Cập nhật huy hiệu lãi/lỗ
+            const badgeEl = $('kpi-finance-profit-badge');
+            if (badgeEl) {
+                if (netProfit > 0) {
+                    const margin = totalIncome > 0 ? Math.round((netProfit / totalIncome) * 100) : 100;
+                    badgeEl.innerHTML = `<span class="badge" style="background:#dcfce7; color:#15803d; font-weight:700;">Có lãi (+${margin}%)</span>`;
+                    if ($('kpi-finance-profit')) $('kpi-finance-profit').style.color = '#15803d';
+                } else if (netProfit < 0) {
+                    badgeEl.innerHTML = `<span class="badge" style="background:#fee2e2; color:#b91c1c; font-weight:700;">Tạm lỗ (Chi > Thu)</span>`;
+                    if ($('kpi-finance-profit')) $('kpi-finance-profit').style.color = '#b91c1c';
+                } else {
+                    badgeEl.innerHTML = `<span class="badge" style="background:#f1f5f9; color:#475569; font-weight:700;">Hòa vốn</span>`;
+                    if ($('kpi-finance-profit')) $('kpi-finance-profit').style.color = '#475569';
+                }
             }
+
+            // TỔNG HỢP SỔ QUỸ THU - CHI DÒNG TIỀN
+            rawCashFlowData = [];
+
+            // Dòng thu từ thanh toán
+            filteredPayments.forEach(p => {
+                const maDon = p.donHang ? p.donHang.maDon : null;
+                const tenBan = p.donHang && p.donHang.banAn ? (p.donHang.banAn.tenBan || `Bàn #${p.donHang.banAn.maBan}`) : '';
+                const desc = maDon 
+                    ? `Thanh toán hoá đơn đơn hàng #${maDon}${tenBan ? ' (' + tenBan + ')' : ''}` 
+                    : `Giao dịch thanh toán #${p.maTt}`;
+
+                let methodLabel = 'Tiền mặt';
+                if (p.phuongThuc === 'CHUYEN_KHOAN') methodLabel = 'Chuyển khoản QR';
+                if (p.phuongThuc === 'THE') methodLabel = 'Thẻ POS';
+
+                rawCashFlowData.push({
+                    source: 'THU',
+                    code: `#GD-${p.maTt}`,
+                    time: p.thoiGian,
+                    type: 'THU',
+                    content: desc,
+                    method: methodLabel,
+                    amount: Number(p.soTien || 0),
+                    orderId: maDon,
+                    paymentMethod: p.phuongThuc,
+                    rawId: p.maTt
+                });
+            });
+
+            // Dòng chi từ nhập kho
+            filteredImports.forEach(p => {
+                const nlName = p.nguyenLieu ? (p.nguyenLieu.tenNguyenLieu || p.nguyenLieu.tenNl || `NL #${p.nguyenLieu.nlId}`) : 'Nguyên liệu';
+                const dvt = p.nguyenLieu ? (p.nguyenLieu.donViTinh || p.nguyenLieu.dvt || '') : '';
+                const nccName = p.nhaCungCap ? p.nhaCungCap.tenNcc : (p.ghiChu || 'Tự do');
+                const amt = Number(p.tongTien != null ? p.tongTien : ((p.soLuong || 0) * (p.donGia || 0)));
+
+                rawCashFlowData.push({
+                    source: 'CHI',
+                    code: `#PN-${p.pnId}`,
+                    time: p.ngayNhapXuat,
+                    type: 'CHI',
+                    content: `Nhập kho: ${nlName} (${p.soLuong} ${dvt}) - NCC: ${nccName}`,
+                    method: 'Tiền mặt / Quỹ kho',
+                    amount: amt,
+                    pnId: p.pnId,
+                    rawId: p.pnId
+                });
+            });
+
+            // Sắp xếp thời gian mới nhất lên đầu
+            rawCashFlowData.sort((a, b) => new Date(b.time || 0).getTime() - new Date(a.time || 0).getTime());
+
+            // Render vào bảng sổ quỹ
+            renderCashFlowTable();
+
         } catch (e) {
-            console.warn('Lỗi lấy doanh thu:', e);
-            showToast('Không thể tải thống kê doanh thu: ' + e.message, 'error');
+            console.warn('Lỗi lấy báo cáo tài chính:', e);
+            showToast('Không thể tải báo cáo tài chính: ' + e.message, 'error');
         }
+    }
+
+    function renderCashFlowTable() {
+        const tbody = $('cash-flow-tbody');
+        if (!tbody) return;
+
+        const filterType = $('cash-flow-filter-type') ? $('cash-flow-filter-type').value : 'ALL';
+        const displayList = rawCashFlowData.filter(item => {
+            if (filterType === 'ALL') return true;
+            return item.type === filterType;
+        });
+
+        if (displayList.length === 0) {
+            tbody.innerHTML = `
+                <tr><td colspan="7">
+                    <div class="ui-empty-box">
+                        <div class="empty-title">Không có giao dịch dòng tiền nào</div>
+                        <div class="empty-desc">Không phát sinh khoản Thu hoặc Chi nào trong mốc thời gian đã chọn.</div>
+                    </div>
+                </td></tr>
+            `;
+            return;
+        }
+
+        tbody.innerHTML = displayList.map(item => {
+            const isThu = item.type === 'THU';
+            const badgeType = isThu
+                ? '<span class="badge" style="background:#dcfce7; color:#15803d; font-weight:700;">+ THU (Vào)</span>'
+                : '<span class="badge" style="background:#fee2e2; color:#b91c1c; font-weight:700;">- CHI (Ra)</span>';
+
+            const timeStr = item.time ? new Date(item.time).toLocaleString('vi-VN') : '—';
+            const amountStr = isThu 
+                ? `<span style="font-weight:700; color:#15803d; font-size:13px;">+${formatVND(item.amount)}</span>`
+                : `<span style="font-weight:700; color:#b91c1c; font-size:13px;">-${formatVND(item.amount)}</span>`;
+
+            let actionHtml = '—';
+            if (isThu && item.orderId) {
+                actionHtml = `
+                    <button class="btn btn-secondary btn-sm" onclick="reprintReceiptInvoice(${item.orderId}, '${item.paymentMethod || 'TIEN_MAT'}')" style="padding:4px 8px; font-size:12px; display:inline-flex; align-items:center; gap:4px;" title="Xem và in hoá đơn bán hàng">
+                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 6 2 18 2 18 9"></polyline><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"></path><rect x="6" y="14" width="12" height="8"></rect></svg>
+                        In HĐ
+                    </button>
+                `;
+            } else if (!isThu && item.pnId) {
+                actionHtml = `
+                    <button class="btn btn-secondary btn-sm" onclick="viewGoodsReceiptById(${item.pnId})" style="padding:4px 8px; font-size:12px; display:inline-flex; align-items:center; gap:4px;" title="Xem và in lại biên lai nhập kho">
+                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 6 2 18 2 18 9"></polyline><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"></path><rect x="6" y="14" width="12" height="8"></rect></svg>
+                        In biên lai
+                    </button>
+                `;
+            }
+
+            return `
+                <tr>
+                    <td><strong>${item.code}</strong></td>
+                    <td style="font-size:12px; color:var(--text-muted);">${timeStr}</td>
+                    <td>${badgeType}</td>
+                    <td>${escHtml(item.content)}</td>
+                    <td style="font-size:12px;">${escHtml(item.method)}</td>
+                    <td style="text-align:right;">${amountStr}</td>
+                    <td style="text-align:center;">${actionHtml}</td>
+                </tr>
+            `;
+        }).join('');
+    }
+
+    async function loadDailyRevenue() {
+        await loadFinancialReport();
     }
 
     // PAYMENT MODAL WORKFLOW
