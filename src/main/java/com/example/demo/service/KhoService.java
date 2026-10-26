@@ -202,7 +202,7 @@ public class KhoService {
             String mucDo = "AN_TOAN";
             if (ton.compareTo(BigDecimal.ZERO) <= 0) {
                 mucDo = "HET_HANG";
-            } else if (ton.compareTo(new BigDecimal("5.0")) <= 0) {
+            } else if (ton.compareTo(new BigDecimal("10.0")) <= 0) {
                 mucDo = "SAP_HET";
             }
 
@@ -248,7 +248,7 @@ public class KhoService {
         }
 
         long soNlSapHet = nguyenLieuRepository.findAll().stream()
-                .filter(nl -> nl.getSoLuongTon() != null && nl.getSoLuongTon().compareTo(new BigDecimal("5.0")) <= 0)
+                .filter(nl -> nl.getSoLuongTon() != null && nl.getSoLuongTon().compareTo(new BigDecimal("10.0")) <= 0)
                 .count();
 
         return ThongKeKhoResponse.builder()

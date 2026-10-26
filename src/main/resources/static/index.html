@@ -888,6 +888,74 @@
             font-size: 12px;
         }
 
+        /* PRINT STYLES CHO HÓA ĐƠN & XUẤT BILL */
+        @media print {
+            body * {
+                visibility: hidden !important;
+            }
+            #receipt-modal,
+            #receipt-modal * {
+                visibility: visible !important;
+            }
+            #receipt-modal {
+                position: fixed !important;
+                left: 0 !important;
+                top: 0 !important;
+                width: 100vw !important;
+                height: 100vh !important;
+                background: #ffffff !important;
+                display: flex !important;
+                justify-content: center !important;
+                align-items: flex-start !important;
+                padding-top: 10px !important;
+                z-index: 999999 !important;
+            }
+            #receipt-modal .modal-dialog {
+                box-shadow: none !important;
+                border: none !important;
+                max-width: 360px !important;
+                width: 100% !important;
+                margin: 0 auto !important;
+                padding: 0 !important;
+                background: transparent !important;
+            }
+            #receipt-modal .modal-header,
+            #receipt-modal .modal-footer,
+            #receipt-modal .modal-close {
+                display: none !important;
+            }
+            .receipt-ticket {
+                background: #ffffff !important;
+                border: 1px dashed #666666 !important;
+                box-shadow: none !important;
+                padding: 16px !important;
+                width: 100% !important;
+                color: #000000 !important;
+                font-family: 'Courier New', Courier, monospace, -apple-system, sans-serif !important;
+            }
+        }
+
+        .notification-tag {
+            font-size: 10px;
+            font-weight: 700;
+            padding: 2px 6px;
+            border-radius: 4px;
+            text-transform: uppercase;
+            letter-spacing: 0.3px;
+        }
+        .notification-tag-bep {
+            background: #dcfce7;
+            color: #15803d;
+        }
+        .notification-tag-kho {
+            background: #fef3c7;
+            color: #b45309;
+        }
+        .notification-tag-out {
+            background: #fee2e2;
+            color: #b91c1c;
+        }
+
         /* FOOTER */
         footer {
             background: white;
@@ -1430,10 +1498,11 @@
                                 <th>Thời gian</th>
                                 <th>Phương thức</th>
                                 <th>Số tiền</th>
+                                <th style="text-align:center;">Thao tác</th>
                             </tr>
                         </thead>
                         <tbody id="recent-payments-tbody">
-                            <tr><td colspan="5" style="text-align:center; color:var(--text-muted);">Đang tải...</td></tr>
+                            <tr><td colspan="6" style="text-align:center; color:var(--text-muted);">Đang tải...</td></tr>
                         </tbody>
                     </table>
                 </div>
@@ -1606,8 +1675,12 @@
                 </div>
             </div>
         </div>
-        <div class="modal-footer">
-            <button class="btn btn-primary" onclick="closeModal('receipt-modal')">Xong</button>
+        <div class="modal-footer" style="display:flex; justify-content:space-between; align-items:center; gap:10px;">
+            <button class="btn btn-secondary" onclick="printReceiptTicket()" style="display:inline-flex; align-items:center; gap:6px; font-weight:600;">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 6 2 18 2 18 9"></polyline><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"></path><rect x="6" y="14" width="12" height="8"></rect></svg>
+                In hoá đơn (Xuất bill)
+            </button>
+            <button class="btn btn-primary" onclick="closeModal('receipt-modal')">Đóng</button>
         </div>
     </div>
 </div>
@@ -2158,6 +2231,8 @@
     // HỆ THỐNG CHUÔNG THÔNG BÁO TỪ BẾP (NOTIFICATION BELL)
     // ─────────────────────────────────────────────────────────────
     let notificationsStore = [];
+    let knownLowStockNlIds = new Set();
+    let isFirstStockCheck = true;
 
     function toggleNotificationDropdown() {
         const dd = $('notification-dropdown');
@@ -2188,26 +2263,36 @@
             listEl.innerHTML = `
                 <div class="notification-empty">
                     <div style="font-weight:700; margin-bottom:4px; color:var(--text-main);">Không có thông báo mới</div>
-                    <div style="font-size:11px; color:var(--text-muted);">Khi đầu bếp báo nấu xong, chuông sẽ hiển thị danh sách tại đây.</div>
+                    <div style="font-size:11px; color:var(--text-muted);">Khi đầu bếp báo nấu xong hoặc nguyên liệu sắp hết hàng, chuông sẽ hiển thị danh sách tại đây.</div>
                 </div>
             `;
             return;
         }
 
-        listEl.innerHTML = notificationsStore.map(n => `
-            <div class="notification-item ${n.unread ? 'unread' : ''}" onclick="handleClickNotification(${n.id})">
-                <div class="notification-dot ${n.unread ? '' : 'read'}"></div>
+        listEl.innerHTML = notificationsStore.map(n => {
+            const isKho = n.type === 'KHO_CANH_BAO';
+            const tagClass = isKho ? (n.isOut ? 'notification-tag-out' : 'notification-tag-kho') : 'notification-tag-bep';
+            const tagText = isKho ? (n.isOut ? 'Hết hàng' : 'Kho') : 'Bếp';
+            const dotColor = isKho ? (n.isOut ? '#ef4444' : '#f59e0b') : '#10b981';
+
+            return `
+            <div class="notification-item ${n.unread ? 'unread' : ''}" onclick="handleClickNotification('${n.id}')">
+                <div class="notification-dot ${n.unread ? '' : 'read'}" style="${n.unread ? `background:${dotColor};` : ''}"></div>
                 <div class="notification-content">
-                    <div class="notification-title">${escHtml(n.title)}</div>
+                    <div class="notification-title" style="display:flex; justify-content:space-between; align-items:center; gap:6px;">
+                        <span style="font-size:13px; font-weight:700;">${escHtml(n.title)}</span>
+                        <span class="notification-tag ${tagClass}">${tagText}</span>
+                    </div>
                     <div class="notification-desc">${escHtml(n.message)}</div>
                     <div class="notification-time">${escHtml(n.time)}</div>
                 </div>
             </div>
-        `).join('');
+            `;
+        }).join('');
     }
 
     async function handleClickNotification(id) {
-        const item = notificationsStore.find(n => n.id === id);
+        const item = notificationsStore.find(n => String(n.id) === String(id));
         if (item) {
             item.unread = false;
             renderNotificationList();
@@ -2216,13 +2301,20 @@
             const dd = $('notification-dropdown');
             if (dd) dd.style.display = 'none';
 
-            // Chuyển tới sơ đồ bàn
-            const navTables = $('nav-btn-tables');
-            if (navTables) switchNav('tables', navTables);
+            if (item.type === 'KHO_CANH_BAO') {
+                // Chuyển tới tab Kho & Nguyên liệu
+                const navInv = $('nav-btn-inventory');
+                if (navInv) switchNav('inventory', navInv);
+                await loadInventoryReport();
+            } else {
+                // Chuyển tới sơ đồ bàn
+                const navTables = $('nav-btn-tables');
+                if (navTables) switchNav('tables', navTables);
 
-            // Mở bàn tương ứng để phục vụ lên món
-            if (item.maBan) {
-                await selectTable(item.maBan);
+                // Mở bàn tương ứng để phục vụ lên món
+                if (item.maBan) {
+                    await selectTable(item.maBan);
+                }
             }
         }
     }
@@ -2241,40 +2333,53 @@
         }
     });
 
-    // Kiểm tra định kỳ và bắn thông báo khi có món nấu xong
+    // Kiểm tra định kỳ và cập nhật thông báo (Đơn nấu xong & Cảnh báo kho nguyên liệu)
     async function checkCookedOrdersNotification() {
         try {
+            // 1. KIỂM TRA ĐƠN HÀNG BẾP NẤU XONG
             const orders = await apiFetch('/api/don-hang');
-            if (!Array.isArray(orders)) return;
-
             const newTablesWithCooked = new Map();
-            // CHỈ LẤY CÁC ĐƠN ĐÃ NẤU XONG CỦA BÀN ĐANG CÓ KHÁCH (CO_KHACH)
-            const currentCooked = orders.filter(o => {
-                if (o.trangThai !== 'HOAN_THANH' || !o.ban || !o.ban.maBan) return false;
-                const tbl = allTables.find(t => t.maBan === o.ban.maBan);
-                return tbl ? (tbl.trangThai === 'CO_KHACH') : false;
-            });
+            let cookedNotifications = [];
 
-            currentCooked.forEach(o => {
-                newTablesWithCooked.set(o.ban.maBan, {
-                    maDon: o.maDon,
-                    tenBan: o.ban.tenBan,
-                    ngayDat: o.ngayDat
+            if (Array.isArray(orders)) {
+                // CHỈ LẤY CÁC ĐƠN ĐÃ NẤU XONG CỦA BÀN ĐANG CÓ KHÁCH (CO_KHACH)
+                const currentCooked = orders.filter(o => {
+                    if (o.trangThai !== 'HOAN_THANH' || !o.ban || !o.ban.maBan) return false;
+                    const tbl = allTables.find(t => t.maBan === o.ban.maBan);
+                    return tbl ? (tbl.trangThai === 'CO_KHACH') : false;
                 });
-            });
 
-            // Lần đầu tải trang -> nạp các đơn đang thực sự chờ lên món của bàn có khách
-            if (isFirstCookedCheck) {
-                knownCookedOrderIds = new Set(currentCooked.map(o => o.maDon));
-                isFirstCookedCheck = false;
+                currentCooked.forEach(o => {
+                    newTablesWithCooked.set(o.ban.maBan, {
+                        maDon: o.maDon,
+                        tenBan: o.ban.tenBan,
+                        ngayDat: o.ngayDat
+                    });
+                });
+
+                if (isFirstCookedCheck) {
+                    knownCookedOrderIds = new Set(currentCooked.map(o => o.maDon));
+                    isFirstCookedCheck = false;
+                } else {
+                    const newlyCooked = currentCooked.filter(o => !knownCookedOrderIds.has(o.maDon));
+                    if (newlyCooked.length > 0) {
+                        newlyCooked.forEach(o => {
+                            knownCookedOrderIds.add(o.maDon);
+                            const tableName = o.ban ? o.ban.tenBan : `Bàn #${o.maBan}`;
+                            playKitchenNotificationChime();
+                            showToast(`Bếp đã nấu xong món cho ${tableName} (Đơn #${o.maDon})! Nhân viên vui lòng lên món cho khách.`, 'success');
+                        });
+                    }
+                }
+
                 tablesWithCookedOrders = newTablesWithCooked;
 
-                notificationsStore = [];
                 currentCooked.forEach(o => {
                     const tableName = o.ban ? o.ban.tenBan : `Bàn #${o.maBan}`;
                     const timeStr = o.ngayDat ? new Date(o.ngayDat).toLocaleTimeString('vi-VN', { hour:'2-digit', minute:'2-digit' }) : 'Vừa xong';
-                    notificationsStore.push({
-                        id: o.maDon,
+                    cookedNotifications.push({
+                        id: `order_${o.maDon}`,
+                        type: 'BEP_XONG',
                         maDon: o.maDon,
                         maBan: o.ban ? o.ban.maBan : null,
                         tenBan: tableName,
@@ -2284,53 +2389,69 @@
                         unread: true
                     });
                 });
-                renderNotificationList();
-                return;
             }
 
-            // Loại bỏ các thông báo của đơn không còn hợp lệ (đã thanh toán hoặc đã hủy hoặc bàn đã trống)
-            const activeCookedMap = new Map(currentCooked.map(o => [o.maDon, o]));
-            notificationsStore = notificationsStore.filter(n => activeCookedMap.has(n.maDon));
-
-            // Tìm những đơn hàng mới chuyển sang HOAN_THANH
-            const newlyCooked = currentCooked.filter(o => !knownCookedOrderIds.has(o.maDon));
-            if (newlyCooked.length > 0) {
-                newlyCooked.forEach(o => {
-                    knownCookedOrderIds.add(o.maDon);
-                    const tableName = o.ban ? o.ban.tenBan : `Bàn #${o.maBan}`;
-                    const timeStr = new Date().toLocaleTimeString('vi-VN', { hour:'2-digit', minute:'2-digit' });
-
-                    notificationsStore.unshift({
-                        id: o.maDon,
-                        maDon: o.maDon,
-                        maBan: o.ban ? o.ban.maBan : null,
-                        tenBan: tableName,
-                        title: `${tableName} — Món đã nấu xong!`,
-                        message: `Đơn #${o.maDon} vừa được bếp báo hoàn thành. Nhân viên vui lòng lên món cho khách.`,
-                        time: timeStr,
-                        unread: true
+            // 2. KIỂM TRA CẢNH BÁO TỒN KHO NGUYÊN LIỆU (SẮP HẾT / HẾT HÀNG)
+            let stockNotifications = [];
+            try {
+                const stockData = await apiFetch('/api/nguyen-lieu/bao-cao-ton-kho');
+                if (Array.isArray(stockData)) {
+                    const lowStockItems = stockData.filter(i => {
+                        const ton = Number(i.soLuongTon || 0);
+                        return (i.mucDoCanhBao === 'SAP_HET' || i.mucDoCanhBao === 'HET_HANG' || ton <= 10.0);
                     });
 
-                    // Phát chuông báo âm thanh
-                    playKitchenNotificationChime();
-
-                    // Bắn Toast thông báo nổi bật cho nhân viên
-                    showToast(`Bếp đã nấu xong món cho ${tableName} (Đơn #${o.maDon})! Nhân viên vui lòng lên món cho khách.`, 'success');
-                });
-
-                renderNotificationList();
-                tablesWithCookedOrders = newTablesWithCooked;
-
-                // Cập nhật lại giao diện bàn ăn nếu đang ở tab sơ đồ bàn
-                if (currentTabName === 'tables') {
-                    renderTableGrid();
-                    if (selectedTable && newTablesWithCooked.has(selectedTable.maBan)) {
-                        loadOrderForTable(selectedTable.maBan);
+                    if (isFirstStockCheck) {
+                        knownLowStockNlIds = new Set(lowStockItems.map(i => i.nlId));
+                        isFirstStockCheck = false;
+                    } else {
+                        const newlyLow = lowStockItems.filter(i => !knownLowStockNlIds.has(i.nlId));
+                        if (newlyLow.length > 0) {
+                            newlyLow.forEach(i => {
+                                knownLowStockNlIds.add(i.nlId);
+                                playKitchenNotificationChime();
+                                showToast(`Cảnh báo kho: Nguyên liệu "${i.tenNguyenLieu}" sắp hết hàng (còn ${i.soLuongTon} ${i.donViTinh})!`, 'warning');
+                            });
+                        }
                     }
+
+                    lowStockItems.forEach(i => {
+                        const ton = Number(i.soLuongTon || 0);
+                        const isOut = ton <= 0;
+                        stockNotifications.push({
+                            id: `kho_${i.nlId}`,
+                            type: 'KHO_CANH_BAO',
+                            nlId: i.nlId,
+                            tenNguyenLieu: i.tenNguyenLieu,
+                            isOut: isOut,
+                            title: `Kho: ${i.tenNguyenLieu} ${isOut ? 'ĐÃ HẾT HÀNG!' : 'sắp hết hàng!'}`,
+                            message: `Tồn kho chỉ còn ${i.soLuongTon} ${i.donViTinh} (Định mức tối thiểu: 10 ${i.donViTinh}). Vui lòng nhập hàng bổ sung.`,
+                            time: isOut ? 'Hết hàng' : 'Sắp hết',
+                            unread: true
+                        });
+                    });
                 }
-            } else {
-                tablesWithCookedOrders = newTablesWithCooked;
-                renderNotificationList();
+            } catch (errStock) {
+                console.warn('Lỗi kiểm tra cảnh báo tồn kho:', errStock);
+            }
+
+            // 3. HỢP NHẤT DANH SÁCH THÔNG BÁO VÀ BẢO LƯU TRẠNG THÁI ĐÃ ĐỌC
+            const readIdSet = new Set(notificationsStore.filter(n => !n.unread).map(n => String(n.id)));
+            const merged = [...cookedNotifications, ...stockNotifications];
+            merged.forEach(n => {
+                if (readIdSet.has(String(n.id))) {
+                    n.unread = false;
+                }
+            });
+            notificationsStore = merged;
+            renderNotificationList();
+
+            // Cập nhật lại giao diện bàn ăn nếu đang ở tab sơ đồ bàn
+            if (currentTabName === 'tables') {
+                renderTableGrid();
+                if (selectedTable && newTablesWithCooked.has(selectedTable.maBan)) {
+                    loadOrderForTable(selectedTable.maBan);
+                }
             }
         } catch (err) {
             // Im lặng nếu lỗi mạng tạm thời
@@ -3227,14 +3348,14 @@
 
     async function loadRecentPayments() {
         const tbody = $('recent-payments-tbody');
-        tbody.innerHTML = `<tr><td colspan="5"><div class="ui-loading-box"><div class="spinner"></div><span>Đang tải lịch sử giao dịch...</span></div></td></tr>`;
+        tbody.innerHTML = `<tr><td colspan="6"><div class="ui-loading-box"><div class="spinner"></div><span>Đang tải lịch sử giao dịch...</span></div></td></tr>`;
         try {
             const res = await apiFetch('/api/thanh-toan');
             const list = Array.isArray(res) ? res : [];
 
             if (list.length === 0) {
                 tbody.innerHTML = `
-                    <tr><td colspan="5">
+                    <tr><td colspan="6">
                         <div class="ui-empty-box">
                             <div class="empty-title">Chưa có giao dịch thanh toán nào</div>
                             <div class="empty-desc">Các giao dịch thanh toán thành công sẽ được ghi nhận và hiển thị tại đây.</div>
@@ -3252,6 +3373,14 @@
                 if (p.phuongThuc === 'CHUYEN_KHOAN') methodBadge = '<span class="badge badge-success">Chuyển khoản QR</span>';
                 if (p.phuongThuc === 'THE') methodBadge = '<span class="badge badge-warning">Thẻ POS</span>';
 
+                const maDon = p.donHang ? p.donHang.maDon : null;
+                const actionBtn = maDon ? `
+                    <button class="btn btn-secondary btn-sm" onclick="reprintReceiptInvoice(${maDon}, '${p.phuongThuc || 'TIEN_MAT'}')" style="padding:4px 8px; font-size:12px; display:inline-flex; align-items:center; gap:4px;" title="Xem lại và in phiếu hoá đơn">
+                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 6 2 18 2 18 9"></polyline><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"></path><rect x="6" y="14" width="12" height="8"></rect></svg>
+                        In lại HĐ
+                    </button>
+                ` : '—';
+
                 return `
                 <tr>
                     <td><strong>#${p.maTt}</strong></td>
@@ -3259,12 +3388,13 @@
                     <td style="font-size:12px; color:var(--text-muted);">${p.thoiGian ? new Date(p.thoiGian).toLocaleString('vi-VN') : '—'}</td>
                     <td>${methodBadge}</td>
                     <td style="font-weight:700; color:var(--success);">${formatVND(p.soTien)}</td>
+                    <td style="text-align:center;">${actionBtn}</td>
                 </tr>
                 `;
             }).join('');
         } catch (e) {
             tbody.innerHTML = `
-                <tr><td colspan="5">
+                <tr><td colspan="6">
                     <div class="ui-error-box">
                         <div class="error-title">Lỗi tải lịch sử giao dịch</div>
                         <div class="error-desc">${escHtml(e.message)}</div>
@@ -3398,7 +3528,7 @@
     function showReceipt(order, payment) {
         $('rc-id').textContent = `#${order.maDon}`;
         $('rc-table').textContent = order.tenBan;
-        $('rc-date').textContent = 'Ngày: ' + new Date().toLocaleString('vi-VN');
+        $('rc-date').textContent = 'Ngày: ' + (order.ngayDat ? new Date(order.ngayDat).toLocaleString('vi-VN') : new Date().toLocaleString('vi-VN'));
         $('rc-total').textContent = formatVND(order.tongTien);
         $('rc-method').textContent = payment.phuongThuc || 'TIỀN MẶT';
 
@@ -3413,6 +3543,23 @@
         `).join('');
 
         $('receipt-modal').classList.add('active');
+    }
+
+    function printReceiptTicket() {
+        window.print();
+    }
+
+    async function reprintReceiptInvoice(maDon, phuongThuc) {
+        if (!maDon) {
+            showToast('Không tìm thấy thông tin đơn hàng để in lại hoá đơn', 'error');
+            return;
+        }
+        try {
+            const detail = await apiFetch(`/api/don-hang/${maDon}/chi-tiet-hoa-don`);
+            showReceipt(detail, { phuongThuc: phuongThuc || 'TIỀN MẶT' });
+        } catch (e) {
+            showToast('Lỗi tải chi tiết hoá đơn: ' + e.message, 'error');
+        }
     }
 
     // ─────────────────────────────────────────────────────────────
@@ -3454,6 +3601,25 @@
                 return;
             }
 
+            // Tải danh mục công thức định lượng và tồn kho để hiển thị tiêu hao cho bếp
+            let allRecipes = [];
+            try {
+                const rRes = await apiFetch('/api/cong-thuc-mon');
+                if (Array.isArray(rRes)) allRecipes = rRes;
+            } catch (err) {
+                console.warn('Lỗi tải công thức món:', err);
+            }
+
+            let stockMap = new Map();
+            try {
+                const nlRes = await apiFetch('/api/nguyen-lieu/bao-cao-ton-kho');
+                if (Array.isArray(nlRes)) {
+                    nlRes.forEach(nl => stockMap.set(nl.nlId, nl));
+                }
+            } catch (err) {
+                console.warn('Lỗi tải tồn kho:', err);
+            }
+
             const detailedOrders = await Promise.all(activeOrders.map(async (o) => {
                 try {
                     const detail = await apiFetch(`/api/don-hang/${o.maDon}/chi-tiet-hoa-don`);
@@ -3481,16 +3647,62 @@
                 const timeStr = order.ngayDat ? new Date(order.ngayDat).toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' }) : '--:--';
 
                 const itemsHtml = (order.danhSachMon && order.danhSachMon.length > 0)
-                    ? order.danhSachMon.map(item => `
-                        <div style="display:flex; justify-content:space-between; align-items:center; padding:8px 0; border-bottom:1px dashed #e2e8f0;">
-                            <div style="font-weight:600; font-size:14px; color:#1e293b;">
-                                ${escHtml(item.tenMon)}
+                    ? order.danhSachMon.map(item => {
+                        const dishRecipes = allRecipes.filter(r => r.id && r.id.maMon === item.maMon);
+                        let recipeBreakdown = '';
+
+                        if (dishRecipes.length > 0) {
+                            recipeBreakdown = dishRecipes.map(r => {
+                                const nlFromStock = stockMap.get(r.id.nlId);
+                                const nl = nlFromStock || r.nguyenLieu;
+                                const nlName = nl ? (nl.tenNguyenLieu || nl.tenNl || `Nguyên liệu #${r.id.nlId}`) : `Nguyên liệu #${r.id.nlId}`;
+                                const dvt = nl ? (nl.donViTinh || nl.dvt || '') : '';
+                                const dinhLuong = Number(r.soLuongDung || 0);
+                                const tieuHao = (dinhLuong * (item.soLuong || 1)).toFixed(2).replace(/\.?0+$/, '');
+                                const tonKhoNum = nl && nl.soLuongTon != null ? Number(nl.soLuongTon) : null;
+                                const tonKhoStr = tonKhoNum != null ? tonKhoNum.toFixed(2).replace(/\.?0+$/, '') : '—';
+                                const isOut = tonKhoNum != null && tonKhoNum <= 0;
+                                const isLow = tonKhoNum != null && tonKhoNum <= 10;
+                                const stockColor = isOut ? '#dc2626' : (isLow ? '#d97706' : '#16a34a');
+                                const stockTag = isOut ? '<span style="color:#dc2626; font-weight:700;">(HẾT HÀNG)</span>' : (isLow ? '<span style="color:#d97706; font-weight:700;">(Sắp hết)</span>' : '');
+
+                                return `
+                                    <div style="display:flex; justify-content:space-between; align-items:center; padding:3px 0; font-size:12px; gap:8px;">
+                                        <div style="color:#334155; line-height:1.3;">
+                                            • <strong>${escHtml(nlName)}</strong>:
+                                            <span style="color:#ea580c; font-weight:700;">-${tieuHao} ${escHtml(dvt)}</span>
+                                            <span style="color:#64748b; font-size:11px;">(${dinhLuong} ${escHtml(dvt)}/phần)</span>
+                                        </div>
+                                        <div style="font-size:11px; color:${stockColor}; font-weight:600; white-space:nowrap;">
+                                            Tồn: ${tonKhoStr} ${escHtml(dvt)} ${stockTag}
+                                        </div>
+                                    </div>
+                                `;
+                            }).join('');
+                        } else {
+                            recipeBreakdown = `<div style="font-size:11px; color:#94a3b8; font-style:italic;">Món chưa cài công thức định lượng trừ kho</div>`;
+                        }
+
+                        return `
+                            <div style="padding:8px 0; border-bottom:1px dashed #e2e8f0;">
+                                <div style="display:flex; justify-content:space-between; align-items:center;">
+                                    <div style="font-weight:700; font-size:14px; color:#1e293b;">
+                                        ${escHtml(item.tenMon)}
+                                    </div>
+                                    <div style="background:#fff7ed; border:1px solid #fed7aa; color:#c2410c; font-weight:800; font-size:13px; padding:2px 8px; border-radius:6px;">
+                                        x${item.soLuong}
+                                    </div>
+                                </div>
+                                <div style="margin-top:6px; background:#f8fafc; border:1px solid #edf2f7; border-radius:6px; padding:6px 10px;">
+                                    <div style="font-size:10px; font-weight:700; color:#64748b; text-transform:uppercase; letter-spacing:0.4px; margin-bottom:3px; display:flex; align-items:center; gap:4px;">
+                                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/></svg>
+                                        Định lượng nguyên liệu trừ kho:
+                                    </div>
+                                    ${recipeBreakdown}
+                                </div>
                             </div>
-                            <div style="background:#fff7ed; border:1px solid #fed7aa; color:#c2410c; font-weight:800; font-size:14px; padding:2px 8px; border-radius:6px;">
-                                x${item.soLuong}
-                            </div>
-                        </div>
-                    `).join('')
+                        `;
+                    }).join('')
                     : `<p style="color:var(--text-muted); font-size:12px; font-style:italic; padding:8px 0;">Chưa có món ăn trong đơn này</p>`;
 
                 const actionHtml = isCompleted
@@ -3575,15 +3787,15 @@
 
             tbody.innerHTML = list.map(r => {
                 const monName = r.monAn ? r.monAn.tenMon : (r.id ? `Món #${r.id.maMon}` : '—');
-                const nlName = r.nguyenLieu ? r.nguyenLieu.tenNl : (r.id ? `Nguyên liệu #${r.id.nlId}` : '—');
-                const dvt = r.nguyenLieu ? r.nguyenLieu.dvt : '';
+                const nlName = r.nguyenLieu ? (r.nguyenLieu.tenNguyenLieu || r.nguyenLieu.tenNl) : (r.id ? `Nguyên liệu #${r.id.nlId}` : '—');
+                const dvt = r.nguyenLieu ? (r.nguyenLieu.donViTinh || r.nguyenLieu.dvt || '') : '';
                 const tonKho = r.nguyenLieu ? Number(r.nguyenLieu.soLuongTon || 0) : 0;
                 const soLuongDung = Number(r.soLuongDung || 0);
 
                 let statusBadge = '<span class="badge" style="background:#dcfce7; color:#15803d;">Dồi dào</span>';
                 if (tonKho <= 0) {
                     statusBadge = '<span class="badge" style="background:#fee2e2; color:#b91c1c;">Hết hàng</span>';
-                } else if (tonKho < 20) {
+                } else if (tonKho <= 10) {
                     statusBadge = '<span class="badge" style="background:#fef3c7; color:#b45309;">Sắp hết</span>';
                 }
 
