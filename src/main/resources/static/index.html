@@ -803,6 +803,26 @@
         }
         .kpi-title { font-size: 12px; color: var(--text-muted); font-weight: 600; text-transform: uppercase; }
         .kpi-value { font-size: 22px; font-weight: 800; color: var(--text-main); margin-top: 4px; }
+        .kpi-card.clickable {
+            cursor: pointer;
+            transition: all 0.2s ease;
+            position: relative;
+        }
+        .kpi-card.clickable:hover {
+            transform: translateY(-3px);
+            box-shadow: var(--shadow-md);
+            border-color: var(--primary);
+        }
+        .kpi-action-hint {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            font-size: 11px;
+            font-weight: 700;
+            padding: 2px 8px;
+            border-radius: 99px;
+            transition: all 0.15s;
+        }
 
         /* MODALS */
         .modal-overlay {
@@ -1468,55 +1488,67 @@
             </div>
             <div class="grid-4">
                 <!-- THẺ 1: TỔNG THU (DOANH THU BÁN) -->
-                <div class="kpi-card">
+                <div class="kpi-card clickable" onclick="openFinanceDetailModal('THU')" title="Bấm vào để xem chi tiết các đơn hàng và món ăn đã thu tiền">
                     <div class="kpi-icon" style="background:#dcfce7; color:#15803d;">
                         <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path></svg>
                     </div>
-                    <div>
+                    <div style="flex:1;">
                         <div class="kpi-title">Tổng Thu (Doanh thu)</div>
                         <div class="kpi-value" id="kpi-finance-income" style="color:#15803d;">0 ₫</div>
-                        <div style="font-size:11px; color:var(--text-muted); margin-top:2px;" id="kpi-finance-income-sub">0 đơn thanh toán</div>
+                        <div style="display:flex; align-items:center; justify-content:space-between; margin-top:4px; gap:6px; flex-wrap:wrap;">
+                            <span style="font-size:11px; color:var(--text-muted);" id="kpi-finance-income-sub">0 đơn thanh toán</span>
+                            <span class="kpi-action-hint" style="background:#dcfce7; color:#15803d;">Xem chi tiết thu &rarr;</span>
+                        </div>
                     </div>
                 </div>
 
                 <!-- THẺ 2: TỔNG CHI (NHẬP KHO NGUYÊN LIỆU) -->
-                <div class="kpi-card">
+                <div class="kpi-card clickable" onclick="openFinanceDetailModal('CHI')" title="Bấm vào để xem chi tiết đã chi nhập những nguyên liệu gì">
                     <div class="kpi-icon" style="background:#fee2e2; color:#b91c1c;">
                         <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 16v1a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V7a2 2 0 0 1 2-2h11a2 2 0 0 1 2 2v1"></path><path d="M18 8h4a2 2 0 0 1 2 2v7a2 2 0 0 1-2 2h-4"></path><circle cx="6" cy="19" r="2"></circle><circle cx="18" cy="19" r="2"></circle></svg>
                     </div>
-                    <div>
+                    <div style="flex:1;">
                         <div class="kpi-title">Tổng Chi (Nhập kho)</div>
                         <div class="kpi-value" id="kpi-finance-expense" style="color:#b91c1c;">0 ₫</div>
-                        <div style="font-size:11px; color:var(--text-muted); margin-top:2px;" id="kpi-finance-expense-sub">0 phiếu nhập kho</div>
+                        <div style="display:flex; align-items:center; justify-content:space-between; margin-top:4px; gap:6px; flex-wrap:wrap;">
+                            <span style="font-size:11px; color:var(--text-muted);" id="kpi-finance-expense-sub">0 phiếu nhập kho</span>
+                            <span class="kpi-action-hint" style="background:#fee2e2; color:#b91c1c;">Xem chi tiết chi &rarr;</span>
+                        </div>
                     </div>
                 </div>
 
                 <!-- THẺ 3: LỢI NHUẬN RÒNG -->
-                <div class="kpi-card" style="border: 2px solid #e0e7ff; background:#fbfbfe;">
+                <div class="kpi-card clickable" onclick="openFinanceDetailModal('ALL')" style="border: 2px solid #e0e7ff; background:#fbfbfe;" title="Bấm vào để xem bảng đối soát tổng hợp cả Thu và Chi">
                     <div class="kpi-icon" style="background:#ede9fe; color:#6d28d9;">
                         <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="1" x2="12" y2="23"></line><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path></svg>
                     </div>
-                    <div>
+                    <div style="flex:1;">
                         <div class="kpi-title">Lợi nhuận ròng (Thu - Chi)</div>
                         <div class="kpi-value" id="kpi-finance-profit" style="color:#4338ca;">0 ₫</div>
-                        <div style="margin-top:4px;" id="kpi-finance-profit-badge">
-                            <span class="badge" style="background:#e0e7ff; color:#4338ca; font-size:10px;">Hòa vốn</span>
+                        <div style="display:flex; align-items:center; justify-content:space-between; margin-top:4px; gap:6px; flex-wrap:wrap;">
+                            <span id="kpi-finance-profit-badge">
+                                <span class="badge" style="background:#e0e7ff; color:#4338ca; font-size:10px;">Hòa vốn</span>
+                            </span>
+                            <span class="kpi-action-hint" style="background:#ede9fe; color:#5b21b6;">Đối soát &rarr;</span>
                         </div>
                     </div>
                 </div>
 
                 <!-- THẺ 4: HÌNH THỨC DÒNG TIỀN -->
-                <div class="kpi-card">
+                <div class="kpi-card clickable" onclick="openFinanceDetailModal('THU')" title="Bấm vào để xem chi tiết dòng tiền thanh toán">
                     <div class="kpi-icon" style="background:#fef3c7; color:#b45309;">
                         <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="20" height="14" x="2" y="5" rx="2"></rect><line x1="2" x2="22" y1="10" y2="10"></line></svg>
                     </div>
-                    <div>
+                    <div style="flex:1;">
                         <div class="kpi-title">Dòng tiền thanh toán</div>
                         <div style="font-size:13px; font-weight:700; color:#1e293b; margin-top:2px;">
                             TM: <span id="kpi-rev-cash" style="color:#059669;">0 ₫</span>
                         </div>
-                        <div style="font-size:11px; color:var(--text-muted); margin-top:2px;">
-                            CK/Thẻ: <span id="kpi-rev-transfer" style="color:#0284c7; font-weight:600;">0 ₫</span>
+                        <div style="display:flex; align-items:center; justify-content:space-between; margin-top:2px; gap:4px; flex-wrap:wrap;">
+                            <span style="font-size:11px; color:var(--text-muted);">
+                                CK/Thẻ: <span id="kpi-rev-transfer" style="color:#0284c7; font-weight:600;">0 ₫</span>
+                            </span>
+                            <span class="kpi-action-hint" style="background:#fef3c7; color:#b45309;">Chi tiết &rarr;</span>
                         </div>
                     </div>
                 </div>
@@ -1650,28 +1682,34 @@
 
         <!-- BẢNG CÔNG THỨC & ĐỊNH LƯỢNG NGUYÊN LIỆU MÓN ĂN -->
         <div class="card">
-            <div class="card-header">
+            <div class="card-header" style="flex-wrap:wrap; gap:10px;">
                 <div>
-                    <div class="card-title">Bảng định lượng nguyên liệu món ăn</div>
+                    <div class="card-title">Bảng định lượng nguyên liệu món ăn (100% món đã cài công thức)</div>
                     <p style="font-size:12px; color:var(--text-muted); margin-top:2px;">
-                        Định lượng nguyên liệu tiêu hao khi bán 1 suất món ăn (hệ thống tự động trừ kho nguyên liệu)
+                        Định lượng nguyên liệu tiêu hao khi chế biến món ăn (hệ thống tự động trừ kho nguyên liệu tương ứng)
                     </p>
                 </div>
-                <button class="btn btn-secondary btn-sm" onclick="loadRecipesTable()">Tải lại công thức</button>
+                <div style="display:flex; align-items:center; gap:8px; flex-wrap:wrap;">
+                    <input type="text" id="recipe-search-input" placeholder="Lọc theo tên món hoặc nguyên liệu..." oninput="filterRecipesTable()" style="width:230px; padding:6px 10px; font-size:12px;">
+                    <button class="btn btn-primary btn-sm" onclick="openRecipeModal()">+ Cài công thức món</button>
+                    <button class="btn btn-secondary btn-sm" onclick="loadRecipesTable()">Tải lại</button>
+                </div>
             </div>
-            <div class="table-responsive">
+            <div class="table-responsive" style="max-height:480px; overflow-y:auto;">
                 <table class="app-table">
                     <thead>
                         <tr>
+                            <th>Mã món</th>
                             <th>Món ăn</th>
                             <th>Nguyên liệu sử dụng</th>
                             <th>Định lượng tiêu hao / Suất</th>
                             <th>Tồn kho hiện tại</th>
                             <th>Trạng thái nguyên liệu</th>
+                            <th style="text-align:center;">Thao tác</th>
                         </tr>
                     </thead>
                     <tbody id="recipe-list-tbody">
-                        <tr><td colspan="5" style="text-align:center; color:var(--text-muted);">Đang tải công thức...</td></tr>
+                        <tr><td colspan="7" style="text-align:center; color:var(--text-muted);">Đang tải công thức...</td></tr>
                     </tbody>
                 </table>
             </div>
@@ -1854,6 +1892,83 @@
                 In biên lai (Xuất PDF)
             </button>
             <button class="btn btn-primary" onclick="closeModal('goods-receipt-modal')">Đóng</button>
+        </div>
+    </div>
+</div>
+
+<!-- ===== MODAL: CHI TIẾT KHOẢN THU / KHOẢN CHI / ĐỐI SOÁT ===== -->
+<div class="modal-overlay" id="finance-detail-modal">
+    <div class="modal-dialog" style="max-width:940px; width:96%;">
+        <div class="modal-header" style="flex-wrap:wrap; gap:10px;">
+            <div>
+                <h3 id="fd-modal-title" style="font-size:17px; font-weight:800; color:#1e293b;">Chi tiết Báo cáo Tài chính</h3>
+                <div style="font-size:12px; color:var(--text-muted); margin-top:2px;">
+                    Kỳ đối soát: <strong id="fd-period-label" style="color:var(--primary);">Hôm nay</strong>
+                </div>
+            </div>
+            <div style="display:flex; align-items:center; gap:8px; flex-wrap:wrap;">
+                <div class="filter-group" style="display:inline-flex;">
+                    <button type="button" id="fd-tab-thu" class="btn btn-sm btn-secondary" onclick="switchFinanceModalTab('THU')">Khoản Thu (+)</button>
+                    <button type="button" id="fd-tab-chi" class="btn btn-sm btn-secondary" onclick="switchFinanceModalTab('CHI')">Khoản Chi (-)</button>
+                    <button type="button" id="fd-tab-all" class="btn btn-sm btn-secondary" onclick="switchFinanceModalTab('ALL')">Tất cả Thu & Chi</button>
+                </div>
+                <button class="modal-close" onclick="closeModal('finance-detail-modal')">&times;</button>
+            </div>
+        </div>
+        <div class="modal-body" style="max-height:72vh; overflow-y:auto; padding:18px 20px;">
+            <div id="fd-summary-strip" class="grid-3" style="margin-bottom:16px; gap:12px;"></div>
+            <div class="table-responsive" style="border:1px solid var(--border); border-radius:var(--radius-md); overflow:hidden;">
+                <table class="app-table" style="margin:0;">
+                    <thead id="fd-table-head"></thead>
+                    <tbody id="fd-table-body"></tbody>
+                </table>
+            </div>
+        </div>
+        <div class="modal-footer" style="display:flex; justify-content:space-between; align-items:center; gap:10px; background:#f8fafc; padding:12px 20px; border-top:1px solid var(--border); flex-wrap:wrap;">
+            <div id="fd-footer-summary" style="font-size:13px; font-weight:700; color:#1e293b;"></div>
+            <div style="display:flex; gap:8px;">
+                <button type="button" class="btn btn-secondary btn-sm" onclick="scrollToCashFlowLedger()">Cuộn xuống Sổ quỹ</button>
+                <button type="button" class="btn btn-primary" onclick="closeModal('finance-detail-modal')">Đóng</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ===== MODAL: CÀI ĐẶT CÔNG THỨC ĐỊNH LƯỢNG MÓN ĂN ===== -->
+<div class="modal-overlay" id="recipe-modal">
+    <div class="modal-dialog">
+        <div class="modal-header">
+            <h3 id="recipe-modal-title">Cài đặt công thức định lượng món</h3>
+            <button class="modal-close" onclick="closeModal('recipe-modal')">&times;</button>
+        </div>
+        <div class="modal-body">
+            <form id="recipe-form" onsubmit="submitRecipeForm(event)">
+                <label>Chọn món ăn <span style="color:red">*</span></label>
+                <select id="recipe-dish-select" required></select>
+
+                <label>Chọn nguyên liệu trừ kho <span style="color:red">*</span></label>
+                <select id="recipe-ingredient-select" required onchange="onRecipeIngredientChange()"></select>
+
+                <div class="grid-2" style="gap:10px;">
+                    <div>
+                        <label>Định lượng cho 1 suất <span style="color:red">*</span></label>
+                        <input type="number" id="recipe-qty-input" step="0.01" min="0.001" required placeholder="VD: 0.2">
+                    </div>
+                    <div>
+                        <label>Đơn vị tính</label>
+                        <input type="text" id="recipe-unit-input" readonly style="background:#f1f5f9;">
+                    </div>
+                </div>
+
+                <div style="background:#eff6ff; color:#1e40af; padding:8px 12px; border-radius:6px; font-size:12px; margin-top:12px; border:1px solid #bfdbfe;">
+                    <strong>Quy tắc trừ kho:</strong> Khi món ăn này được nhân viên bán ra, hệ thống sẽ tự động trừ kho số lượng tương ứng với định lượng cài đặt.
+                </div>
+
+                <div style="display:flex; justify-content:flex-end; gap:8px; margin-top:16px;">
+                    <button type="button" class="btn btn-secondary" onclick="closeModal('recipe-modal')">Hủy</button>
+                    <button type="submit" class="btn btn-primary" id="btn-save-recipe">Lưu công thức</button>
+                </div>
+            </form>
         </div>
     </div>
 </div>
@@ -3717,6 +3832,17 @@
     // ─────────────────────────────────────────────────────────────
     let financeTimeFilter = 'today';
     let rawCashFlowData = [];
+    let orderDetailCache = new Map();
+    let currentFilteredPayments = [];
+    let currentFilteredImports = [];
+    let currentFinanceSummary = {
+        totalIncome: 0,
+        cashIncome: 0,
+        transferIncome: 0,
+        totalExpense: 0,
+        netProfit: 0,
+        periodText: 'Hôm nay'
+    };
 
     function setFinanceTimeFilter(mode) {
         financeTimeFilter = mode;
@@ -3808,6 +3934,19 @@
                 return true;
             });
 
+            // Lấy chi tiết danh sách món ăn cho các đơn đã thanh toán (để biết thu tiền từ những món gì)
+            await Promise.all(filteredPayments.map(async (p) => {
+                const maDon = p.donHang ? p.donHang.maDon : null;
+                if (maDon && !orderDetailCache.has(maDon)) {
+                    try {
+                        const detail = await apiFetch(`/api/don-hang/${maDon}/chi-tiet-hoa-don`);
+                        if (detail) orderDetailCache.set(maDon, detail);
+                    } catch (err) {
+                        // ignore
+                    }
+                }
+            }));
+
             // TÍNH TOÁN CÁC CHỈ SỐ TÀI CHÍNH
             let totalIncome = 0;
             let cashIncome = 0;
@@ -3829,6 +3968,25 @@
             });
 
             const netProfit = totalIncome - totalExpense;
+
+            let periodLabel = 'Tất cả thời gian';
+            if (financeTimeFilter === 'today') {
+                periodLabel = `Hôm nay (${dd}/${mm}/${yyyy})`;
+            } else if (financeTimeFilter === 'custom' && customDateStr) {
+                const parts = customDateStr.split('-');
+                periodLabel = parts.length === 3 ? `Ngày ${parts[2]}/${parts[1]}/${parts[0]}` : customDateStr;
+            }
+
+            currentFilteredPayments = filteredPayments;
+            currentFilteredImports = filteredImports;
+            currentFinanceSummary = {
+                totalIncome,
+                cashIncome,
+                transferIncome,
+                totalExpense,
+                netProfit,
+                periodText: periodLabel
+            };
 
             // HIỂN THỊ CÁC THẺ KPI TÀI CHÍNH
             if ($('kpi-finance-income')) $('kpi-finance-income').textContent = formatVND(totalIncome);
@@ -3863,10 +4021,17 @@
             // Dòng thu từ thanh toán
             filteredPayments.forEach(p => {
                 const maDon = p.donHang ? p.donHang.maDon : null;
-                const tenBan = p.donHang && p.donHang.banAn ? (p.donHang.banAn.tenBan || `Bàn #${p.donHang.banAn.maBan}`) : '';
-                const desc = maDon 
-                    ? `Thanh toán hoá đơn đơn hàng #${maDon}${tenBan ? ' (' + tenBan + ')' : ''}` 
+                const detail = maDon ? orderDetailCache.get(maDon) : null;
+                const tenBan = (detail && detail.tenBan) ? detail.tenBan : (p.donHang && p.donHang.ban ? p.donHang.ban.tenBan : '');
+                const dishes = (detail && Array.isArray(detail.danhSachMon)) ? detail.danhSachMon : [];
+
+                const titleLine = maDon 
+                    ? `Thu tiền đơn hàng #${maDon}${tenBan ? ' (' + tenBan + ')' : ''}` 
                     : `Giao dịch thanh toán #${p.maTt}`;
+
+                const dishSummary = dishes.length > 0
+                    ? dishes.map(d => `${d.tenMon} ×${d.soLuong} (${formatVND(d.thanhTien)})`).join(', ')
+                    : '';
 
                 let methodLabel = 'Tiền mặt';
                 if (p.phuongThuc === 'CHUYEN_KHOAN') methodLabel = 'Chuyển khoản QR';
@@ -3877,7 +4042,10 @@
                     code: `#GD-${p.maTt}`,
                     time: p.thoiGian,
                     type: 'THU',
-                    content: desc,
+                    content: titleLine,
+                    subDetail: dishSummary ? `Món bán: ${dishSummary}` : '',
+                    dishesList: dishes,
+                    tenBan: tenBan || 'Bàn ăn',
                     method: methodLabel,
                     amount: Number(p.soTien || 0),
                     orderId: maDon,
@@ -3890,16 +4058,31 @@
             filteredImports.forEach(p => {
                 const nlName = p.nguyenLieu ? (p.nguyenLieu.tenNguyenLieu || p.nguyenLieu.tenNl || `NL #${p.nguyenLieu.nlId}`) : 'Nguyên liệu';
                 const dvt = p.nguyenLieu ? (p.nguyenLieu.donViTinh || p.nguyenLieu.dvt || '') : '';
-                const nccName = p.nhaCungCap ? p.nhaCungCap.tenNcc : (p.ghiChu || 'Tự do');
-                const amt = Number(p.tongTien != null ? p.tongTien : ((p.soLuong || 0) * (p.donGia || 0)));
+                const nccName = p.nhaCungCap ? p.nhaCungCap.tenNcc : 'NCC tự do';
+                const nccPhone = (p.nhaCungCap && p.nhaCungCap.soDienThoai) ? p.nhaCungCap.soDienThoai : '';
+                const nvName = p.nhanVien ? p.nhanVien.hoTen : 'Thủ kho';
+                const khoName = (p.kho && p.kho.tenKho) ? p.kho.tenKho : 'Kho chính';
+                const qty = Number(p.soLuong || 0);
+                const price = Number(p.donGia || 0);
+                const amt = Number(p.tongTien != null ? p.tongTien : (qty * price));
 
                 rawCashFlowData.push({
                     source: 'CHI',
                     code: `#PN-${p.pnId}`,
                     time: p.ngayNhapXuat,
                     type: 'CHI',
-                    content: `Nhập kho: ${nlName} (${p.soLuong} ${dvt}) - NCC: ${nccName}`,
-                    method: 'Tiền mặt / Quỹ kho',
+                    content: `Chi nhập kho: ${nlName} (${qty} ${dvt} × ${formatVND(price)}/${dvt || 'đv'})`,
+                    subDetail: `NCC: ${nccName} • Người nhập: ${nvName}${p.ghiChu ? ' • Ghi chú: ' + p.ghiChu : ''}`,
+                    nlName: nlName,
+                    dvt: dvt,
+                    qty: qty,
+                    price: price,
+                    nccName: nccName,
+                    nccPhone: nccPhone,
+                    nvName: nvName,
+                    khoName: khoName,
+                    ghiChu: p.ghiChu || 'Nhập kho nguyên liệu',
+                    method: 'Quỹ tiền mặt / Công nợ NCC',
                     amount: amt,
                     pnId: p.pnId,
                     rawId: p.pnId
@@ -3973,13 +4156,247 @@
                     <td><strong>${item.code}</strong></td>
                     <td style="font-size:12px; color:var(--text-muted);">${timeStr}</td>
                     <td>${badgeType}</td>
-                    <td>${escHtml(item.content)}</td>
+                    <td>
+                        <div style="font-weight:700; color:#1e293b;">${escHtml(item.content)}</div>
+                        ${item.subDetail ? `<div style="font-size:11px; color:#64748b; margin-top:2px;">${escHtml(item.subDetail)}</div>` : ''}
+                    </td>
                     <td style="font-size:12px;">${escHtml(item.method)}</td>
                     <td style="text-align:right;">${amountStr}</td>
                     <td style="text-align:center;">${actionHtml}</td>
                 </tr>
             `;
         }).join('');
+    }
+
+    async function openFinanceDetailModal(mode) {
+        if (rawCashFlowData.length === 0) {
+            await loadFinancialReport();
+        }
+        switchFinanceModalTab(mode || 'ALL');
+        $('finance-detail-modal').classList.add('active');
+    }
+
+    function scrollToCashFlowLedger() {
+        closeModal('finance-detail-modal');
+        const el = $('cash-flow-tbody');
+        if (el) {
+            el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+    }
+
+    function switchFinanceModalTab(mode) {
+        const btnThu = $('fd-tab-thu');
+        const btnChi = $('fd-tab-chi');
+        const btnAll = $('fd-tab-all');
+
+        if (btnThu) btnThu.className = mode === 'THU' ? 'btn btn-sm btn-primary' : 'btn btn-sm btn-secondary';
+        if (btnChi) btnChi.className = mode === 'CHI' ? 'btn btn-sm btn-primary' : 'btn btn-sm btn-secondary';
+        if (btnAll) btnAll.className = mode === 'ALL' ? 'btn btn-sm btn-primary' : 'btn btn-sm btn-secondary';
+
+        if ($('fd-period-label')) $('fd-period-label').textContent = currentFinanceSummary.periodText || 'Hôm nay';
+
+        const strip = $('fd-summary-strip');
+        const thead = $('fd-table-head');
+        const tbody = $('fd-table-body');
+        const footerSum = $('fd-footer-summary');
+
+        const thuList = rawCashFlowData.filter(x => x.type === 'THU');
+        const chiList = rawCashFlowData.filter(x => x.type === 'CHI');
+
+        if (mode === 'THU') {
+            $('fd-modal-title').textContent = 'Chi tiết Tổng Thu (Doanh thu bán hàng)';
+            strip.innerHTML = `
+                <div style="background:#f0fdf4; border:1px solid #bbf7d0; border-radius:8px; padding:12px;">
+                    <div style="font-size:11px; color:#166534; font-weight:700; text-transform:uppercase;">Tổng số đơn đã thu</div>
+                    <div style="font-size:18px; font-weight:800; color:#15803d; margin-top:4px;">${thuList.length} đơn hàng</div>
+                </div>
+                <div style="background:#f8fafc; border:1px solid #e2e8f0; border-radius:8px; padding:12px;">
+                    <div style="font-size:11px; color:#475569; font-weight:700; text-transform:uppercase;">Phân bổ phương thức</div>
+                    <div style="font-size:13px; font-weight:700; color:#1e293b; margin-top:4px;">
+                        TM: <span style="color:#059669;">${formatVND(currentFinanceSummary.cashIncome)}</span> | CK/Thẻ: <span style="color:#0284c7;">${formatVND(currentFinanceSummary.transferIncome)}</span>
+                    </div>
+                </div>
+                <div style="background:#dcfce7; border:1px solid #86efac; border-radius:8px; padding:12px;">
+                    <div style="font-size:11px; color:#14532d; font-weight:700; text-transform:uppercase;">Tổng cộng tiền Thu (+)</div>
+                    <div style="font-size:20px; font-weight:800; color:#15803d; margin-top:4px;">+${formatVND(currentFinanceSummary.totalIncome)}</div>
+                </div>
+            `;
+
+            thead.innerHTML = `
+                <tr>
+                    <th>Mã GD / Đơn</th>
+                    <th>Bàn & Giờ thu</th>
+                    <th>Chi tiết thu gì (Các món đã bán)</th>
+                    <th>Phương thức</th>
+                    <th style="text-align:right;">Số tiền thu (+)</th>
+                    <th style="text-align:center;">Hóa đơn</th>
+                </tr>
+            `;
+
+            if (thuList.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="6" style="text-align:center; padding:28px; color:var(--text-muted);">Chưa có khoản thu bán hàng nào trong kỳ này.</td></tr>`;
+            } else {
+                tbody.innerHTML = thuList.map(item => {
+                    const timeStr = item.time ? new Date(item.time).toLocaleString('vi-VN') : '—';
+                    const dishesHtml = (item.dishesList && item.dishesList.length > 0)
+                        ? item.dishesList.map(d => `
+                            <div style="display:flex; justify-content:space-between; font-size:12px; padding:2px 0; border-bottom:1px dashed #f1f5f9;">
+                                <span>• <strong>${escHtml(d.tenMon)}</strong> <span style="color:#c2410c; font-weight:700;">×${d.soLuong}</span></span>
+                                <span style="color:#475569; font-weight:600;">${formatVND(d.thanhTien)}</span>
+                            </div>
+                        `).join('')
+                        : `<span style="color:#64748b; font-size:12px;">${escHtml(item.content)}</span>`;
+
+                    return `
+                        <tr>
+                            <td>
+                                <strong>${item.code}</strong>
+                                ${item.orderId ? `<div style="font-size:11px; color:var(--primary); font-weight:700;">Đơn #${item.orderId}</div>` : ''}
+                            </td>
+                            <td>
+                                <div style="font-weight:700; color:#1e293b;">${escHtml(item.tenBan || 'Bàn ăn')}</div>
+                                <div style="font-size:11px; color:var(--text-muted);">${timeStr}</div>
+                            </td>
+                            <td style="min-width:250px;">${dishesHtml}</td>
+                            <td><span class="badge" style="background:#e0f2fe; color:#0369a1; font-weight:600;">${escHtml(item.method)}</span></td>
+                            <td style="text-align:right; font-weight:800; color:#15803d; font-size:14px;">+${formatVND(item.amount)}</td>
+                            <td style="text-align:center;">
+                                ${item.orderId ? `
+                                    <button class="btn btn-secondary btn-sm" onclick="reprintReceiptInvoice(${item.orderId}, '${item.paymentMethod || 'TIEN_MAT'}')">In HĐ</button>
+                                ` : '—'}
+                            </td>
+                        </tr>
+                    `;
+                }).join('');
+            }
+            footerSum.innerHTML = `Tổng cộng khoản Thu (${thuList.length} đơn): <span style="color:#15803d; font-size:15px;">+${formatVND(currentFinanceSummary.totalIncome)}</span>`;
+
+        } else if (mode === 'CHI') {
+            $('fd-modal-title').textContent = 'Chi tiết Tổng Chi (Chi phí nhập nguyên liệu kho)';
+            strip.innerHTML = `
+                <div style="background:#fef2f2; border:1px solid #fecaca; border-radius:8px; padding:12px;">
+                    <div style="font-size:11px; color:#991b1b; font-weight:700; text-transform:uppercase;">Tổng số phiếu chi nhập</div>
+                    <div style="font-size:18px; font-weight:800; color:#b91c1c; margin-top:4px;">${chiList.length} phiếu nhập kho</div>
+                </div>
+                <div style="background:#f8fafc; border:1px solid #e2e8f0; border-radius:8px; padding:12px;">
+                    <div style="font-size:11px; color:#475569; font-weight:700; text-transform:uppercase;">Hạng mục chi phí</div>
+                    <div style="font-size:13px; font-weight:700; color:#1e293b; margin-top:4px;">Nhập nguyên vật liệu chế biến</div>
+                </div>
+                <div style="background:#fee2e2; border:1px solid #fca5a5; border-radius:8px; padding:12px;">
+                    <div style="font-size:11px; color:#7f1d1d; font-weight:700; text-transform:uppercase;">Tổng cộng tiền Chi (-)</div>
+                    <div style="font-size:20px; font-weight:800; color:#b91c1c; margin-top:4px;">-${formatVND(currentFinanceSummary.totalExpense)}</div>
+                </div>
+            `;
+
+            thead.innerHTML = `
+                <tr>
+                    <th>Mã Phiếu</th>
+                    <th>Thời gian nhập</th>
+                    <th>Chi tiết chi gì (Nguyên liệu nhập kho)</th>
+                    <th>Số lượng × Đơn giá</th>
+                    <th>Nhà cung cấp & Người nhập</th>
+                    <th style="text-align:right;">Số tiền chi (-)</th>
+                    <th style="text-align:center;">Biên lai</th>
+                </tr>
+            `;
+
+            if (chiList.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="7" style="text-align:center; padding:28px; color:var(--text-muted);">Chưa có khoản chi nhập kho nào trong kỳ này.</td></tr>`;
+            } else {
+                tbody.innerHTML = chiList.map(item => {
+                    const timeStr = item.time ? new Date(item.time).toLocaleString('vi-VN') : '—';
+                    return `
+                        <tr>
+                            <td><strong style="color:#c2410c;">${item.code}</strong></td>
+                            <td style="font-size:12px; color:var(--text-muted);">${timeStr}</td>
+                            <td>
+                                <div style="font-weight:800; color:#1e293b; font-size:13px;">${escHtml(item.nlName || 'Nguyên liệu')}</div>
+                                <div style="font-size:11px; color:#64748b; margin-top:2px;">
+                                    Kho: <strong>${escHtml(item.khoName)}</strong> • Ghi chú: <em>${escHtml(item.ghiChu)}</em>
+                                </div>
+                            </td>
+                            <td>
+                                <div style="font-weight:700; color:#0f172a;">${item.qty} ${escHtml(item.dvt)}</div>
+                                <div style="font-size:11px; color:#64748b;">× ${formatVND(item.price)} / ${escHtml(item.dvt || 'đv')}</div>
+                            </td>
+                            <td>
+                                <div style="font-weight:700; color:#1e40af; font-size:12px;">${escHtml(item.nccName)}</div>
+                                <div style="font-size:11px; color:#64748b;">Người nhập: ${escHtml(item.nvName)}</div>
+                            </td>
+                            <td style="text-align:right; font-weight:800; color:#b91c1c; font-size:14px;">-${formatVND(item.amount)}</td>
+                            <td style="text-align:center;">
+                                <button class="btn btn-secondary btn-sm" onclick="viewGoodsReceiptById(${item.pnId})">In biên lai</button>
+                            </td>
+                        </tr>
+                    `;
+                }).join('');
+            }
+            footerSum.innerHTML = `Tổng cộng khoản Chi (${chiList.length} phiếu nhập): <span style="color:#b91c1c; font-size:15px;">-${formatVND(currentFinanceSummary.totalExpense)}</span>`;
+
+        } else {
+            $('fd-modal-title').textContent = 'Đối soát Tổng hợp: Thu - Chi & Lợi nhuận ròng';
+            const profitColor = currentFinanceSummary.netProfit >= 0 ? '#15803d' : '#b91c1c';
+            strip.innerHTML = `
+                <div style="background:#f0fdf4; border:1px solid #bbf7d0; border-radius:8px; padding:12px; cursor:pointer;" onclick="switchFinanceModalTab('THU')">
+                    <div style="font-size:11px; color:#166534; font-weight:700; text-transform:uppercase;">Tổng Thu Bán Hàng (${thuList.length} đơn)</div>
+                    <div style="font-size:18px; font-weight:800; color:#15803d; margin-top:4px;">+${formatVND(currentFinanceSummary.totalIncome)}</div>
+                </div>
+                <div style="background:#fef2f2; border:1px solid #fecaca; border-radius:8px; padding:12px; cursor:pointer;" onclick="switchFinanceModalTab('CHI')">
+                    <div style="font-size:11px; color:#991b1b; font-weight:700; text-transform:uppercase;">Tổng Chi Nhập Kho (${chiList.length} phiếu)</div>
+                    <div style="font-size:18px; font-weight:800; color:#b91c1c; margin-top:4px;">-${formatVND(currentFinanceSummary.totalExpense)}</div>
+                </div>
+                <div style="background:#f5f3ff; border:1px solid #ddd6fe; border-radius:8px; padding:12px;">
+                    <div style="font-size:11px; color:#5b21b6; font-weight:700; text-transform:uppercase;">Lợi Nhuận Ròng (Thu - Chi)</div>
+                    <div style="font-size:20px; font-weight:800; color:${profitColor}; margin-top:4px;">${formatVND(currentFinanceSummary.netProfit)}</div>
+                </div>
+            `;
+
+            thead.innerHTML = `
+                <tr>
+                    <th>Mã CT</th>
+                    <th>Thời gian</th>
+                    <th>Phân loại</th>
+                    <th>Chi tiết nội dung (Thu món gì / Chi nhập hàng gì)</th>
+                    <th>Hình thức / NCC</th>
+                    <th style="text-align:right;">Số tiền</th>
+                    <th style="text-align:center;">Chứng từ</th>
+                </tr>
+            `;
+
+            if (rawCashFlowData.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="7" style="text-align:center; padding:28px; color:var(--text-muted);">Không có giao dịch Thu hoặc Chi nào trong kỳ này.</td></tr>`;
+            } else {
+                tbody.innerHTML = rawCashFlowData.map(item => {
+                    const isThu = item.type === 'THU';
+                    const timeStr = item.time ? new Date(item.time).toLocaleString('vi-VN') : '—';
+                    const badge = isThu
+                        ? '<span class="badge" style="background:#dcfce7; color:#15803d; font-weight:700;">+ THU</span>'
+                        : '<span class="badge" style="background:#fee2e2; color:#b91c1c; font-weight:700;">- CHI</span>';
+
+                    return `
+                        <tr>
+                            <td><strong>${item.code}</strong></td>
+                            <td style="font-size:12px; color:var(--text-muted);">${timeStr}</td>
+                            <td>${badge}</td>
+                            <td>
+                                <div style="font-weight:700; color:#1e293b;">${escHtml(item.content)}</div>
+                                ${item.subDetail ? `<div style="font-size:11px; color:#64748b; margin-top:2px;">${escHtml(item.subDetail)}</div>` : ''}
+                            </td>
+                            <td style="font-size:12px;">${escHtml(isThu ? item.method : item.nccName)}</td>
+                            <td style="text-align:right; font-weight:800; color:${isThu ? '#15803d' : '#b91c1c'};">
+                                ${isThu ? '+' : '-'}${formatVND(item.amount)}
+                            </td>
+                            <td style="text-align:center;">
+                                ${isThu && item.orderId
+                                    ? `<button class="btn btn-secondary btn-sm" onclick="reprintReceiptInvoice(${item.orderId}, '${item.paymentMethod || 'TIEN_MAT'}')">In HĐ</button>`
+                                    : `<button class="btn btn-secondary btn-sm" onclick="viewGoodsReceiptById(${item.pnId})">In biên lai</button>`}
+                            </td>
+                        </tr>
+                    `;
+                }).join('');
+            }
+            footerSum.innerHTML = `Thu: <span style="color:#15803d;">+${formatVND(currentFinanceSummary.totalIncome)}</span> &nbsp;|&nbsp; Chi: <span style="color:#b91c1c;">-${formatVND(currentFinanceSummary.totalExpense)}</span> &nbsp;&rarr;&nbsp; Lợi nhuận: <span style="color:${profitColor}; font-size:15px;">${formatVND(currentFinanceSummary.netProfit)}</span>`;
+        }
     }
 
     async function loadDailyRevenue() {
@@ -4326,48 +4743,158 @@
         }
     }
 
+    let allRecipesList = [];
+    let allIngredientsForRecipe = [];
+
     async function loadRecipesTable() {
         const tbody = $('recipe-list-tbody');
         if (!tbody) return;
 
         try {
             const data = await apiFetch('/api/cong-thuc-mon');
-            const list = Array.isArray(data) ? data : [];
-            if (list.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="5" style="text-align:center; padding:20px; color:var(--text-muted);">Chưa có công thức định lượng nào trong hệ thống</td></tr>`;
-                return;
-            }
-
-            tbody.innerHTML = list.map(r => {
-                const monName = r.monAn ? r.monAn.tenMon : (r.id ? `Món #${r.id.maMon}` : '—');
-                const nlName = r.nguyenLieu ? (r.nguyenLieu.tenNguyenLieu || r.nguyenLieu.tenNl) : (r.id ? `Nguyên liệu #${r.id.nlId}` : '—');
-                const dvt = r.nguyenLieu ? (r.nguyenLieu.donViTinh || r.nguyenLieu.dvt || '') : '';
-                const tonKho = r.nguyenLieu ? Number(r.nguyenLieu.soLuongTon || 0) : 0;
-                const soLuongDung = Number(r.soLuongDung || 0);
-
-                let statusBadge = '<span class="badge" style="background:#dcfce7; color:#15803d;">Dồi dào</span>';
-                if (tonKho <= 0) {
-                    statusBadge = '<span class="badge" style="background:#fee2e2; color:#b91c1c;">Hết hàng</span>';
-                } else if (tonKho <= 10) {
-                    statusBadge = '<span class="badge" style="background:#fef3c7; color:#b45309;">Sắp hết</span>';
-                }
-
-                return `
-                    <tr>
-                        <td style="font-weight:700; color:#1e293b;">${escHtml(monName)}</td>
-                        <td style="font-weight:600;">${escHtml(nlName)}</td>
-                        <td style="font-weight:700; color:var(--primary);">${soLuongDung} ${escHtml(dvt)} / suất</td>
-                        <td style="font-weight:600;">${tonKho} ${escHtml(dvt)}</td>
-                        <td>${statusBadge}</td>
-                    </tr>
-                `;
-            }).join('');
+            allRecipesList = Array.isArray(data) ? data : [];
+            filterRecipesTable();
         } catch (e) {
             tbody.innerHTML = `
-                <tr><td colspan="5" style="text-align:center; color:var(--danger); padding:20px;">
+                <tr><td colspan="7" style="text-align:center; color:var(--danger); padding:20px;">
                     Lỗi tải công thức: ${escHtml(e.message)}
                 </td></tr>
             `;
+        }
+    }
+
+    function filterRecipesTable() {
+        const tbody = $('recipe-list-tbody');
+        if (!tbody) return;
+
+        const keyword = ($('recipe-search-input') ? $('recipe-search-input').value : '').trim().toLowerCase();
+        const filtered = allRecipesList.filter(r => {
+            if (!keyword) return true;
+            const monName = (r.monAn ? r.monAn.tenMon : '').toLowerCase();
+            const nlName = (r.nguyenLieu ? (r.nguyenLieu.tenNguyenLieu || r.nguyenLieu.tenNl) : '').toLowerCase();
+            return monName.includes(keyword) || nlName.includes(keyword) || String(r.id ? r.id.maMon : '').includes(keyword);
+        });
+
+        if (filtered.length === 0) {
+            tbody.innerHTML = `<tr><td colspan="7" style="text-align:center; padding:20px; color:var(--text-muted);">Không tìm thấy công thức định lượng phù hợp</td></tr>`;
+            return;
+        }
+
+        tbody.innerHTML = filtered.map(r => {
+            const maMon = r.id ? r.id.maMon : '--';
+            const nlId = r.id ? r.id.nlId : '--';
+            const monName = r.monAn ? r.monAn.tenMon : `Món #${maMon}`;
+            const nlName = r.nguyenLieu ? (r.nguyenLieu.tenNguyenLieu || r.nguyenLieu.tenNl) : `Nguyên liệu #${nlId}`;
+            const dvt = r.nguyenLieu ? (r.nguyenLieu.donViTinh || r.nguyenLieu.dvt || '') : '';
+            const tonKho = r.nguyenLieu ? Number(r.nguyenLieu.soLuongTon || 0) : 0;
+            const soLuongDung = Number(r.soLuongDung || 0);
+
+            let statusBadge = '<span class="badge" style="background:#dcfce7; color:#15803d; font-weight:600;">Dồi dào</span>';
+            if (tonKho <= 0) {
+                statusBadge = '<span class="badge" style="background:#fee2e2; color:#b91c1c; font-weight:700;">Hết hàng</span>';
+            } else if (tonKho <= 10) {
+                statusBadge = '<span class="badge" style="background:#fef3c7; color:#b45309; font-weight:700;">Sắp hết</span>';
+            }
+
+            return `
+                <tr>
+                    <td><strong>#${maMon}</strong></td>
+                    <td style="font-weight:700; color:#1e293b;">${escHtml(monName)}</td>
+                    <td style="font-weight:600;">${escHtml(nlName)}</td>
+                    <td style="font-weight:700; color:var(--primary);">${soLuongDung} ${escHtml(dvt)} / suất</td>
+                    <td style="font-weight:600;">${tonKho} ${escHtml(dvt)}</td>
+                    <td>${statusBadge}</td>
+                    <td style="text-align:center; white-space:nowrap;">
+                        <button class="btn btn-secondary btn-sm" onclick="openRecipeModal(${maMon}, ${nlId}, ${soLuongDung})" style="padding:3px 8px; font-size:11px; margin-right:4px;">Sửa</button>
+                        <button class="btn btn-danger btn-sm" onclick="deleteRecipe(${maMon}, ${nlId}, '${escHtml(monName)}', '${escHtml(nlName)}')" style="padding:3px 8px; font-size:11px;">Xóa</button>
+                    </td>
+                </tr>
+            `;
+        }).join('');
+    }
+
+    async function openRecipeModal(editMaMon, editNlId, editQty) {
+        try {
+            const [dishes, ingredients] = await Promise.all([
+                apiFetch('/api/mon-an'),
+                apiFetch('/api/nguyen-lieu')
+            ]);
+
+            allIngredientsForRecipe = Array.isArray(ingredients) ? ingredients : [];
+
+            const dishSel = $('recipe-dish-select');
+            dishSel.innerHTML = (Array.isArray(dishes) ? dishes : []).map(d => `
+                <option value="${d.maMon}" ${editMaMon === d.maMon ? 'selected' : ''}>#${d.maMon} - ${escHtml(d.tenMon)}</option>
+            `).join('');
+
+            const ingSel = $('recipe-ingredient-select');
+            ingSel.innerHTML = allIngredientsForRecipe.map(i => `
+                <option value="${i.nlId}" ${editNlId === i.nlId ? 'selected' : ''} data-dvt="${escHtml(i.donViTinh || '')}">${escHtml(i.tenNguyenLieu)} (${escHtml(i.donViTinh || '')} - Tồn: ${i.soLuongTon || 0})</option>
+            `).join('');
+
+            $('recipe-modal-title').textContent = editMaMon ? 'Chỉnh sửa định lượng món' : 'Cài đặt công thức định lượng món';
+            $('recipe-qty-input').value = editQty != null ? editQty : '';
+            onRecipeIngredientChange();
+
+            $('recipe-modal').classList.add('active');
+        } catch (e) {
+            showToast('Lỗi tải danh sách món / nguyên liệu: ' + e.message, 'error');
+        }
+    }
+
+    function onRecipeIngredientChange() {
+        const sel = $('recipe-ingredient-select');
+        const opt = sel.options[sel.selectedIndex];
+        const dvt = opt ? opt.getAttribute('data-dvt') : '';
+        $('recipe-unit-input').value = dvt || 'kg';
+    }
+
+    async function submitRecipeForm(e) {
+        e.preventDefault();
+        const maMon = Number($('recipe-dish-select').value);
+        const nlId = Number($('recipe-ingredient-select').value);
+        const soLuongDung = Number($('recipe-qty-input').value);
+
+        if (!maMon || !nlId || !soLuongDung || soLuongDung <= 0) {
+            showToast('Vui lòng nhập số lượng định lượng hợp lệ (> 0)!', 'error');
+            return;
+        }
+
+        const btn = $('btn-save-recipe');
+        const oldText = btn.textContent;
+        btn.disabled = true;
+        btn.textContent = 'Đang lưu...';
+
+        try {
+            await apiFetch('/api/cong-thuc-mon', {
+                method: 'POST',
+                body: JSON.stringify({
+                    id: { maMon: maMon, nlId: nlId },
+                    soLuongDung: soLuongDung
+                })
+            });
+
+            closeModal('recipe-modal');
+            showToast('Đã lưu công thức định lượng thành công!');
+            await loadRecipesTable();
+            await loadKitchenOrders();
+        } catch (err) {
+            showToast('Lỗi lưu công thức: ' + err.message, 'error');
+        } finally {
+            btn.disabled = false;
+            btn.textContent = oldText;
+        }
+    }
+
+    async function deleteRecipe(maMon, nlId, monName, nlName) {
+        if (!confirm(`Bạn có chắc muốn xóa công thức: [${monName} -> ${nlName}]?`)) return;
+        try {
+            await apiFetch(`/api/cong-thuc-mon/xoa?maMon=${maMon}&nlId=${nlId}`, { method: 'DELETE' });
+            showToast(`Đã xóa định lượng của ${monName}!`);
+            await loadRecipesTable();
+            await loadKitchenOrders();
+        } catch (e) {
+            showToast('Lỗi xóa công thức: ' + e.message, 'error');
         }
     }
 
