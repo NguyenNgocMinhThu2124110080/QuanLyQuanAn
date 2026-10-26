@@ -2481,7 +2481,6 @@
                 if (!isBackground) {
                     showToast(`Đăng nhập thành công: ${currentUser.hoTen} (${ROLE_DISPLAY_LABEL[currentUser.vaiTro] || currentUser.vaiTro})`);
                 }
-                syncAccountNamesFromServer();
 
                 // Nếu có hành động đang chờ trước đó, thực thi ngay
                 if (pendingAuthAction) {
@@ -2545,8 +2544,9 @@
             throw new Error('Lỗi kết nối máy chủ: ' + err.message);
         }
 
-        // Tự động làm mới Token JWT nếu Token trong trình duyệt bị hết hạn hoặc không khớp (401 / 403)
-        if ((res.status === 401 || res.status === 403) && !options._retried) {
+        // Tự động làm mới Token JWT tối đa 1 lần (có cooldown 30s để tuyệt đối không lặp vô hạn)
+        if (res.status === 401 && !options._retried && (!window._lastAutoReloginAt || Date.now() - window._lastAutoReloginAt > 30000)) {
+            window._lastAutoReloginAt = Date.now();
             const roleToUsername = {
                 'ADMIN': 'admin',
                 'QUAN_LY': 'quanly01',
@@ -6162,7 +6162,7 @@
                 loadKitchenOrders();
             }
         }
-    }, 4000);
+    }, 12000);
 
     // ─────────────────────────────────────────────────────────────
     // INITIALIZATION

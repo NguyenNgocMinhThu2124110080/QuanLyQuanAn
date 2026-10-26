@@ -74,12 +74,7 @@ public class SecurityConfig {
                 // 2. Phân quyền chỉ dành riêng cho ADMIN
                 .requestMatchers("/api/phan-quyen/**").hasAnyAuthority("ADMIN", "ROLE_ADMIN")
 
-                // 3. Phân quyền dành cho ADMIN và QUAN_LY (Quản lý nhân sự)
-                .requestMatchers(
-                    "/api/nhan-vien/**"
-                ).hasAnyAuthority("ADMIN", "QUAN_LY", "ROLE_ADMIN", "ROLE_QUAN_LY")
-
-                // 4. Cho phép các nghiệp vụ bàn ăn, thực đơn, gọi món, kho hàng và thanh toán hoạt động thông suốt
+                // 3. Cho phép các nghiệp vụ bàn ăn, thực đơn, gọi món, kho hàng, thanh toán và nhân sự hoạt động thông suốt
                 .requestMatchers(
                     "/api/ban-an/**",
                     "/api/don-hang/**",
@@ -89,7 +84,10 @@ public class SecurityConfig {
                     "/api/nguyen-lieu/**",
                     "/api/nha-cung-cap/**",
                     "/api/phieu-nhap-xuat/**",
-                    "/api/thanh-toan/**"
+                    "/api/thanh-toan/**",
+                    "/api/nhan-vien/**",
+                    "/api/nguoi-dung/**",
+                    "/api/tai-khoan/**"
                 ).permitAll()
 
                 // 5. Các API tài khoản khác yêu cầu phải đăng nhập hợp lệ
