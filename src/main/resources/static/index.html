@@ -6,7 +6,7 @@
     <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
     <meta http-equiv="Pragma" content="no-cache">
     <meta http-equiv="Expires" content="0">
-    <title>Hệ Thống Quản Lý Quán Ăn</title>
+    <title>POS - Quản Lý Quán Ăn</title>
     <script>
         // TỐI ƯU TỐC ĐỘ QUÉT QR TRÊN ĐIỆN THOẠI: HIỂN THỊ TỨC THÌ TRONG 0.1 GIÂY (KHÔNG ĐỢI TẢI 6600 DÒNG POS)
         (function() {
@@ -1115,7 +1115,7 @@
             justify-content: center;
             font-size: 22px;
         }
-        .kpi-title { font-size: 12px; color: var(--text-muted); font-weight: 600; text-transform: uppercase; }
+        .kpi-title { font-size: 12.5px; color: var(--text-muted); font-weight: 600; }
         .kpi-value { font-size: 22px; font-weight: 800; color: var(--text-main); margin-top: 4px; }
         .kpi-card.clickable {
             cursor: pointer;
@@ -1333,7 +1333,7 @@
             </svg>
         </div>
         <div>
-            <h1>QUẢN LÝ QUÁN ĂN</h1>
+            <h1>Quản Lý Quán Ăn</h1>
         </div>
     </div>
     <div class="header-right-group" style="display:flex; align-items:center; gap:10px;">
@@ -1626,7 +1626,7 @@
                     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path><polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline><line x1="12" y1="22.08" x2="12" y2="12"></line></svg>
                 </div>
                 <div>
-                    <div class="kpi-title">Tổng nguyên liệu</div>
+                    <div class="kpi-title">Nguyên liệu</div>
                     <div class="kpi-value" id="kpi-total-ingredients">0</div>
                 </div>
             </div>
@@ -1635,7 +1635,7 @@
                     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>
                 </div>
                 <div>
-                    <div class="kpi-title">Sắp hết hàng (&le;5)</div>
+                    <div class="kpi-title">Sắp hết (&le;5)</div>
                     <div class="kpi-value" id="kpi-warning-ingredients" style="color:#d97706;">0</div>
                 </div>
             </div>
@@ -1644,7 +1644,7 @@
                     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="15" y1="9" x2="9" y2="15"></line><line x1="9" y1="9" x2="15" y2="15"></line></svg>
                 </div>
                 <div>
-                    <div class="kpi-title">Đã hết hàng (=0)</div>
+                    <div class="kpi-title">Hết hàng</div>
                     <div class="kpi-value" id="kpi-out-of-stock" style="color:#dc2626;">0</div>
                 </div>
             </div>
@@ -1653,7 +1653,7 @@
                     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"></line><line x1="12" y1="20" x2="12" y2="4"></line><line x1="6" y1="20" x2="6" y2="14"></line></svg>
                 </div>
                 <div>
-                    <div class="kpi-title">Tổng tiền nhập kho</div>
+                    <div class="kpi-title">Tiền nhập</div>
                     <div class="kpi-value" id="kpi-total-import-val" style="font-size:16px;">0 ₫</div>
                 </div>
             </div>
@@ -1702,14 +1702,14 @@
             <!-- FORM LẬP PHIẾU NHẬP / XUẤT KHO -->
             <div class="card">
                 <div class="card-header">
-                    <div class="card-title" id="stock-form-title">Lập phiếu nhập / xuất kho</div>
+                    <div class="card-title" id="stock-form-title">Lập phiếu kho</div>
                 </div>
 
                 <form id="stock-movement-form" onsubmit="submitStockMovement(event)">
                     <label>Loại phiếu <span style="color:red">*</span></label>
                     <select id="movement-type" onchange="toggleMovementFields()">
-                        <option value="NHAP">Nhập kho (Tăng tồn kho)</option>
-                        <option value="XUAT">Xuất kho (Giảm tồn kho)</option>
+                        <option value="NHAP">Nhập kho</option>
+                        <option value="XUAT">Xuất kho</option>
                     </select>
 
                     <label>Nguyên liệu <span style="color:red">*</span></label>
@@ -1739,14 +1739,14 @@
                     <label>Ghi chú</label>
                     <input type="text" id="movement-note" placeholder="VD: Xuất chế biến tiệc / Xuất nấu bữa trưa...">
 
-                    <button type="submit" class="btn btn-primary" id="btn-submit-stock" style="width:100%; margin-top:16px;">Xác nhận lập phiếu</button>
+                    <button type="submit" class="btn btn-primary" id="btn-submit-stock" style="width:100%; margin-top:16px;">Lập phiếu</button>
                 </form>
             </div>
         </div>
 
         <!-- LỊCH SỬ NHẬP XUẤT KHO & BIÊN LAI (THU GỌN ĐỂ MÀN HÌNH KHO THOÁNG SẠCH) -->
         <details class="pos-drawer" style="margin-top:16px;">
-            <summary>Lịch sử phiếu nhập / xuất kho &amp; In biên lai</summary>
+            <summary>Lịch sử nhập xuất kho</summary>
             <div class="drawer-body">
                 <div style="display:flex; justify-content:flex-end; margin-bottom:10px;">
                     <button class="btn btn-secondary btn-sm" onclick="loadInventoryHistory()">Làm mới</button>
@@ -1782,7 +1782,7 @@
         <!-- BÁO CÁO TÀI CHÍNH: THU - CHI - LỢI NHUẬN -->
         <div class="card" style="margin-bottom:20px;">
             <div class="card-header" style="flex-wrap:wrap; gap:12px;">
-                <div class="card-title">Thu - Chi & Lợi nhuận</div>
+                <div class="card-title">Báo cáo Thu - Chi</div>
                 <div style="display:flex; align-items:center; gap:8px; flex-wrap:wrap;">
                     <div class="filter-group" style="display:inline-flex;">
                         <button type="button" id="finance-filter-today" class="btn btn-sm btn-primary" onclick="setFinanceTimeFilter('today')">Hôm nay</button>
@@ -1809,7 +1809,7 @@
                         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 16v1a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V7a2 2 0 0 1 2-2h11a2 2 0 0 1 2 2v1"></path><path d="M18 8h4a2 2 0 0 1 2 2v7a2 2 0 0 1-2 2h-4"></path><circle cx="6" cy="19" r="2"></circle><circle cx="18" cy="19" r="2"></circle></svg>
                     </div>
                     <div style="flex:1;">
-                        <div class="kpi-title">Tổng chi nhập</div>
+                        <div class="kpi-title">Tổng chi</div>
                         <div class="kpi-value" id="kpi-finance-expense" style="color:#b91c1c;">0 ₫</div>
                         <div style="font-size:11.5px; color:var(--text-muted); margin-top:2px;" id="kpi-finance-expense-sub">0 phiếu</div>
                     </div>
@@ -1820,7 +1820,7 @@
                         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="1" x2="12" y2="23"></line><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path></svg>
                     </div>
                     <div style="flex:1;">
-                        <div class="kpi-title">Lợi nhuận ròng</div>
+                        <div class="kpi-title">Lợi nhuận</div>
                         <div class="kpi-value" id="kpi-finance-profit">0 ₫</div>
                         <div style="margin-top:2px;" id="kpi-finance-profit-badge">
                             <span class="badge badge-info">Hòa vốn</span>
@@ -1833,7 +1833,7 @@
                         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect width="20" height="14" x="2" y="5" rx="2"></rect><line x1="2" x2="22" y1="10" y2="10"></line></svg>
                     </div>
                     <div style="flex:1;">
-                        <div class="kpi-title">Phương thức thu</div>
+                        <div class="kpi-title">Phương thức</div>
                         <div style="font-size:13px; font-weight:700; color:var(--text-main); margin-top:4px;">
                             TM: <span id="kpi-rev-cash" style="color:#047857;">0 ₫</span>
                         </div>
@@ -1898,7 +1898,7 @@
 
         <!-- SỔ QUỸ THU - CHI & TOP MÓN BÁN CHẠY (THU GỌN ĐỂ MÀN HÌNH THU NGÂN TỐI GIẢN) -->
         <details class="pos-drawer" id="cashier-advanced-drawer" style="margin-top:16px;">
-            <summary>Sổ quỹ Thu - Chi &amp; Thống kê món bán chạy</summary>
+            <summary>Sổ quỹ &amp; Món bán chạy</summary>
             <div class="drawer-body">
                 <div class="grid-2" style="gap:20px; align-items:start;">
                     <div>
@@ -1992,7 +1992,7 @@
 
         <!-- BẢNG CÔNG THỨC & ĐỊNH LƯỢNG NGUYÊN LIỆU MÓN ĂN (THU GỌN ĐỂ MÀN HÌNH KDS TẬP TRUNG NẤU MÓN) -->
         <details class="pos-drawer">
-            <summary>Cấu hình định lượng nguyên liệu món ăn</summary>
+            <summary>Định lượng món ăn</summary>
             <div class="drawer-body">
                 <div style="display:flex; justify-content:space-between; align-items:center; gap:8px; flex-wrap:wrap; margin-bottom:12px;">
                     <input type="text" id="recipe-search-input" placeholder="Tìm món hoặc nguyên liệu..." oninput="filterRecipesTable()" style="max-width:260px; padding:6px 10px; font-size:12px;">
@@ -2033,7 +2033,7 @@
                     <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
                 </div>
                 <div>
-                    <div class="kpi-title">Tổng tài khoản nhân sự</div>
+                    <div class="kpi-title">Nhân sự</div>
                     <div class="kpi-value" id="admin-kpi-total-staff">0</div>
                 </div>
             </div>
@@ -2051,7 +2051,7 @@
                     <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
                 </div>
                 <div>
-                    <div class="kpi-title">Tài khoản đang khóa</div>
+                    <div class="kpi-title">Đang khóa</div>
                     <div class="kpi-value" style="color:var(--danger);" id="admin-kpi-locked-staff">0</div>
                 </div>
             </div>
@@ -2060,7 +2060,7 @@
                     <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="1" x2="12" y2="23"></line><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path></svg>
                 </div>
                 <div>
-                    <div class="kpi-title">Tổng quỹ lương / tháng</div>
+                    <div class="kpi-title">Quỹ lương</div>
                     <div class="kpi-value" style="color:var(--primary);" id="admin-kpi-total-salary">0 ₫</div>
                 </div>
             </div>
@@ -2068,7 +2068,7 @@
 
         <div class="card">
             <div class="card-header" style="flex-wrap:wrap; gap:10px;">
-                <div class="card-title">Quản lý Tài khoản & Nhân sự</div>
+                <div class="card-title">Tài khoản & Nhân sự</div>
                 <div style="display:flex; gap:8px; flex-wrap:wrap;">
                     <button type="button" class="btn btn-primary btn-sm" onclick="openEditAccountsModal()">
                         ✎ Đổi tên nhanh
@@ -2090,7 +2090,7 @@
                             <th>Liên hệ (SĐT / Email)</th>
                             <th>Chức vụ & Lương</th>
                             <th>Trạng thái</th>
-                            <th style="text-align:center;">Thao tác Admin</th>
+                            <th style="text-align:center;">Thao tác</th>
                         </tr>
                     </thead>
                     <tbody id="admin-accounts-tbody">
@@ -2270,7 +2270,7 @@
         <div class="modal-footer" style="display:flex; justify-content:space-between; align-items:center; gap:10px;">
             <button class="btn btn-secondary" onclick="printReceiptTicket()" style="display:inline-flex; align-items:center; gap:6px; font-weight:600;">
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 6 2 18 2 18 9"></polyline><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"></path><rect x="6" y="14" width="12" height="8"></rect></svg>
-                In hoá đơn (Xuất bill)
+                In hoá đơn
             </button>
             <button class="btn btn-primary" onclick="closeModal('receipt-modal')">Đóng</button>
         </div>
@@ -2289,7 +2289,7 @@
                 <div class="receipt-header">
                     <h4>HỆ THỐNG NHÀ HÀNG & QUÁN ĂN</h4>
                     <p style="font-size:11px; color:#666;">Địa chỉ: TP. Hồ Chí Minh • Hotline: 1900 xxxx</p>
-                    <p style="font-size:13px; margin-top:6px; font-weight:bold; letter-spacing:0.5px;">BIÊN LAI NHẬP HÀNG / PHIẾU NHẬP KHO</p>
+                    <p style="font-size:13px; margin-top:6px; font-weight:bold; letter-spacing:0.5px;">PHIẾU NHẬP KHO</p>
                     <p style="font-size:11px; color:#666;" id="gr-date">Ngày nhập: --/--/---- --:--</p>
                 </div>
                 <div style="font-size:12px; margin-bottom:8px; display:flex; justify-content:space-between; flex-wrap:wrap; gap:4px;">
@@ -2332,15 +2332,13 @@
                         <div style="font-size:10px; color:#888; margin-top:24px;">(Ký & ghi rõ họ tên)</div>
                     </div>
                 </div>
-                <div class="receipt-footer" style="margin-top:12px;">
-                    <p>Biên lai có giá trị xác nhận nhập kho và đối soát thanh toán chi phí.</p>
-                </div>
+
             </div>
         </div>
         <div class="modal-footer" style="display:flex; justify-content:space-between; align-items:center; gap:10px;">
             <button class="btn btn-secondary" onclick="printGoodsReceiptTicket()" style="display:inline-flex; align-items:center; gap:6px; font-weight:600;">
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 6 2 18 2 18 9"></polyline><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"></path><rect x="6" y="14" width="12" height="8"></rect></svg>
-                In biên lai (Xuất PDF)
+                In biên lai
             </button>
             <button class="btn btn-primary" onclick="closeModal('goods-receipt-modal')">Đóng</button>
         </div>
@@ -2352,16 +2350,16 @@
     <div class="modal-dialog" style="max-width:940px; width:96%;">
         <div class="modal-header" style="flex-wrap:wrap; gap:10px;">
             <div>
-                <h3 id="fd-modal-title" style="font-size:17px; font-weight:800; color:#1e293b;">Chi tiết Báo cáo Tài chính</h3>
+                <h3 id="fd-modal-title" style="font-size:17px; font-weight:800; color:#1e293b;">Chi tiết Tài chính</h3>
                 <div style="font-size:12px; color:var(--text-muted); margin-top:2px;">
                     Kỳ đối soát: <strong id="fd-period-label" style="color:var(--primary);">Hôm nay</strong>
                 </div>
             </div>
             <div style="display:flex; align-items:center; gap:8px; flex-wrap:wrap;">
                 <div class="filter-group" style="display:inline-flex;">
-                    <button type="button" id="fd-tab-thu" class="btn btn-sm btn-secondary" onclick="switchFinanceModalTab('THU')">Khoản Thu (+)</button>
-                    <button type="button" id="fd-tab-chi" class="btn btn-sm btn-secondary" onclick="switchFinanceModalTab('CHI')">Khoản Chi (-)</button>
-                    <button type="button" id="fd-tab-all" class="btn btn-sm btn-secondary" onclick="switchFinanceModalTab('ALL')">Tất cả Thu & Chi</button>
+                    <button type="button" id="fd-tab-thu" class="btn btn-sm btn-secondary" onclick="switchFinanceModalTab('THU')">Thu (+)</button>
+                    <button type="button" id="fd-tab-chi" class="btn btn-sm btn-secondary" onclick="switchFinanceModalTab('CHI')">Chi (-)</button>
+                    <button type="button" id="fd-tab-all" class="btn btn-sm btn-secondary" onclick="switchFinanceModalTab('ALL')">Tất cả</button>
                 </div>
                 <button class="modal-close" onclick="closeModal('finance-detail-modal')">&times;</button>
             </div>
@@ -2398,12 +2396,12 @@
                     <div>Bàn hiện tại: <strong id="transfer-from-table-name" style="color:var(--primary);">--</strong></div>
                     <div style="margin-top:4px;">Đơn hàng đang mở: <strong id="transfer-from-order-id">#--</strong></div>
                 </div>
-                <label>Chọn bàn trống muốn chuyển đến <span style="color:red">*</span></label>
+                <label>Chuyển đến bàn <span style="color:red">*</span></label>
                 <select id="transfer-to-table-select" required></select>
 
                 <div style="display:flex; justify-content:flex-end; gap:8px; margin-top:16px;">
                     <button type="button" class="btn btn-secondary" onclick="closeModal('transfer-table-modal')">Hủy</button>
-                    <button type="submit" class="btn btn-primary" id="btn-submit-transfer">Xác nhận đổi bàn</button>
+                    <button type="submit" class="btn btn-primary" id="btn-submit-transfer">Đổi bàn</button>
                 </div>
             </form>
         </div>
@@ -2492,7 +2490,7 @@
 <div class="modal-overlay" id="recipe-modal">
     <div class="modal-dialog">
         <div class="modal-header">
-            <h3 id="recipe-modal-title">Cài đặt công thức định lượng món</h3>
+            <h3 id="recipe-modal-title">Cài đặt định lượng</h3>
             <button class="modal-close" onclick="closeModal('recipe-modal')">&times;</button>
         </div>
         <div class="modal-body">
@@ -2572,9 +2570,7 @@
             <button class="modal-close" onclick="closeModal('edit-accounts-modal')">&times;</button>
         </div>
         <div class="modal-body">
-            <p style="font-size:12px; color:var(--text-muted); margin-bottom:12px;">
-                Tùy chỉnh họ tên hiển thị của các tài khoản trong hệ thống (tự động cập nhật trên thanh Header, Hóa đơn và Phiếu kho).
-            </p>
+
             <form id="edit-accounts-form" onsubmit="submitEditAccounts(event)">
                 <div id="edit-accounts-list" style="display:flex; flex-direction:column; gap:10px;"></div>
                 <div style="display:flex; justify-content:flex-end; gap:8px; margin-top:16px;">
@@ -2613,8 +2609,7 @@
 
 <!-- FOOTER -->
 <footer>
-    <div>© 2026 Hệ Thống Quản Lý Quán Ăn & Bán Hàng POS</div>
-    <div style="color:var(--text-muted); font-size:12px; margin-top:4px;">Phiên bản 2.0 • Hoạt động ổn định</div>
+    <div>© 2026 POS Quán Ăn</div>
 </footer>
 
 <!-- ===== JAVASCRIPT APP LOGIC ===== -->
@@ -2649,6 +2644,17 @@
 
     function formatVND(val) {
         return Number(val || 0).toLocaleString('vi-VN') + ' ₫';
+    }
+
+    function formatShortDateTime(dStr) {
+        if (!dStr) return '—';
+        const d = new Date(dStr);
+        if (isNaN(d.getTime())) return '—';
+        const hh = String(d.getHours()).padStart(2, '0');
+        const mm = String(d.getMinutes()).padStart(2, '0');
+        const dd = String(d.getDate()).padStart(2, '0');
+        const mo = String(d.getMonth() + 1).padStart(2, '0');
+        return `${hh}:${mm} ${dd}/${mo}`;
     }
 
     function escHtml(str) {
@@ -3526,7 +3532,7 @@
                                 notificationsStore = notificationsStore.filter(n => String(n.id) !== `order_${o.maDon}`);
                                 const tableName = o.ban ? o.ban.tenBan : `Bàn #${o.maBan}`;
                                 playKitchenNotificationChime();
-                                showToast(`Bếp đã nấu xong món cho ${tableName} (Đơn #${o.maDon})! Nhân viên vui lòng lên món cho khách.`, 'success');
+                                showToast(`Bếp đã xong món cho ${tableName} (Đơn #${o.maDon})!`, 'success');
                             }
                         });
                     }
@@ -4325,15 +4331,7 @@
     function renderFoodList(filterKw = '') {
         const tbody = $('food-list-tbody');
         if (!Array.isArray(allDishes) || allDishes.length === 0) {
-            tbody.innerHTML = `
-                <tr><td colspan="4">
-                    <div class="ui-empty-box">
-                        <div class="empty-title">Thực đơn chưa có món ăn nào</div>
-                        <div class="empty-desc">Sử dụng form bên trái để thêm món ăn đầu tiên vào thực đơn.</div>
-                        <button class="btn btn-primary btn-sm" onclick="$('food-name').focus()">Nhập món ngay</button>
-                    </div>
-                </td></tr>
-            `;
+            tbody.innerHTML = `<tr><td colspan="4" style="text-align:center; padding:32px 12px; color:var(--text-muted); font-size:13px;">Thực đơn chưa có món</td></tr>`;
             return;
         }
 
@@ -4480,15 +4478,7 @@
     function renderCategoryList() {
         const tbody = $('category-list-tbody');
         if (!Array.isArray(allCategories) || allCategories.length === 0) {
-            tbody.innerHTML = `
-                <tr><td colspan="4">
-                    <div class="ui-empty-box">
-                        <div class="empty-title">Chưa có danh mục nào</div>
-                        <div class="empty-desc">Điền thông tin vào form bên dưới để tạo danh mục phân loại món ăn.</div>
-                        <button class="btn btn-primary btn-sm" onclick="$('cat-name-input').focus()">Thêm danh mục</button>
-                    </div>
-                </td></tr>
-            `;
+            tbody.innerHTML = `<tr><td colspan="4" style="text-align:center; padding:32px 12px; color:var(--text-muted); font-size:13px;">Chưa có danh mục</td></tr>`;
             return;
         }
 
@@ -4624,14 +4614,7 @@
         if ($('kpi-safe-ingredients')) $('kpi-safe-ingredients').textContent = safeCount;
 
         if (total === 0) {
-            tbody.innerHTML = `
-                <tr><td colspan="7">
-                    <div class="ui-empty-box">
-                        <div class="empty-title">Kho chưa có nguyên liệu nào</div>
-                        <div class="empty-desc">Chưa có dữ liệu nguyên liệu trong hệ thống.</div>
-                    </div>
-                </td></tr>
-            `;
+            tbody.innerHTML = `<tr><td colspan="7" style="text-align:center; padding:32px 12px; color:var(--text-muted); font-size:13px;">Kho chưa có nguyên liệu</td></tr>`;
             return;
         }
 
@@ -4683,7 +4666,7 @@
     async function openAddIngredientModal() {
         const role = currentUser ? (currentUser.vaiTro || '') : '';
         if (role === 'DAU_BEP') {
-            showToast('Quyền Đầu bếp chỉ lập phiếu xuất kho. Vui lòng dùng tài khoản Quản lý / Admin để thêm danh mục nguyên liệu mới!', 'error');
+            showToast('Đầu bếp chỉ được lập phiếu xuất kho!', 'error');
             return;
         }
         await loadInventoryDropdowns();
@@ -4929,14 +4912,7 @@
             allInventoryHistory = Array.isArray(data) ? data : [];
 
             if (allInventoryHistory.length === 0) {
-                tbody.innerHTML = `
-                    <tr><td colspan="9">
-                        <div class="ui-empty-box">
-                            <div class="empty-title">Chưa có lịch sử nhập xuất kho</div>
-                            <div class="empty-desc">Các phiếu nhập nguyên liệu hoặc xuất kho chế biến sẽ hiển thị tại đây.</div>
-                        </div>
-                    </td></tr>
-                `;
+                tbody.innerHTML = `<tr><td colspan="9" style="text-align:center; padding:32px 12px; color:var(--text-muted); font-size:13px;">Chưa có lịch sử nhập xuất</td></tr>`;
                 return;
             }
 
@@ -5002,15 +4978,7 @@
             );
 
             if (pendingOrdersList.length === 0) {
-                tbody.innerHTML = `
-                    <tr><td colspan="5">
-                        <div class="ui-empty-box">
-                            <div class="empty-title">Không có đơn hàng nào chờ thanh toán</div>
-                            <div class="empty-desc">Tất cả bàn ăn đã hoàn tất thanh toán hoặc chưa có khách gọi món.</div>
-                            <button class="btn btn-secondary btn-sm" onclick="switchNav('tables', document.querySelectorAll('nav.main-nav button')[0])">Xem sơ đồ bàn ăn</button>
-                        </div>
-                    </td></tr>
-                `;
+                tbody.innerHTML = `<tr><td colspan="5" style="text-align:center; padding:36px 12px; color:var(--text-muted); font-size:13px;">Không có đơn chờ thanh toán</td></tr>`;
                 return;
             }
 
@@ -5060,14 +5028,7 @@
             const list = Array.isArray(res) ? res : [];
 
             if (list.length === 0) {
-                tbody.innerHTML = `
-                    <tr><td colspan="6">
-                        <div class="ui-empty-box">
-                            <div class="empty-title">Chưa có giao dịch thanh toán nào</div>
-                            <div class="empty-desc">Các giao dịch thanh toán thành công sẽ được ghi nhận và hiển thị tại đây.</div>
-                        </div>
-                    </td></tr>
-                `;
+                tbody.innerHTML = `<tr><td colspan="6" style="text-align:center; padding:36px 12px; color:var(--text-muted); font-size:13px;">Chưa có giao dịch</td></tr>`;
                 return;
             }
 
@@ -5083,7 +5044,7 @@
                 const actionBtn = maDon ? `
                     <button class="btn btn-secondary btn-sm" onclick="reprintReceiptInvoice(${maDon}, '${p.phuongThuc || 'TIEN_MAT'}')" style="padding:4px 8px; font-size:12px; display:inline-flex; align-items:center; gap:4px;" title="Xem lại và in phiếu hoá đơn">
                         <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 6 2 18 2 18 9"></polyline><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"></path><rect x="6" y="14" width="12" height="8"></rect></svg>
-                        In lại HĐ
+                        In HĐ
                     </button>
                 ` : '—';
 
@@ -5091,7 +5052,7 @@
                 <tr>
                     <td><strong>#${p.maTt}</strong></td>
                     <td>#${p.donHang ? p.donHang.maDon : '—'}</td>
-                    <td style="font-size:12px; color:var(--text-muted);">${p.thoiGian ? new Date(p.thoiGian).toLocaleTimeString('vi-VN', {hour:'2-digit', minute:'2-digit'}) + ' ' + new Date(p.thoiGian).toLocaleDateString('vi-VN', {day:'2-digit', month:'2-digit'}) : '—'}</td>
+                    <td style="font-size:12px; color:var(--text-muted);">${formatShortDateTime(p.thoiGian)}</td>
                     <td>${methodBadge}</td>
                     <td style="font-weight:700; color:var(--success);">${formatVND(p.soTien)}</td>
                     <td style="text-align:center;">${actionBtn}</td>
@@ -5274,10 +5235,10 @@
 
             // HIỂN THỊ CÁC THẺ KPI TÀI CHÍNH
             if ($('kpi-finance-income')) $('kpi-finance-income').textContent = formatVND(totalIncome);
-            if ($('kpi-finance-income-sub')) $('kpi-finance-income-sub').textContent = `${filteredPayments.length} đơn thanh toán`;
+            if ($('kpi-finance-income-sub')) $('kpi-finance-income-sub').textContent = `${filteredPayments.length} đơn`;
 
             if ($('kpi-finance-expense')) $('kpi-finance-expense').textContent = formatVND(totalExpense);
-            if ($('kpi-finance-expense-sub')) $('kpi-finance-expense-sub').textContent = `${filteredImports.length} phiếu nhập kho`;
+            if ($('kpi-finance-expense-sub')) $('kpi-finance-expense-sub').textContent = `${filteredImports.length} phiếu`;
 
             if ($('kpi-finance-profit')) $('kpi-finance-profit').textContent = formatVND(netProfit);
             if ($('kpi-rev-cash')) $('kpi-rev-cash').textContent = formatVND(cashIncome);
@@ -5288,13 +5249,13 @@
             if (badgeEl) {
                 if (netProfit > 0) {
                     const margin = totalIncome > 0 ? Math.round((netProfit / totalIncome) * 100) : 100;
-                    badgeEl.innerHTML = `<span class="badge" style="background:#dcfce7; color:#15803d; font-weight:700;">Có lãi (+${margin}%)</span>`;
+                    badgeEl.innerHTML = `<span class="badge badge-success">Lãi +${margin}%</span>`;
                     if ($('kpi-finance-profit')) $('kpi-finance-profit').style.color = '#15803d';
                 } else if (netProfit < 0) {
-                    badgeEl.innerHTML = `<span class="badge" style="background:#fee2e2; color:#b91c1c; font-weight:700;">Tạm lỗ (Chi > Thu)</span>`;
+                    badgeEl.innerHTML = `<span class="badge badge-danger">Tạm lỗ</span>`;
                     if ($('kpi-finance-profit')) $('kpi-finance-profit').style.color = '#b91c1c';
                 } else {
-                    badgeEl.innerHTML = `<span class="badge" style="background:#f1f5f9; color:#475569; font-weight:700;">Hòa vốn</span>`;
+                    badgeEl.innerHTML = `<span class="badge badge-info">Hòa vốn</span>`;
                     if ($('kpi-finance-profit')) $('kpi-finance-profit').style.color = '#475569';
                 }
             }
@@ -5405,14 +5366,7 @@
         });
 
         if (displayList.length === 0) {
-            tbody.innerHTML = `
-                <tr><td colspan="7">
-                    <div class="ui-empty-box">
-                        <div class="empty-title">Không có giao dịch dòng tiền nào</div>
-                        <div class="empty-desc">Không phát sinh khoản Thu hoặc Chi nào trong mốc thời gian đã chọn.</div>
-                    </div>
-                </td></tr>
-            `;
+            tbody.innerHTML = `<tr><td colspan="7" style="text-align:center; padding:32px 12px; color:var(--text-muted); font-size:13px;">Không có giao dịch dòng tiền</td></tr>`;
             return;
         }
 
@@ -5500,20 +5454,20 @@
         const chiList = rawCashFlowData.filter(x => x.type === 'CHI');
 
         if (mode === 'THU') {
-            $('fd-modal-title').textContent = 'Chi tiết Tổng Thu (Doanh thu bán hàng)';
+            $('fd-modal-title').textContent = 'Chi tiết Doanh thu';
             strip.innerHTML = `
                 <div style="background:#f0fdf4; border:1px solid #bbf7d0; border-radius:8px; padding:12px;">
-                    <div style="font-size:11px; color:#166534; font-weight:700; text-transform:uppercase;">Tổng số đơn đã thu</div>
+                    <div style="font-size:11px; color:#166534; font-weight:700;">Số đơn thu</div>
                     <div style="font-size:18px; font-weight:800; color:#15803d; margin-top:4px;">${thuList.length} đơn hàng</div>
                 </div>
                 <div style="background:#f8fafc; border:1px solid #e2e8f0; border-radius:8px; padding:12px;">
-                    <div style="font-size:11px; color:#475569; font-weight:700; text-transform:uppercase;">Phân bổ phương thức</div>
+                    <div style="font-size:11px; color:#475569; font-weight:700;">Phương thức</div>
                     <div style="font-size:13px; font-weight:700; color:#1e293b; margin-top:4px;">
                         TM: <span style="color:#059669;">${formatVND(currentFinanceSummary.cashIncome)}</span> | CK/Thẻ: <span style="color:#0284c7;">${formatVND(currentFinanceSummary.transferIncome)}</span>
                     </div>
                 </div>
                 <div style="background:#dcfce7; border:1px solid #86efac; border-radius:8px; padding:12px;">
-                    <div style="font-size:11px; color:#14532d; font-weight:700; text-transform:uppercase;">Tổng cộng tiền Thu (+)</div>
+                    <div style="font-size:11px; color:#14532d; font-weight:700;">Tổng thu</div>
                     <div style="font-size:20px; font-weight:800; color:#15803d; margin-top:4px;">+${formatVND(currentFinanceSummary.totalIncome)}</div>
                 </div>
             `;
@@ -5522,7 +5476,7 @@
                 <tr>
                     <th>Mã GD / Đơn</th>
                     <th>Bàn & Giờ thu</th>
-                    <th>Chi tiết thu gì (Các món đã bán)</th>
+                    <th>Nội dung</th>
                     <th>Phương thức</th>
                     <th style="text-align:right;">Số tiền thu (+)</th>
                     <th style="text-align:center;">Hóa đơn</th>
@@ -5530,7 +5484,7 @@
             `;
 
             if (thuList.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="6" style="text-align:center; padding:28px; color:var(--text-muted);">Chưa có khoản thu bán hàng nào trong kỳ này.</td></tr>`;
+                tbody.innerHTML = `<tr><td colspan="6" style="text-align:center; padding:28px; color:var(--text-muted);">Chưa có khoản thu.</td></tr>`;
             } else {
                 tbody.innerHTML = thuList.map(item => {
                     const timeStr = item.time ? new Date(item.time).toLocaleString('vi-VN') : '—';
@@ -5568,18 +5522,18 @@
             footerSum.innerHTML = `Tổng cộng khoản Thu (${thuList.length} đơn): <span style="color:#15803d; font-size:15px;">+${formatVND(currentFinanceSummary.totalIncome)}</span>`;
 
         } else if (mode === 'CHI') {
-            $('fd-modal-title').textContent = 'Chi tiết Tổng Chi (Chi phí nhập nguyên liệu kho)';
+            $('fd-modal-title').textContent = 'Chi tiết Chi phí';
             strip.innerHTML = `
                 <div style="background:#fef2f2; border:1px solid #fecaca; border-radius:8px; padding:12px;">
-                    <div style="font-size:11px; color:#991b1b; font-weight:700; text-transform:uppercase;">Tổng số phiếu chi nhập</div>
+                    <div style="font-size:11px; color:#991b1b; font-weight:700;">Số phiếu chi</div>
                     <div style="font-size:18px; font-weight:800; color:#b91c1c; margin-top:4px;">${chiList.length} phiếu nhập kho</div>
                 </div>
                 <div style="background:#f8fafc; border:1px solid #e2e8f0; border-radius:8px; padding:12px;">
-                    <div style="font-size:11px; color:#475569; font-weight:700; text-transform:uppercase;">Hạng mục chi phí</div>
-                    <div style="font-size:13px; font-weight:700; color:#1e293b; margin-top:4px;">Nhập nguyên vật liệu chế biến</div>
+                    <div style="font-size:11px; color:#475569; font-weight:700;">Hạng mục</div>
+                    <div style="font-size:13px; font-weight:700; color:#1e293b; margin-top:4px;">Nhập nguyên liệu</div>
                 </div>
                 <div style="background:#fee2e2; border:1px solid #fca5a5; border-radius:8px; padding:12px;">
-                    <div style="font-size:11px; color:#7f1d1d; font-weight:700; text-transform:uppercase;">Tổng cộng tiền Chi (-)</div>
+                    <div style="font-size:11px; color:#7f1d1d; font-weight:700;">Tổng chi</div>
                     <div style="font-size:20px; font-weight:800; color:#b91c1c; margin-top:4px;">-${formatVND(currentFinanceSummary.totalExpense)}</div>
                 </div>
             `;
@@ -5588,7 +5542,7 @@
                 <tr>
                     <th>Mã Phiếu</th>
                     <th>Thời gian nhập</th>
-                    <th>Chi tiết chi gì (Nguyên liệu nhập kho)</th>
+                    <th>Nội dung</th>
                     <th>Số lượng × Đơn giá</th>
                     <th>Nhà cung cấp & Người nhập</th>
                     <th style="text-align:right;">Số tiền chi (-)</th>
@@ -5597,7 +5551,7 @@
             `;
 
             if (chiList.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="7" style="text-align:center; padding:28px; color:var(--text-muted);">Chưa có khoản chi nhập kho nào trong kỳ này.</td></tr>`;
+                tbody.innerHTML = `<tr><td colspan="7" style="text-align:center; padding:28px; color:var(--text-muted);">Chưa có khoản chi.</td></tr>`;
             } else {
                 tbody.innerHTML = chiList.map(item => {
                     const timeStr = item.time ? new Date(item.time).toLocaleString('vi-VN') : '—';
@@ -5630,7 +5584,7 @@
             footerSum.innerHTML = `Tổng cộng khoản Chi (${chiList.length} phiếu nhập): <span style="color:#b91c1c; font-size:15px;">-${formatVND(currentFinanceSummary.totalExpense)}</span>`;
 
         } else {
-            $('fd-modal-title').textContent = 'Đối soát Tổng hợp: Thu - Chi & Lợi nhuận ròng';
+            $('fd-modal-title').textContent = 'Tổng hợp Thu - Chi';
             const profitColor = currentFinanceSummary.netProfit >= 0 ? '#15803d' : '#b91c1c';
             strip.innerHTML = `
                 <div style="background:#f0fdf4; border:1px solid #bbf7d0; border-radius:8px; padding:12px; cursor:pointer;" onclick="switchFinanceModalTab('THU')">
@@ -5642,7 +5596,7 @@
                     <div style="font-size:18px; font-weight:800; color:#b91c1c; margin-top:4px;">-${formatVND(currentFinanceSummary.totalExpense)}</div>
                 </div>
                 <div style="background:#f5f3ff; border:1px solid #ddd6fe; border-radius:8px; padding:12px;">
-                    <div style="font-size:11px; color:#5b21b6; font-weight:700; text-transform:uppercase;">Lợi Nhuận Ròng (Thu - Chi)</div>
+                    <div style="font-size:11px; color:#5b21b6; font-weight:700;">Lợi nhuận</div>
                     <div style="font-size:20px; font-weight:800; color:${profitColor}; margin-top:4px;">${formatVND(currentFinanceSummary.netProfit)}</div>
                 </div>
             `;
@@ -5652,7 +5606,7 @@
                     <th>Mã CT</th>
                     <th>Thời gian</th>
                     <th>Phân loại</th>
-                    <th>Chi tiết nội dung (Thu món gì / Chi nhập hàng gì)</th>
+                    <th>Nội dung</th>
                     <th>Hình thức / NCC</th>
                     <th style="text-align:right;">Số tiền</th>
                     <th style="text-align:center;">Chứng từ</th>
@@ -5660,7 +5614,7 @@
             `;
 
             if (rawCashFlowData.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="7" style="text-align:center; padding:28px; color:var(--text-muted);">Không có giao dịch Thu hoặc Chi nào trong kỳ này.</td></tr>`;
+                tbody.innerHTML = `<tr><td colspan="7" style="text-align:center; padding:28px; color:var(--text-muted);">Không có giao dịch.</td></tr>`;
             } else {
                 tbody.innerHTML = rawCashFlowData.map(item => {
                     const isThu = item.type === 'THU';
@@ -5722,10 +5676,10 @@
             return b.rev - a.rev;
         });
 
-        if (badge) badge.textContent = `${sorted.length} món đã bán trong kỳ`;
+        if (badge) badge.textContent = `${sorted.length} món`;
 
         if (sorted.length === 0) {
-            tbody.innerHTML = `<tr><td colspan="5" style="text-align:center; padding:20px; color:var(--text-muted);">Chưa có dữ liệu món bán ra trong mốc thời gian này.</td></tr>`;
+            tbody.innerHTML = `<tr><td colspan="5" style="text-align:center; padding:20px; color:var(--text-muted);">Chưa có dữ liệu món bán ra.</td></tr>`;
             return;
         }
 
@@ -6768,11 +6722,11 @@
         document.body.innerHTML = `
             <div style="width:100%; max-width:410px; background:#ffffff; border-radius:20px; overflow:hidden; box-shadow:0 20px 50px rgba(0,0,0,0.45); font-family:'Inter', system-ui, sans-serif;">
                 <div style="background:linear-gradient(135deg, #1d4ed8 0%, #1e40af 100%); color:#ffffff; padding:18px 20px; text-align:center;">
-                    <div style="font-size:11px; font-weight:800; letter-spacing:1px; text-transform:uppercase; opacity:0.9;">CỔNG THANH TOÁN VIETQR • NAPAS 247</div>
-                    <div style="font-size:18px; font-weight:800; margin-top:4px;">NHÀ HÀNG ẨM THỰC VIỆT</div>
+                    <div style="font-size:11px; font-weight:800; letter-spacing:1px; text-transform:uppercase; opacity:0.9;">VietQR</div>
+                    <div style="font-size:18px; font-weight:800; margin-top:4px;">Quán Ăn</div>
                 </div>
                 <div id="mobile-qr-body" style="padding:24px 20px; text-align:center;">
-                    <div style="font-size:14px; font-weight:700; color:#334155; margin-bottom:8px;">⏳ Đang xác nhận giao dịch chuyển khoản QR...</div>
+                    <div style="font-size:14px; font-weight:700; color:#334155; margin-bottom:8px;">Đang xác nhận thanh toán...</div>
                     <div style="font-size:12px; color:#64748b;">Đơn hàng #${maDon || '--'}</div>
                 </div>
             </div>
@@ -6865,7 +6819,7 @@
                 </div>
 
                 <div style="margin-top:14px; padding:10px 12px; background:#ecfdf5; border:1px solid #86efac; border-radius:10px; font-size:12px; color:#166534; font-weight:700;">
-                    💻 Màn hình máy tính Thu ngân đã tự động hiện "Thanh toán thành công" và xuất phiếu in hóa đơn!
+                    Đã xác nhận thanh toán "Thanh toán thành công" và xuất phiếu in hóa đơn!
                 </div>
             `;
         } catch (err) {
