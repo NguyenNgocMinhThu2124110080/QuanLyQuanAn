@@ -107,15 +107,27 @@ public class DonHangService {
         BigDecimal donGia = mon.getGia() != null ? mon.getGia() : BigDecimal.ZERO;
         BigDecimal thanhTien = donGia.multiply(BigDecimal.valueOf(req.getSoLuong()));
 
-        // 1. Tạo chi tiết đơn hàng
-        ChiTietDonHang ctdh = new ChiTietDonHang();
-        ctdh.setDonHang(dh);
-        ctdh.setMonAn(mon);
-        ctdh.setSoLuong(req.getSoLuong());
-        ctdh.setDonGia(donGia);
-        ctdh.setThanhTien(thanhTien);
+        // 1. Kiểm tra nếu món đã có trong đơn thì cộng dồn số lượng (x2, x3 thay vì tạo dòng mới)
+        List<ChiTietDonHang> existingList = chiTietDonHangRepository.findByDonHang_MaDon(dh.getMaDon());
+        ChiTietDonHang existingCtdh = existingList.stream()
+                .filter(c -> c.getMonAn() != null && c.getMonAn().getMaMon().equals(mon.getMaMon()))
+                .findFirst()
+                .orElse(null);
 
-        ChiTietDonHang savedCtdh = chiTietDonHangRepository.save(ctdh);
+        ChiTietDonHang savedCtdh;
+        if (existingCtdh != null) {
+            existingCtdh.setSoLuong(existingCtdh.getSoLuong() + req.getSoLuong());
+            existingCtdh.setThanhTien(existingCtdh.getDonGia().multiply(BigDecimal.valueOf(existingCtdh.getSoLuong())));
+            savedCtdh = chiTietDonHangRepository.save(existingCtdh);
+        } else {
+            ChiTietDonHang ctdh = new ChiTietDonHang();
+            ctdh.setDonHang(dh);
+            ctdh.setMonAn(mon);
+            ctdh.setSoLuong(req.getSoLuong());
+            ctdh.setDonGia(donGia);
+            ctdh.setThanhTien(thanhTien);
+            savedCtdh = chiTietDonHangRepository.save(ctdh);
+        }
 
         // 2. Cập nhật lại tổng tiền của đơn hàng
         BigDecimal tongTienMoi = (dh.getTongTien() != null ? dh.getTongTien() : BigDecimal.ZERO).add(thanhTien);

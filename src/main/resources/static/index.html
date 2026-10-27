@@ -3983,32 +3983,49 @@
         // Nạp danh sách món ăn vào dropdown có lọc tìm kiếm
         populateDishSelect();
 
-        // Render food items in order
+        // Render food items in order - gộp nhóm món trùng lặp (x2, x3 thay vì hiện nhiều dòng)
         const itemsContainer = $('current-order-items');
         if (!order.danhSachMon || order.danhSachMon.length === 0) {
             itemsContainer.innerHTML = '<p style="color:var(--text-muted); font-size:12px; text-align:center; padding:12px;">Chưa có món nào</p>';
         } else {
-            itemsContainer.innerHTML = order.danhSachMon.map(item => {
-                const isItemCooked = (order.trangThai === 'HOAN_THANH') || (hasPreviousCooked && cookedSet.has(Number(item.maCtdh)));
+            // Nhóm các dòng có cùng maMon để luôn hiển thị x2, x3 chuẩn POS
+            const groupedMap = new Map();
+            order.danhSachMon.forEach(item => {
+                const key = item.maMon || item.maCtdh;
+                if (!groupedMap.has(key)) {
+                    groupedMap.set(key, { ...item, ctdhList: [item] });
+                } else {
+                    const g = groupedMap.get(key);
+                    g.soLuong = Number(g.soLuong || 0) + Number(item.soLuong || 0);
+                    g.thanhTien = Number(g.thanhTien || 0) + Number(item.thanhTien || 0);
+                    g.ctdhList.push(item);
+                }
+            });
+            const groupedItems = Array.from(groupedMap.values());
+
+            itemsContainer.innerHTML = groupedItems.map(item => {
+                const isItemCooked = (order.trangThai === 'HOAN_THANH') || (hasPreviousCooked && item.ctdhList.some(c => cookedSet.has(Number(c.maCtdh))));
                 let statusDot = '';
                 if (isItemCooked) {
                     statusDot = '<span style="color:#10b981; font-weight:700; font-size:11px; margin-left:4px;" title="Đã nấu xong">✓</span>';
                 } else if (hasPreviousCooked) {
                     statusDot = '<span class="badge" style="background:#fff7ed; color:#c2410c; font-size:10px; padding:1px 6px; margin-left:4px;">Mới</span>';
                 }
+                const firstCtdh = item.ctdhList[0];
                 return `
                     <div class="order-item-row" style="padding:8px 0;">
                         <div style="min-width:0; flex:1;">
-                            <div style="display:flex; align-items:center; gap:4px;">
+                            <div style="display:flex; align-items:center; gap:4px; flex-wrap:wrap;">
                                 <strong style="color:var(--text-main); font-size:13px;">${escHtml(item.tenMon)}</strong>
                                 <span style="background:#f1f5f9; color:#334155; font-weight:700; font-size:11px; padding:1px 6px; border-radius:6px;">x${item.soLuong}</span>
                                 ${statusDot}
                             </div>
                         </div>
-                        <div style="display:flex; align-items:center; gap:6px; flex-shrink:0;">
+                        <div style="display:flex; align-items:center; gap:5px; flex-shrink:0;">
                             <span style="font-weight:700; color:var(--text-main); font-size:13px;">${formatVND(item.thanhTien)}</span>
-                            <button class="btn btn-secondary btn-sm" onclick="quickAddOneMoreDish(${item.maMon})" style="padding:3px 7px; font-size:11px; font-weight:700;">+</button>
-                            <button class="btn btn-secondary btn-sm" onclick="deleteDishFromOrder(${item.maCtdh}, ${isItemCooked}, ${item.maMon || 0}, ${item.soLuong || 1}, '${escHtml(item.tenMon)}')" style="padding:3px 7px; font-size:12px; color:#b91c1c;">&times;</button>
+                            <button class="btn btn-secondary btn-sm" onclick="quickReduceOneDish(${firstCtdh.maCtdh}, ${item.maMon || 0}, ${item.soLuong || 1}, ${isItemCooked}, '${escHtml(item.tenMon)}')" style="padding:2px 7px; font-size:12px; font-weight:700;" title="Giảm 1">-</button>
+                            <button class="btn btn-secondary btn-sm" onclick="quickAddOneMoreDish(${item.maMon})" style="padding:2px 7px; font-size:12px; font-weight:700;" title="Thêm 1">+</button>
+                            <button class="btn btn-secondary btn-sm" onclick="deleteAllDishQuantity(${JSON.stringify(item.ctdhList.map(c=>c.maCtdh)).replace(/"/g, '&quot;')}, ${isItemCooked}, ${item.maMon || 0}, ${item.soLuong || 1}, '${escHtml(item.tenMon)}')" style="padding:2px 7px; font-size:12px; color:#b91c1c;" title="Xóa món">&times;</button>
                         </div>
                     </div>
                 `;
@@ -4094,6 +4111,92 @@
             }
         } catch (err) {
             console.warn('Lỗi hoàn trả tồn kho:', err);
+        }
+    }
+
+    async function quickReduceOneDish(maCtdh, maMon, currentQty, isItemCooked, tenMon) {
+        if (!selectedOrder) return;
+        const role = currentUser ? (currentUser.vaiTro || '') : '';
+        if (isItemCooked && !['ADMIN', 'QUAN_LY'].includes(role)) {
+            showToast(`Món "${tenMon || 'này'}" bếp đã nấu xong! Chỉ Quản lý mới được chỉnh sửa.`, 'error');
+            return;
+        }
+
+        if (currentQty <= 1) {
+            await deleteDishFromOrder(maCtdh, isItemCooked, maMon, currentQty, tenMon);
+            return;
+        }
+
+        try {
+            // 1. Cập nhật giảm số lượng của chi tiết đơn hàng
+            const ctdh = await apiFetch(`/api/chi-tiet-don-hang/${maCtdh}`);
+            if (ctdh) {
+                const donGia = Number(ctdh.donGia || 0);
+                ctdh.soLuong = ctdh.soLuong - 1;
+                ctdh.thanhTien = donGia * ctdh.soLuong;
+                await apiFetch(`/api/chi-tiet-don-hang/${maCtdh}`, {
+                    method: 'PUT',
+                    body: JSON.stringify(ctdh)
+                });
+
+                // Cập nhật lại tổng tiền đơn hàng
+                if (selectedOrder) {
+                    const newTotal = Math.max(0, Number(selectedOrder.tongTien || 0) - donGia);
+                    await apiFetch(`/api/don-hang/${selectedOrder.maDon}`, {
+                        method: 'PUT',
+                        body: JSON.stringify({ ...selectedOrder, tongTien: newTotal })
+                    }).catch(() => null);
+                }
+            }
+
+            // 2. Hoàn trả 1 suất nguyên liệu về kho
+            if (!isItemCooked && maMon) {
+                await restoreIngredientStockForDish(maMon, 1);
+            }
+
+            showToast(`Đã giảm 1 phần "${tenMon || ''}"`);
+            await loadTables();
+            await loadOrderForTable(selectedTable.maBan);
+            if (currentTabName === 'kitchen') {
+                await loadKitchenOrders();
+            }
+        } catch (err) {
+            showToast('Lỗi giảm món: ' + err.message, 'error');
+        }
+    }
+
+    async function deleteAllDishQuantity(ctdhIds, isItemCooked, maMon, totalQty, tenMon) {
+        const role = currentUser ? (currentUser.vaiTro || '') : '';
+        if (isItemCooked) {
+            if (!['ADMIN', 'QUAN_LY'].includes(role)) {
+                showToast(`Món "${tenMon || 'này'}" bếp đã nấu xong! Chỉ Quản lý mới có quyền hủy.`, 'error');
+                return;
+            }
+            if (!confirm(`CẢNH BÁO QUẢN LÝ: Món "${tenMon || ''}" bếp ĐÃ NẤU XONG! Bạn có chắc chắn muốn hủy món này khỏi hóa đơn không?`)) return;
+        } else {
+            if (!confirm(`Huỷ món "${tenMon || ''}" (x${totalQty || 1}) khỏi đơn hàng?`)) return;
+        }
+
+        try {
+            const ids = Array.isArray(ctdhIds) ? ctdhIds : [ctdhIds];
+            for (const id of ids) {
+                await apiFetch(`/api/don-hang/huy-mon/${id}`, { method: 'DELETE' });
+            }
+
+            if (!isItemCooked && maMon) {
+                await restoreIngredientStockForDish(maMon, totalQty || 1);
+                showToast(`Đã huỷ món "${tenMon || ''}" và hoàn trả nguyên liệu về kho!`);
+            } else {
+                showToast(`Đã huỷ món "${tenMon || ''}" khỏi đơn hàng!`);
+            }
+
+            await loadTables();
+            await loadOrderForTable(selectedTable.maBan);
+            if (currentTabName === 'kitchen') {
+                await loadKitchenOrders();
+            }
+        } catch (e) {
+            showToast('Lỗi huỷ món: ' + e.message, 'error');
         }
     }
 
@@ -6298,7 +6401,18 @@
         }
 
         const tbody = $('rc-items-body');
-        tbody.innerHTML = (order.danhSachMon || []).map(item => `
+        const groupedReceiptMap = new Map();
+        (order.danhSachMon || []).forEach(item => {
+            const key = item.maMon || item.tenMon;
+            if (!groupedReceiptMap.has(key)) {
+                groupedReceiptMap.set(key, { ...item });
+            } else {
+                const g = groupedReceiptMap.get(key);
+                g.soLuong = Number(g.soLuong || 0) + Number(item.soLuong || 0);
+                g.thanhTien = Number(g.thanhTien || 0) + Number(item.thanhTien || 0);
+            }
+        });
+        tbody.innerHTML = Array.from(groupedReceiptMap.values()).map(item => `
             <tr>
                 <td>${escHtml(item.tenMon)}</td>
                 <td style="text-align:center;">${item.soLuong}</td>
