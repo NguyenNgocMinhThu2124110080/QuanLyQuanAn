@@ -58,29 +58,29 @@
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
         :root {
-            --primary: #f97316;
-            --primary-hover: #ea580c;
-            --primary-light: #ffedd5;
+            --primary: #ea580c;
+            --primary-hover: #c2410c;
+            --primary-light: #fff7ed;
             --dark: #0f172a;
             --surface: #ffffff;
-            --bg: #f8fafc;
-            --border: #e2e8f0;
-            --text-main: #1e293b;
-            --text-muted: #64748b;
+            --bg: #f3f4f6;
+            --border: #e5e7eb;
+            --text-main: #111827;
+            --text-muted: #6b7280;
             --success: #10b981;
-            --success-light: #d1fae5;
+            --success-light: #ecfdf5;
             --warning: #f59e0b;
-            --warning-light: #fef3c7;
+            --warning-light: #fffbeb;
             --danger: #ef4444;
-            --danger-light: #fee2e2;
-            --info: #3b82f6;
-            --info-light: #dbeafe;
-            --radius-sm: 6px;
-            --radius-md: 10px;
-            --radius-lg: 14px;
-            --shadow-sm: 0 1px 3px rgba(0,0,0,0.08);
-            --shadow-md: 0 4px 12px rgba(0,0,0,0.06);
-            --shadow-lg: 0 10px 25px rgba(0,0,0,0.1);
+            --danger-light: #fef2f2;
+            --info: #475569;
+            --info-light: #f1f5f9;
+            --radius-sm: 8px;
+            --radius-md: 12px;
+            --radius-lg: 16px;
+            --shadow-sm: 0 1px 2px rgba(15, 23, 42, 0.04);
+            --shadow-md: 0 4px 12px rgba(15, 23, 42, 0.06);
+            --shadow-lg: 0 12px 28px rgba(15, 23, 42, 0.12);
         }
 
         * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -151,20 +151,19 @@
             white-space: nowrap;
         }
         .role-pill {
-            background: var(--primary);
-            color: white;
+            background: rgba(255, 255, 255, 0.12);
+            color: #e2e8f0;
             padding: 2px 8px;
-            border-radius: 12px;
-            font-size: 10px;
-            text-transform: uppercase;
-            font-weight: 700;
+            border-radius: 99px;
+            font-size: 11px;
+            font-weight: 500;
             white-space: nowrap;
             flex-shrink: 0;
         }
         .btn-switch-user {
             background: transparent;
             color: #cbd5e1;
-            border: 1px solid rgba(255,255,255,0.25);
+            border: 1px solid rgba(255,255,255,0.2);
             padding: 4px 10px;
             border-radius: 16px;
             font-size: 11px;
@@ -176,9 +175,9 @@
             color: white;
         }
         .btn-logout {
-            background: rgba(239, 68, 68, 0.2);
-            color: #fca5a5;
-            border: 1px solid rgba(239, 68, 68, 0.4);
+            background: rgba(255, 255, 255, 0.08);
+            color: #cbd5e1;
+            border: 1px solid rgba(255, 255, 255, 0.15);
             padding: 4px 10px;
             border-radius: 16px;
             font-size: 11px;
@@ -619,19 +618,21 @@
             background-color: #f8fafc;
         }
 
-        /* STATUS BADGES */
+        /* STATUS BADGES (CLEAN MODERN FLAT) */
         .badge {
-            display: inline-block;
-            padding: 3px 8px;
-            border-radius: 12px;
-            font-size: 11px;
-            font-weight: 700;
-            text-transform: uppercase;
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            padding: 3px 10px;
+            border-radius: 999px;
+            font-size: 11.5px;
+            font-weight: 600;
+            letter-spacing: 0;
         }
-        .badge-success { background: var(--success-light); color: #065f46; }
-        .badge-warning { background: var(--warning-light); color: #92400e; }
-        .badge-danger { background: var(--danger-light); color: #991b1b; }
-        .badge-info { background: var(--info-light); color: #1e40af; }
+        .badge-success { background: #ecfdf5; color: #047857; }
+        .badge-warning { background: #fffbeb; color: #b45309; }
+        .badge-danger { background: #fef2f2; color: #b91c1c; }
+        .badge-info { background: #f1f5f9; color: #475569; }
 
         /* TOAST ALERT */
         #toast {
@@ -849,61 +850,191 @@
         }
         .table-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
-            gap: 16px;
+            grid-template-columns: repeat(auto-fill, minmax(175px, 1fr));
+            gap: 14px;
         }
         .table-card {
-            background: white;
-            border: 2px solid var(--border);
-            border-radius: var(--radius-lg);
+            background: #ffffff;
+            border: 1px solid var(--border);
+            border-radius: 14px;
             padding: 16px;
             cursor: pointer;
-            transition: all 0.2s ease;
+            transition: all 0.16s ease;
             position: relative;
             display: flex;
             flex-direction: column;
-            gap: 8px;
+            justify-content: space-between;
+            gap: 12px;
+            min-height: 88px;
+            box-shadow: 0 1px 2px rgba(15, 23, 42, 0.03);
         }
         .table-card:hover {
-            transform: translateY(-3px);
+            transform: translateY(-2px);
+            border-color: #cbd5e1;
             box-shadow: var(--shadow-md);
         }
-        .table-card.selected {
-            border-color: var(--primary);
-            box-shadow: 0 0 0 3px rgba(249, 115, 22, 0.2);
+        .table-card.status-TRONG {
+            background: #ffffff;
         }
-        .table-card.status-TRONG { border-top: 5px solid var(--success); }
-        .table-card.status-CO_KHACH { border-top: 5px solid var(--danger); background: #fffcfb; }
-        .table-card.status-DAT_TRUOC { border-top: 5px solid var(--info); }
+        .table-card.status-CO_KHACH {
+            background: #fffaf5;
+            border-color: #fdba74;
+        }
+        .table-card.status-DAT_TRUOC {
+            background: #f8fafc;
+            border-color: #cbd5e1;
+        }
         .table-card.cooked-ready {
-            border-color: #10b981 !important;
-            border-top: 5px solid #10b981 !important;
+            border-color: #34d399 !important;
             background: #f0fdf4 !important;
-            animation: pulse-cooked 2s infinite ease-in-out;
         }
-        @keyframes pulse-cooked {
-            0% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.5); }
-            70% { box-shadow: 0 0 0 8px rgba(16, 185, 129, 0); }
-            100% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0); }
+        .table-card.selected {
+            border-color: var(--primary) !important;
+            box-shadow: 0 0 0 3px rgba(234, 88, 12, 0.15) !important;
         }
-
+        .status-dot {
+            width: 7px;
+            height: 7px;
+            border-radius: 50%;
+            display: inline-block;
+            flex-shrink: 0;
+        }
         .table-header {
             display: flex;
             justify-content: space-between;
             align-items: center;
+            gap: 8px;
         }
         .table-name {
-            font-size: 16px;
+            font-size: 15.5px;
             font-weight: 700;
+            color: var(--text-main);
+            letter-spacing: -0.2px;
         }
         .table-capacity {
             font-size: 12px;
             color: var(--text-muted);
+            font-weight: 500;
         }
-        .table-order-preview {
-            margin-top: 6px;
+
+        /* TOUCH POS DISH GRID (KIOTVIET / IPOS STYLE) */
+        .pos-touch-grid {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 8px;
+            max-height: 220px;
+            overflow-y: auto;
+            padding: 2px;
+        }
+        .pos-dish-btn {
+            background: #ffffff;
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 9px 11px;
+            text-align: left;
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.12s ease;
+            user-select: none;
+        }
+        .pos-dish-btn:hover {
+            border-color: #fdba74;
+            background: #fffaf5;
+        }
+        .pos-dish-btn:active {
+            transform: scale(0.97);
+            background: #ffedd5;
+        }
+        .pos-dish-btn .pos-dish-info {
+            min-width: 0;
+            flex: 1;
+        }
+        .pos-dish-btn .pos-dish-title {
+            font-size: 12.5px;
+            font-weight: 600;
+            color: var(--text-main);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        .pos-dish-btn .pos-dish-price {
+            font-size: 11.5px;
+            font-weight: 700;
+            color: var(--primary);
+            margin-top: 2px;
+        }
+        .pos-dish-btn .pos-dish-add {
+            width: 24px;
+            height: 24px;
+            border-radius: 7px;
+            background: #f1f5f9;
+            color: #334155;
+            font-weight: 700;
+            font-size: 15px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+            transition: all 0.12s ease;
+        }
+        .pos-dish-btn:hover .pos-dish-add {
+            background: var(--primary);
+            color: #ffffff;
+        }
+
+        /* COLLAPSIBLE SECONDARY DRAWERS */
+        details.pos-drawer {
+            background: #ffffff;
+            border: 1px solid var(--border);
+            border-radius: var(--radius-lg);
+            box-shadow: var(--shadow-sm);
+            overflow: hidden;
+        }
+        details.pos-drawer > summary {
+            padding: 14px 20px;
+            font-size: 14px;
+            font-weight: 700;
+            color: var(--text-main);
+            cursor: pointer;
+            list-style: none;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background: #ffffff;
+            user-select: none;
+            transition: background 0.15s ease;
+        }
+        details.pos-drawer > summary:hover {
+            background: #f8fafc;
+        }
+        details.pos-drawer > summary::-webkit-details-marker {
+            display: none;
+        }
+        details.pos-drawer > summary::after {
+            content: 'Mở rộng ▾';
             font-size: 12px;
+            font-weight: 600;
             color: var(--text-muted);
+            background: #f8fafc;
+            border: 1px solid var(--border);
+            padding: 4px 10px;
+            border-radius: 99px;
+        }
+        details.pos-drawer[open] > summary {
+            border-bottom: 1px solid var(--border);
+            background: #f8fafc;
+        }
+        details.pos-drawer[open] > summary::after {
+            content: 'Thu gọn ▴';
+            color: var(--primary);
+            border-color: #fdba74;
+            background: #fff7ed;
+        }
+        details.pos-drawer .drawer-body {
+            padding: 18px 20px;
         }
 
         /* ORDER DETAILS PANEL */
@@ -1315,74 +1446,58 @@
                         <div style="margin-top: 16px;" id="empty-state-actions"></div>
                     </div>
 
-                    <!-- KHI BÀN CÓ KHÁCH: HIỂN THỊ ĐƠN HÀNG -->
+                    <!-- KHI BÀN CÓ KHÁCH: HIỂN THỊ ĐƠN HÀNG CHUẨN POS -->
                     <div id="order-active-state" style="display: none;">
-                        <div style="display:flex; justify-content:space-between; font-size:12px; color:var(--text-muted); margin-bottom:12px;">
-                            <span>Đơn hàng: <strong id="current-order-id">#--</strong></span>
-                            <span>Giờ vào: <strong id="current-order-time">--:--</strong></span>
+                        <div style="display:flex; justify-content:space-between; font-size:12px; color:var(--text-muted); margin-bottom:10px;">
+                            <span>Mã đơn <strong id="current-order-id" style="color:var(--text-main);">#--</strong></span>
+                            <span>Giờ mở <strong id="current-order-time" style="color:var(--text-main);">--:--</strong></span>
                         </div>
 
-                        <!-- THÊM MÓN NHANH VÀO ĐƠN -->
-                        <div style="background:#f8fafc; padding:12px; border-radius:var(--radius-sm); border:1px solid var(--border); margin-bottom:14px;">
-                            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
-                                <label style="margin:0; font-weight:700;">Thêm món vào bàn:</label>
-                                <span id="dish-filter-count" style="font-size:11px; color:var(--text-muted);"></span>
-                            </div>
-
-                            <!-- Ô TÌM KIẾM MÓN ĂN NHANH -->
+                        <!-- CHỌN MÓN CHẠM NHANH (TOUCH POS GRID) -->
+                        <div style="background:#f8fafc; padding:12px; border-radius:12px; border:1px solid var(--border); margin-bottom:12px;">
                             <div style="position:relative; margin-bottom:8px;">
                                 <input type="text" id="order-search-dish" 
-                                       placeholder="Gõ tên món cần tìm (VD: cơm, phở, trà...)" 
+                                       placeholder="Tìm món nhanh (phở, cơm, trà...)" 
                                        oninput="filterDishDropdown(this.value)" 
-                                       style="width:100%; padding:7px 28px 7px 10px; font-size:13px; border:1px solid #cbd5e1; border-radius:6px; background:#fff;">
-                                <span onclick="clearOrderDishSearch()" style="position:absolute; right:9px; top:6px; cursor:pointer; color:#64748b; font-size:15px; font-weight:700; display:none;" id="btn-clear-dish-search">&times;</span>
+                                       style="width:100%; padding:8px 30px 8px 12px; font-size:13px; border:1px solid var(--border); border-radius:8px; background:#fff;">
+                                <span onclick="clearOrderDishSearch()" style="position:absolute; right:10px; top:6px; cursor:pointer; color:#64748b; font-size:16px; font-weight:700; display:none;" id="btn-clear-dish-search">&times;</span>
                             </div>
 
-                            <!-- DANH MỤC LỌC NHANH DẠNG PILLS -->
                             <div id="order-category-pills" style="display:flex; gap:5px; margin-bottom:8px; flex-wrap:wrap;">
-                                <button type="button" class="btn btn-secondary btn-sm active-cat-pill" id="cat-pill-0" style="font-size:11px; padding:3px 9px; border-radius:12px;" onclick="filterDishByCategory(0, this)">Tất cả</button>
-                                <button type="button" class="btn btn-secondary btn-sm" id="cat-pill-1" style="font-size:11px; padding:3px 9px; border-radius:12px;" onclick="filterDishByCategory(1, this)">Món chính</button>
-                                <button type="button" class="btn btn-secondary btn-sm" id="cat-pill-2" style="font-size:11px; padding:3px 9px; border-radius:12px;" onclick="filterDishByCategory(2, this)">Ăn vặt</button>
-                                <button type="button" class="btn btn-secondary btn-sm" id="cat-pill-3" style="font-size:11px; padding:3px 9px; border-radius:12px;" onclick="filterDishByCategory(3, this)">Nước uống</button>
-                                <button type="button" class="btn btn-secondary btn-sm" id="cat-pill-4" style="font-size:11px; padding:3px 9px; border-radius:12px;" onclick="filterDishByCategory(4, this)">Tráng miệng</button>
+                                <button type="button" class="btn btn-secondary btn-sm active-cat-pill" id="cat-pill-0" style="font-size:11px; padding:4px 10px; border-radius:99px;" onclick="filterDishByCategory(0, this)">Tất cả</button>
                             </div>
 
-                            <!-- GỢI Ý NHANH KHI GÕ TÌM KIẾM -->
-                            <div id="quick-search-dish-list" style="display:none; max-height:150px; overflow-y:auto; background:#ffffff; border:1px solid #cbd5e1; border-radius:6px; margin-bottom:8px;"></div>
+                            <!-- LƯỚI CHẠM MÓN 1-TAP CHUẨN POS -->
+                            <div id="pos-touch-dish-grid" class="pos-touch-grid"></div>
+                            <span id="dish-filter-count" style="display:none;"></span>
+                            <div id="quick-search-dish-list" style="display:none;"></div>
 
-                            <!-- CHỌN MÓN TRải RỘNG 100% KHÔNG BỊ CẮT CHỮ -->
-                            <div style="margin-bottom:8px;">
-                                <select id="select-food-to-order" style="width:100%; font-weight:600; padding:8px 10px;">
-                                    <option value="">-- Chọn món ăn --</option>
-                                </select>
-                            </div>
-                            <div style="display:flex; gap:8px; align-items:center;">
-                                <div style="display:flex; align-items:center; gap:6px; background:#fff; border:1px solid #cbd5e1; border-radius:6px; padding:2px 8px;">
-                                    <span style="font-size:12px; color:#64748b; font-weight:600; white-space:nowrap;">Số lượng:</span>
-                                    <input type="number" id="input-food-qty" value="1" min="1" max="50" style="width:52px; border:none; padding:5px 2px; text-align:center; font-weight:700;">
-                                </div>
-                                <button class="btn btn-primary" onclick="addDishToCurrentOrder()" style="flex:1; padding:8px 14px; font-weight:700;">+ Thêm vào bàn</button>
+                            <!-- FALLBACK SELECT ẨN ĐỂ TƯƠNG THÍCH NGƯỢC -->
+                            <div style="display:none;">
+                                <select id="select-food-to-order"><option value="">-- Chọn món ăn --</option></select>
+                                <input type="number" id="input-food-qty" value="1" min="1" max="50">
+                                <button class="btn btn-primary" onclick="addDishToCurrentOrder()">+ Thêm</button>
                             </div>
                         </div>
-                        <!-- TRẠNG THÁI TIẾN ĐỘ BẾP NẤU (KDS ALERT CHO PHỤC VỤ) -->
-                        <div id="order-kitchen-status-box" style="display:none; border:1px solid #e2e8f0; border-radius:var(--radius-sm); padding:8px 12px; margin-bottom:10px; align-items:center; gap:8px;"></div>
+
+                        <!-- TRẠNG THÁI BẾP NẤU -->
+                        <div id="order-kitchen-status-box" style="display:none; border:1px solid #e2e8f0; border-radius:8px; padding:8px 12px; margin-bottom:10px; align-items:center; justify-content:space-between; gap:8px;"></div>
 
                         <!-- DANH SÁCH MÓN ĐÃ GỌI -->
-                        <div style="max-height:220px; overflow-y:auto; padding-right:4px;">
+                        <div style="max-height:210px; overflow-y:auto; padding-right:2px;">
                             <div id="current-order-items"></div>
                         </div>
 
                         <!-- TỔNG TIỀN VÀ THAO TÁC -->
-                        <div class="order-total-box">
-                            <div style="display:flex; justify-content:space-between; font-size:13px; color:var(--text-muted);">
-                                <span>Tổng cộng:</span>
-                                <span>Thành tiền</span>
+                        <div class="order-total-box" style="padding:14px; margin-top:10px;">
+                            <div style="display:flex; justify-content:space-between; align-items:baseline;">
+                                <span style="font-size:13px; font-weight:600; color:var(--text-muted);">Tổng thanh toán</span>
+                                <div class="total-amount-display" id="current-order-total" style="font-size:22px;">0 ₫</div>
                             </div>
-                            <div class="total-amount-display" id="current-order-total">0 ₫</div>
-                            <div style="display:grid; grid-template-columns:1fr 1fr 1.3fr; gap:6px; margin-top:10px;">
-                                <button class="btn btn-secondary btn-sm" onclick="openTransferTableModal()" title="Chuyển toàn bộ đơn của bàn này sang một bàn trống khác">Đổi bàn</button>
-                                <button class="btn btn-danger btn-sm" onclick="cancelCurrentOrder()">Hủy đơn</button>
-                                <button class="btn btn-success" onclick="openPaymentForCurrentOrder()">Thanh toán</button>
+                            <div style="display:grid; grid-template-columns:1fr 1fr 1.5fr; gap:8px; margin-top:8px;">
+                                <button class="btn btn-secondary btn-sm" onclick="openTransferTableModal()" style="padding:9px 8px;">Đổi bàn</button>
+                                <button class="btn btn-secondary btn-sm" onclick="cancelCurrentOrder()" style="padding:9px 8px; color:#b91c1c;">Hủy đơn</button>
+                                <button class="btn btn-success" onclick="openPaymentForCurrentOrder()" style="padding:9px 12px; font-weight:700;">Thanh toán</button>
                             </div>
                         </div>
                     </div>
@@ -1633,33 +1748,35 @@
             </div>
         </div>
 
-        <!-- LỊCH SỬ NHẬP XUẤT KHO & BIÊN LAI -->
-        <div class="card" style="margin-top:20px;">
-            <div class="card-header" style="flex-wrap:wrap; gap:10px;">
-                <div class="card-title">Lịch sử nhập / xuất kho</div>
-                <button class="btn btn-secondary btn-sm" onclick="loadInventoryHistory()">Làm mới</button>
+        <!-- LỊCH SỬ NHẬP XUẤT KHO & BIÊN LAI (THU GỌN ĐỂ MÀN HÌNH KHO THOÁNG SẠCH) -->
+        <details class="pos-drawer" style="margin-top:16px;">
+            <summary>Lịch sử phiếu nhập / xuất kho &amp; In biên lai</summary>
+            <div class="drawer-body">
+                <div style="display:flex; justify-content:flex-end; margin-bottom:10px;">
+                    <button class="btn btn-secondary btn-sm" onclick="loadInventoryHistory()">Làm mới</button>
+                </div>
+                <div class="table-responsive" style="max-height:380px; overflow-y:auto;">
+                    <table class="app-table">
+                        <thead>
+                            <tr>
+                                <th>Mã phiếu</th>
+                                <th>Thời gian</th>
+                                <th>Loại</th>
+                                <th>Nguyên liệu</th>
+                                <th>Số lượng</th>
+                                <th>Đơn giá</th>
+                                <th>Thành tiền</th>
+                                <th>NCC / Ghi chú</th>
+                                <th style="text-align:center;">Biên lai</th>
+                            </tr>
+                        </thead>
+                        <tbody id="inventory-history-tbody">
+                            <tr><td colspan="9" style="text-align:center; color:var(--text-muted);">Đang tải...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
             </div>
-            <div class="table-responsive" style="max-height:400px; overflow-y:auto;">
-                <table class="app-table">
-                    <thead>
-                        <tr>
-                            <th>Mã phiếu</th>
-                            <th>Thời gian</th>
-                            <th>Loại phiếu</th>
-                            <th>Nguyên liệu</th>
-                            <th>Số lượng</th>
-                            <th>Đơn giá</th>
-                            <th>Thành tiền</th>
-                            <th>Nhà cung cấp / Ghi chú</th>
-                            <th style="text-align:center;">Thao tác</th>
-                        </tr>
-                    </thead>
-                    <tbody id="inventory-history-tbody">
-                        <tr><td colspan="9" style="text-align:center; color:var(--text-muted);">Đang tải lịch sử nhập xuất...</td></tr>
-                    </tbody>
-                </table>
-            </div>
-        </div>
+        </details>
     </div>
 
     <!-- ========================================================
@@ -1680,68 +1797,52 @@
                 </div>
             </div>
             <div class="grid-4">
-                <!-- THẺ 1: TỔNG THU (DOANH THU BÁN) -->
-                <div class="kpi-card clickable" onclick="openFinanceDetailModal('THU')" title="Bấm vào để xem chi tiết các đơn hàng và món ăn đã thu tiền">
-                    <div class="kpi-icon" style="background:#dcfce7; color:#15803d;">
-                        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path></svg>
+                <div class="kpi-card clickable" onclick="openFinanceDetailModal('THU')">
+                    <div class="kpi-icon" style="background:#ecfdf5; color:#047857;">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path></svg>
                     </div>
                     <div style="flex:1;">
-                        <div class="kpi-title">Tổng Thu</div>
-                        <div class="kpi-value" id="kpi-finance-income" style="color:#15803d;">0 ₫</div>
-                        <div style="display:flex; align-items:center; justify-content:space-between; margin-top:4px; gap:6px; flex-wrap:wrap;">
-                            <span style="font-size:11px; color:var(--text-muted);" id="kpi-finance-income-sub">0 đơn</span>
-                            <span class="kpi-action-hint" style="background:#dcfce7; color:#15803d;">Chi tiết &rarr;</span>
-                        </div>
+                        <div class="kpi-title">Tổng thu</div>
+                        <div class="kpi-value" id="kpi-finance-income" style="color:#047857;">0 ₫</div>
+                        <div style="font-size:11.5px; color:var(--text-muted); margin-top:2px;" id="kpi-finance-income-sub">0 đơn</div>
                     </div>
                 </div>
 
-                <!-- THẺ 2: TỔNG CHI (NHẬP KHO NGUYÊN LIỆU) -->
-                <div class="kpi-card clickable" onclick="openFinanceDetailModal('CHI')" title="Bấm vào để xem chi tiết đã chi nhập những nguyên liệu gì">
-                    <div class="kpi-icon" style="background:#fee2e2; color:#b91c1c;">
-                        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 16v1a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V7a2 2 0 0 1 2-2h11a2 2 0 0 1 2 2v1"></path><path d="M18 8h4a2 2 0 0 1 2 2v7a2 2 0 0 1-2 2h-4"></path><circle cx="6" cy="19" r="2"></circle><circle cx="18" cy="19" r="2"></circle></svg>
+                <div class="kpi-card clickable" onclick="openFinanceDetailModal('CHI')">
+                    <div class="kpi-icon" style="background:#fef2f2; color:#b91c1c;">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 16v1a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V7a2 2 0 0 1 2-2h11a2 2 0 0 1 2 2v1"></path><path d="M18 8h4a2 2 0 0 1 2 2v7a2 2 0 0 1-2 2h-4"></path><circle cx="6" cy="19" r="2"></circle><circle cx="18" cy="19" r="2"></circle></svg>
                     </div>
                     <div style="flex:1;">
-                        <div class="kpi-title">Tổng Chi</div>
+                        <div class="kpi-title">Tổng chi nhập</div>
                         <div class="kpi-value" id="kpi-finance-expense" style="color:#b91c1c;">0 ₫</div>
-                        <div style="display:flex; align-items:center; justify-content:space-between; margin-top:4px; gap:6px; flex-wrap:wrap;">
-                            <span style="font-size:11px; color:var(--text-muted);" id="kpi-finance-expense-sub">0 phiếu</span>
-                            <span class="kpi-action-hint" style="background:#fee2e2; color:#b91c1c;">Chi tiết &rarr;</span>
-                        </div>
+                        <div style="font-size:11.5px; color:var(--text-muted); margin-top:2px;" id="kpi-finance-expense-sub">0 phiếu</div>
                     </div>
                 </div>
 
-                <!-- THẺ 3: LỢI NHUẬN RÒNG -->
-                <div class="kpi-card clickable" onclick="openFinanceDetailModal('ALL')" style="border: 2px solid #e0e7ff; background:#fbfbfe;" title="Bấm vào để xem bảng đối soát tổng hợp cả Thu và Chi">
-                    <div class="kpi-icon" style="background:#ede9fe; color:#6d28d9;">
-                        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="1" x2="12" y2="23"></line><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path></svg>
+                <div class="kpi-card clickable" onclick="openFinanceDetailModal('ALL')">
+                    <div class="kpi-icon" style="background:#f1f5f9; color:#334155;">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="1" x2="12" y2="23"></line><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path></svg>
                     </div>
                     <div style="flex:1;">
                         <div class="kpi-title">Lợi nhuận ròng</div>
-                        <div class="kpi-value" id="kpi-finance-profit" style="color:#4338ca;">0 ₫</div>
-                        <div style="display:flex; align-items:center; justify-content:space-between; margin-top:4px; gap:6px; flex-wrap:wrap;">
-                            <span id="kpi-finance-profit-badge">
-                                <span class="badge" style="background:#e0e7ff; color:#4338ca; font-size:10px;">Hòa vốn</span>
-                            </span>
-                            <span class="kpi-action-hint" style="background:#ede9fe; color:#5b21b6;">Đối soát &rarr;</span>
+                        <div class="kpi-value" id="kpi-finance-profit">0 ₫</div>
+                        <div style="margin-top:2px;" id="kpi-finance-profit-badge">
+                            <span class="badge badge-info">Hòa vốn</span>
                         </div>
                     </div>
                 </div>
 
-                <!-- THẺ 4: HÌNH THỨC DÒNG TIỀN -->
-                <div class="kpi-card clickable" onclick="openFinanceDetailModal('THU')" title="Bấm vào để xem chi tiết dòng tiền thanh toán">
-                    <div class="kpi-icon" style="background:#fef3c7; color:#b45309;">
-                        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="20" height="14" x="2" y="5" rx="2"></rect><line x1="2" x2="22" y1="10" y2="10"></line></svg>
+                <div class="kpi-card clickable" onclick="openFinanceDetailModal('THU')">
+                    <div class="kpi-icon" style="background:#fff7ed; color:#ea580c;">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect width="20" height="14" x="2" y="5" rx="2"></rect><line x1="2" x2="22" y1="10" y2="10"></line></svg>
                     </div>
                     <div style="flex:1;">
-                        <div class="kpi-title">Dòng tiền thanh toán</div>
-                        <div style="font-size:13px; font-weight:700; color:#1e293b; margin-top:2px;">
-                            TM: <span id="kpi-rev-cash" style="color:#059669;">0 ₫</span>
+                        <div class="kpi-title">Phương thức thu</div>
+                        <div style="font-size:13px; font-weight:700; color:var(--text-main); margin-top:4px;">
+                            TM: <span id="kpi-rev-cash" style="color:#047857;">0 ₫</span>
                         </div>
-                        <div style="display:flex; align-items:center; justify-content:space-between; margin-top:2px; gap:4px; flex-wrap:wrap;">
-                            <span style="font-size:11px; color:var(--text-muted);">
-                                CK/Thẻ: <span id="kpi-rev-transfer" style="color:#0284c7; font-weight:600;">0 ₫</span>
-                            </span>
-                            <span class="kpi-action-hint" style="background:#fef3c7; color:#b45309;">Chi tiết &rarr;</span>
+                        <div style="font-size:11.5px; color:var(--text-muted); margin-top:2px;">
+                            CK/Thẻ: <span id="kpi-rev-transfer" style="color:var(--text-main); font-weight:600;">0 ₫</span>
                         </div>
                     </div>
                 </div>
@@ -1799,66 +1900,68 @@
             </div>
         </div>
 
-        <!-- THỐNG KÊ TOP MÓN ĂN BÁN CHẠY NHẤT -->
-        <div class="card" style="margin-top:20px;">
-            <div class="card-header" style="flex-wrap:wrap; gap:10px;">
-                <div class="card-title">Top món bán chạy</div>
-                <span class="badge" style="background:#eff6ff; color:#1d4ed8; font-size:11px; font-weight:700;" id="top-dishes-count-badge">Đang thống kê...</span>
-            </div>
-            <div class="table-responsive">
-                <table class="app-table">
-                    <thead>
-                        <tr>
-                            <th style="width:80px;">Hạng</th>
-                            <th>Tên món ăn</th>
-                            <th style="text-align:center;">Số lượng đã bán</th>
-                            <th style="width:240px;">Tỷ trọng doanh thu</th>
-                            <th style="text-align:right;">Doanh thu mang lại</th>
-                        </tr>
-                    </thead>
-                    <tbody id="top-selling-dishes-tbody">
-                        <tr><td colspan="5" style="text-align:center; color:var(--text-muted);">Đang tổng hợp dữ liệu món bán chạy...</td></tr>
-                    </tbody>
-                </table>
-            </div>
-        </div>
+        <!-- SỔ QUỸ THU - CHI & TOP MÓN BÁN CHẠY (THU GỌN ĐỂ MÀN HÌNH THU NGÂN TỐI GIẢN) -->
+        <details class="pos-drawer" id="cashier-advanced-drawer" style="margin-top:16px;">
+            <summary>Sổ quỹ Thu - Chi &amp; Thống kê món bán chạy</summary>
+            <div class="drawer-body">
+                <div class="grid-2" style="gap:20px; align-items:start;">
+                    <div>
+                        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
+                            <strong style="font-size:14px;">Top món bán chạy</strong>
+                            <span class="badge badge-info" id="top-dishes-count-badge">0 món</span>
+                        </div>
+                        <div class="table-responsive">
+                            <table class="app-table">
+                                <thead>
+                                    <tr>
+                                        <th>Hạng</th>
+                                        <th>Món ăn</th>
+                                        <th style="text-align:center;">SL</th>
+                                        <th>Tỷ trọng</th>
+                                        <th style="text-align:right;">Doanh thu</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="top-selling-dishes-tbody">
+                                    <tr><td colspan="5" style="text-align:center; color:var(--text-muted);">Đang tải...</td></tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
 
-        <!-- SỔ QUỸ THU - CHI DÒNG TIỀN -->
-        <div class="card" style="margin-top:20px;">
-            <div class="card-header" style="flex-wrap:wrap; gap:10px;">
-                <div class="card-title">Sổ quỹ Thu - Chi</div>
-                <div style="display:flex; align-items:center; gap:8px; flex-wrap:wrap;">
-                    <label style="margin:0; font-size:12px;">Lọc loại:</label>
-                    <select id="cash-flow-filter-type" onchange="renderCashFlowTable()" style="width:auto; padding:5px 10px; font-size:12px;">
-                        <option value="ALL">Tất cả (Thu & Chi)</option>
-                        <option value="THU">Chỉ dòng Thu (+)</option>
-                        <option value="CHI">Chỉ dòng Chi (-)</option>
-                    </select>
-                    <button type="button" class="btn btn-success btn-sm" onclick="exportCashFlowToCSV()" style="display:inline-flex; align-items:center; gap:5px; font-weight:700;" title="Xuất toàn bộ báo cáo Sổ quỹ Thu - Chi ra file Excel (.csv)">
-                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
-                        Xuất Excel (.csv)
-                    </button>
+                    <div>
+                        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px; flex-wrap:wrap; gap:8px;">
+                            <strong style="font-size:14px;">Sổ quỹ Thu - Chi</strong>
+                            <div style="display:flex; align-items:center; gap:6px;">
+                                <select id="cash-flow-filter-type" onchange="renderCashFlowTable()" style="width:auto; padding:4px 8px; font-size:12px;">
+                                    <option value="ALL">Tất cả</option>
+                                    <option value="THU">Khoản Thu (+)</option>
+                                    <option value="CHI">Khoản Chi (-)</option>
+                                </select>
+                                <button type="button" class="btn btn-secondary btn-sm" onclick="exportCashFlowToCSV()">Xuất CSV</button>
+                            </div>
+                        </div>
+                        <div class="table-responsive" style="max-height:380px; overflow-y:auto;">
+                            <table class="app-table">
+                                <thead>
+                                    <tr>
+                                        <th>Mã</th>
+                                        <th>Giờ</th>
+                                        <th>Loại</th>
+                                        <th>Nội dung</th>
+                                        <th>Hình thức</th>
+                                        <th style="text-align:right;">Số tiền</th>
+                                        <th style="text-align:center;">Phiếu</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="cash-flow-tbody">
+                                    <tr><td colspan="7" style="text-align:center; color:var(--text-muted);">Đang tải...</td></tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
                 </div>
             </div>
-            <div class="table-responsive" style="max-height:480px; overflow-y:auto;">
-                <table class="app-table">
-                    <thead>
-                        <tr>
-                            <th>Mã GD / Phiếu</th>
-                            <th>Thời gian</th>
-                            <th>Phân loại</th>
-                            <th>Nội dung giao dịch</th>
-                            <th>Hình thức</th>
-                            <th style="text-align:right;">Số tiền</th>
-                            <th style="text-align:center;">Chứng từ</th>
-                        </tr>
-                    </thead>
-                    <tbody id="cash-flow-tbody">
-                        <tr><td colspan="7" style="text-align:center; color:var(--text-muted);">Đang tải sổ quỹ dòng tiền...</td></tr>
-                    </tbody>
-                </table>
-            </div>
-        </div>
+        </details>
     </div>
 
     <!-- ========================================================
@@ -1891,35 +1994,37 @@
             </div>
         </div>
 
-        <!-- BẢNG CÔNG THỨC & ĐỊNH LƯỢNG NGUYÊN LIỆU MÓN ĂN -->
-        <div class="card">
-            <div class="card-header" style="flex-wrap:wrap; gap:10px;">
-                <div class="card-title">Định lượng công thức món</div>
-                <div style="display:flex; align-items:center; gap:8px; flex-wrap:wrap;">
-                    <input type="text" id="recipe-search-input" placeholder="Lọc theo tên món hoặc nguyên liệu..." oninput="filterRecipesTable()" style="width:230px; padding:6px 10px; font-size:12px;">
-                    <button class="btn btn-primary btn-sm" onclick="openRecipeModal()">+ Cài công thức món</button>
-                    <button class="btn btn-secondary btn-sm" onclick="loadRecipesTable()">Tải lại</button>
+        <!-- BẢNG CÔNG THỨC & ĐỊNH LƯỢNG NGUYÊN LIỆU MÓN ĂN (THU GỌN ĐỂ MÀN HÌNH KDS TẬP TRUNG NẤU MÓN) -->
+        <details class="pos-drawer">
+            <summary>Cấu hình định lượng nguyên liệu món ăn</summary>
+            <div class="drawer-body">
+                <div style="display:flex; justify-content:space-between; align-items:center; gap:8px; flex-wrap:wrap; margin-bottom:12px;">
+                    <input type="text" id="recipe-search-input" placeholder="Tìm món hoặc nguyên liệu..." oninput="filterRecipesTable()" style="max-width:260px; padding:6px 10px; font-size:12px;">
+                    <div style="display:flex; gap:6px;">
+                        <button class="btn btn-primary btn-sm" onclick="openRecipeModal()">+ Cài công thức</button>
+                        <button class="btn btn-secondary btn-sm" onclick="loadRecipesTable()">Làm mới</button>
+                    </div>
+                </div>
+                <div class="table-responsive" style="max-height:420px; overflow-y:auto;">
+                    <table class="app-table">
+                        <thead>
+                            <tr>
+                                <th>Mã</th>
+                                <th>Món ăn</th>
+                                <th>Nguyên liệu</th>
+                                <th>Định mức / suất</th>
+                                <th>Tồn kho</th>
+                                <th>Trạng thái</th>
+                                <th style="text-align:center;">Thao tác</th>
+                            </tr>
+                        </thead>
+                        <tbody id="recipe-list-tbody">
+                            <tr><td colspan="7" style="text-align:center; color:var(--text-muted);">Đang tải...</td></tr>
+                        </tbody>
+                    </table>
                 </div>
             </div>
-            <div class="table-responsive" style="max-height:480px; overflow-y:auto;">
-                <table class="app-table">
-                    <thead>
-                        <tr>
-                            <th>Mã món</th>
-                            <th>Món ăn</th>
-                            <th>Nguyên liệu sử dụng</th>
-                            <th>Định lượng tiêu hao / Suất</th>
-                            <th>Tồn kho hiện tại</th>
-                            <th>Trạng thái nguyên liệu</th>
-                            <th style="text-align:center;">Thao tác</th>
-                        </tr>
-                    </thead>
-                    <tbody id="recipe-list-tbody">
-                        <tr><td colspan="7" style="text-align:center; color:var(--text-muted);">Đang tải công thức...</td></tr>
-                    </tbody>
-                </table>
-            </div>
-        </div>
+        </details>
     </div>
 
     <!-- ========================================================
@@ -2956,41 +3061,25 @@
                 const cleanName = sanitizeAccountName(nd.hoTen, roleCode);
                 const isLocked = tk.trangThai === 0;
 
-                let roleBadge = `<span class="badge badge-info">${escHtml(ROLE_DISPLAY_LABEL[roleCode] || roleCode)}</span>`;
-                if (roleCode === 'ADMIN') roleBadge = `<span class="badge" style="background:#ffedd5; color:#c2410c; font-weight:800;">Chủ quán (ADMIN)</span>`;
-                else if (roleCode === 'QUAN_LY') roleBadge = `<span class="badge" style="background:#dbeafe; color:#1d4ed8; font-weight:700;">Quản lý cửa hàng</span>`;
-                else if (roleCode === 'NHAN_VIEN_PHUC_VU') roleBadge = `<span class="badge" style="background:#dcfce7; color:#15803d; font-weight:700;">Nhân viên Phục vụ</span>`;
-                else if (roleCode === 'DAU_BEP') roleBadge = `<span class="badge" style="background:#f3e8ff; color:#7c3aed; font-weight:700;">Bếp trưởng / Kho</span>`;
-
+                const roleBadge = `<span class="badge badge-info">${escHtml(ROLE_DISPLAY_LABEL[roleCode] || roleCode)}</span>`;
                 const statusBadge = isLocked
                     ? `<span class="badge badge-danger">Đã khóa</span>`
                     : `<span class="badge badge-success">Hoạt động</span>`;
 
                 return `
                     <tr>
-                        <td><strong>#NV-${nv.nvId}</strong></td>
-                        <td>
-                            <strong style="font-size:14px; color:#1e293b;">${escHtml(cleanName)}</strong>
-                            <div style="font-size:11px; color:var(--text-muted);">${escHtml(nd.gioiTinh || '')} • ${escHtml(nd.diaChi || '')}</div>
-                        </td>
-                        <td><code style="background:#f1f5f9; padding:3px 8px; border-radius:4px; font-weight:700; color:#0f172a;">${escHtml(tk.username || '--')}</code></td>
+                        <td><strong>#${nv.nvId}</strong></td>
+                        <td><strong style="color:var(--text-main);">${escHtml(cleanName)}</strong></td>
+                        <td><code style="background:#f1f5f9; padding:2px 7px; border-radius:4px; font-weight:600; color:var(--text-main);">${escHtml(tk.username || '--')}</code></td>
                         <td>${roleBadge}</td>
-                        <td style="font-size:12px;">
-                            <div><strong>${escHtml(nd.soDienThoai || '--')}</strong></div>
-                            <div style="color:var(--text-muted);">${escHtml(tk.email || '')}</div>
-                        </td>
-                        <td>
-                            <div style="font-weight:600; font-size:12px;">${escHtml(nv.chucVu || '--')}</div>
-                            <div style="color:var(--primary); font-weight:700; font-size:12px;">${formatVND(nv.luong || 0)}</div>
-                        </td>
+                        <td style="font-size:12px;">${escHtml(nd.soDienThoai || '--')}</td>
+                        <td style="font-weight:600; font-size:12.5px;">${formatVND(nv.luong || 0)}</td>
                         <td>${statusBadge}</td>
                         <td style="text-align:center; white-space:nowrap;">
-                            <button class="btn btn-primary btn-sm" onclick="openEditAccountsModal(${nd.userId})" style="padding:4px 10px; font-size:12px; margin-right:4px;">
-                                ✎ Đổi tên / Sửa
-                            </button>
+                            <button class="btn btn-secondary btn-sm" onclick="openEditAccountsModal(${nd.userId})" style="margin-right:4px;">Sửa</button>
                             ${roleCode !== 'ADMIN' ? `
-                                <button class="btn ${isLocked ? 'btn-success' : 'btn-danger'} btn-sm" onclick="toggleAccountLockStatus(${tk.taiKhoanId}, ${isLocked ? 1 : 0}, '${escHtml(cleanName)}')" style="padding:4px 8px; font-size:12px;">
-                                    ${isLocked ? 'Mở khóa' : 'Khóa TK'}
+                                <button class="btn ${isLocked ? 'btn-success' : 'btn-secondary'} btn-sm" onclick="toggleAccountLockStatus(${tk.taiKhoanId}, ${isLocked ? 1 : 0}, '${escHtml(cleanName)}')">
+                                    ${isLocked ? 'Mở' : 'Khóa'}
                                 </button>
                             ` : ''}
                         </td>
@@ -3564,15 +3653,15 @@
             const isSelected = selectedTable && selectedTable.maBan === t.maBan;
             const hasCooked = (t.trangThai === 'CO_KHACH') && tablesWithCookedOrders && tablesWithCookedOrders.has(t.maBan);
             const statusClass = `status-${t.trangThai} ${hasCooked ? 'cooked-ready' : ''}`;
-            const badgeText = t.trangThai === 'TRONG' ? 'Trống' : (t.trangThai === 'CO_KHACH' ? 'Có khách' : 'Đặt trước');
 
-            const badgeHtml = hasCooked
-                ? `<span class="badge" style="background:#10b981; color:#fff; font-weight:700;">Đã nấu xong</span>`
-                : `<span class="badge ${t.trangThai === 'TRONG' ? 'badge-success' : 'badge-danger'}">${badgeText}</span>`;
-
-            const previewText = hasCooked
-                ? `<span style="color:#15803d; font-weight:700;">Sẵn sàng lên món</span>`
-                : (t.trangThai === 'CO_KHACH' ? 'Đang phục vụ' : 'Sẵn sàng');
+            let badgeHtml = `<span class="badge" style="background:#f1f5f9; color:#64748b;"><span class="status-dot" style="background:#94a3b8;"></span>Trống</span>`;
+            if (hasCooked) {
+                badgeHtml = `<span class="badge" style="background:#ecfdf5; color:#047857; border:1px solid #a7f3d0;"><span class="status-dot" style="background:#10b981;"></span>Món xong</span>`;
+            } else if (t.trangThai === 'CO_KHACH') {
+                badgeHtml = `<span class="badge" style="background:#fff7ed; color:#c2410c; border:1px solid #fed7aa;"><span class="status-dot" style="background:#ea580c;"></span>Có khách</span>`;
+            } else if (t.trangThai === 'DAT_TRUOC') {
+                badgeHtml = `<span class="badge badge-info">Đặt trước</span>`;
+            }
 
             return `
             <div class="table-card ${statusClass} ${isSelected ? 'selected' : ''}" onclick="selectTable(${t.maBan})">
@@ -3580,10 +3669,7 @@
                     <span class="table-name">${escHtml(t.tenBan)}</span>
                     ${badgeHtml}
                 </div>
-                <div class="table-capacity">${t.sucChua || 4} chỗ ngồi</div>
-                <div class="table-order-preview">
-                    ${previewText}
-                </div>
+                <div class="table-capacity">${t.sucChua || 4} ghế</div>
             </div>`;
         }).join('');
     }
@@ -3613,8 +3699,8 @@
 
         $('order-panel-title').textContent = selectedTable.tenBan;
         const statusBadge = $('order-table-status-badge');
-        statusBadge.textContent = selectedTable.trangThai === 'TRONG' ? 'BÀN TRỐNG' : 'ĐANG DÙNG';
-        statusBadge.className = `badge ${selectedTable.trangThai === 'TRONG' ? 'badge-success' : 'badge-danger'}`;
+        statusBadge.textContent = selectedTable.trangThai === 'TRONG' ? 'Trống' : 'Có khách';
+        statusBadge.className = `badge ${selectedTable.trangThai === 'TRONG' ? 'badge-info' : 'badge-warning'}`;
 
         if (selectedTable.trangThai === 'TRONG') {
             $('order-empty-state').style.display = 'block';
@@ -3776,31 +3862,28 @@
         const countEl = $('dish-filter-count');
         if (countEl) countEl.textContent = `${filtered.length} món`;
 
-        const quickBox = $('quick-search-dish-list');
-        if (quickBox) {
-            if (normalizedKw && filtered.length > 0) {
-                quickBox.style.display = 'block';
-                quickBox.innerHTML = filtered.map(d => `
-                    <div onclick="quickPickSearchedDish(${d.maMon})" style="display:flex; justify-content:space-between; align-items:center; padding:7px 10px; border-bottom:1px solid #f1f5f9; cursor:pointer; font-size:12px;">
-                        <strong style="color:#0f172a;">${escHtml(d.tenMon)}</strong>
-                        <span style="color:var(--primary); font-weight:700;">${formatVND(d.gia)}</span>
-                    </div>
-                `).join('');
-            } else if (normalizedKw && filtered.length === 0) {
-                quickBox.style.display = 'block';
-                quickBox.innerHTML = `<div style="padding:8px 10px; font-size:12px; color:#dc2626; text-align:center;">Không tìm thấy món "${escHtml(currentDishSearchKeyword.trim())}"</div>`;
+        const touchGrid = $('pos-touch-dish-grid');
+        if (touchGrid) {
+            if (filtered.length === 0) {
+                touchGrid.innerHTML = `<div style="grid-column:1/-1; padding:16px 10px; font-size:12px; color:var(--text-muted); text-align:center;">Không tìm thấy món phù hợp</div>`;
             } else {
-                quickBox.style.display = 'none';
-                quickBox.innerHTML = '';
+                touchGrid.innerHTML = filtered.map(d => `
+                    <button type="button" class="pos-dish-btn" onclick="quickAddOneMoreDish(${d.maMon})" title="Chạm để thêm ${escHtml(d.tenMon)}">
+                        <div class="pos-dish-info">
+                            <div class="pos-dish-title">${escHtml(d.tenMon)}</div>
+                            <div class="pos-dish-price">${formatVND(d.gia)}</div>
+                        </div>
+                        <span class="pos-dish-add">+</span>
+                    </button>
+                `).join('');
             }
         }
 
         if (filtered.length === 0) {
-            sel.innerHTML = '<option value="">Không có món trong mục này</option>';
+            sel.innerHTML = '<option value="">Không có món</option>';
         } else {
             sel.innerHTML = '<option value="">-- Chọn món ăn --</option>' +
                 filtered.map(d => `<option value="${d.maMon}">${escHtml(d.tenMon)} — ${formatVND(d.gia)}</option>`).join('');
-            // Khi đang gõ tìm kiếm hoặc chỉ có 1 món, tự động chọn sẵn món đầu tiên để bấm Thêm được ngay
             if (normalizedKw || filtered.length === 1) {
                 sel.value = String(filtered[0].maMon);
             }
@@ -3884,29 +3967,26 @@
             itemsContainer.innerHTML = '<p style="color:var(--text-muted); font-size:12px; text-align:center; padding:12px;">Chưa có món nào</p>';
         } else {
             itemsContainer.innerHTML = order.danhSachMon.map(item => {
-                let itemTag = '';
                 const isItemCooked = (order.trangThai === 'HOAN_THANH') || (hasPreviousCooked && cookedSet.has(Number(item.maCtdh)));
-                if (order.trangThai === 'HOAN_THANH') {
-                    itemTag = '<span class="badge" style="background:#dcfce7; color:#15803d; font-size:10px; margin-left:6px;">✓ Đã nấu xong</span>';
+                let statusDot = '';
+                if (isItemCooked) {
+                    statusDot = '<span style="color:#10b981; font-weight:700; font-size:11px; margin-left:4px;" title="Đã nấu xong">✓</span>';
                 } else if (hasPreviousCooked) {
-                    if (cookedSet.has(Number(item.maCtdh))) {
-                        itemTag = '<span class="badge" style="background:#dcfce7; color:#15803d; font-size:10px; margin-left:6px;">✓ Đã lên món</span>';
-                    } else {
-                        itemTag = '<span class="badge" style="background:#ffedd5; color:#c2410c; font-size:10px; font-weight:700; margin-left:6px;">Món mới (Đang nấu)</span>';
-                    }
+                    statusDot = '<span class="badge" style="background:#fff7ed; color:#c2410c; font-size:10px; padding:1px 6px; margin-left:4px;">Mới</span>';
                 }
                 return `
-                    <div class="order-item-row">
-                        <div>
-                            <strong>${escHtml(item.tenMon)}</strong> ${itemTag}
-                            <div style="color:var(--text-muted); font-size:11px;">
-                                ${formatVND(item.donGia)} &times; ${item.soLuong}
+                    <div class="order-item-row" style="padding:8px 0;">
+                        <div style="min-width:0; flex:1;">
+                            <div style="display:flex; align-items:center; gap:4px;">
+                                <strong style="color:var(--text-main); font-size:13px;">${escHtml(item.tenMon)}</strong>
+                                <span style="background:#f1f5f9; color:#334155; font-weight:700; font-size:11px; padding:1px 6px; border-radius:6px;">x${item.soLuong}</span>
+                                ${statusDot}
                             </div>
                         </div>
-                        <div style="display:flex; align-items:center; gap:6px;">
-                            <span style="font-weight:700; color:var(--text-main);">${formatVND(item.thanhTien)}</span>
-                            <button class="btn btn-secondary btn-sm" onclick="quickAddOneMoreDish(${item.maMon})" style="padding:2px 6px; font-size:11px; font-weight:700;" title="Gọi thêm +1 suất món này">+1</button>
-                            <button class="btn btn-danger btn-sm" onclick="deleteDishFromOrder(${item.maCtdh}, ${isItemCooked}, ${item.maMon || 0}, ${item.soLuong || 1}, '${escHtml(item.tenMon)}')" title="${isItemCooked ? 'Món đã nấu xong (Chỉ Quản lý mới được phép hủy)' : 'Huỷ món & hoàn trả nguyên liệu vào kho'}">&times;</button>
+                        <div style="display:flex; align-items:center; gap:6px; flex-shrink:0;">
+                            <span style="font-weight:700; color:var(--text-main); font-size:13px;">${formatVND(item.thanhTien)}</span>
+                            <button class="btn btn-secondary btn-sm" onclick="quickAddOneMoreDish(${item.maMon})" style="padding:3px 7px; font-size:11px; font-weight:700;">+</button>
+                            <button class="btn btn-secondary btn-sm" onclick="deleteDishFromOrder(${item.maCtdh}, ${isItemCooked}, ${item.maMon || 0}, ${item.soLuong || 1}, '${escHtml(item.tenMon)}')" style="padding:3px 7px; font-size:12px; color:#b91c1c;">&times;</button>
                         </div>
                     </div>
                 `;
@@ -3914,10 +3994,10 @@
         }
     }
 
-    async function addDishToCurrentOrder() {
+    async function addDishToCurrentOrder(directFoodId, directQty) {
         if (!selectedOrder) return;
-        const foodId = $('select-food-to-order').value;
-        const qty = Number($('input-food-qty').value);
+        const foodId = directFoodId || $('select-food-to-order').value;
+        const qty = directQty || Number($('input-food-qty').value) || 1;
 
         if (!foodId) {
             showToast('Vui lòng chọn món ăn cần gọi!', 'error');
@@ -3952,7 +4032,7 @@
             notificationsStore = notificationsStore.filter(n => n.maDon !== selectedOrder.maDon);
             renderNotificationList();
 
-            showToast('Đã thêm món mới và đẩy sang Bếp chế biến! (Đã tự động trừ kho)');
+            showToast('Đã thêm món vào bàn!');
             await loadTables();
             await loadOrderForTable(selectedTable.maBan);
             if (currentTabName === 'kitchen') {
@@ -3968,9 +4048,7 @@
 
     async function quickAddOneMoreDish(maMon) {
         if (!selectedOrder || !maMon) return;
-        $('select-food-to-order').value = maMon;
-        $('input-food-qty').value = 1;
-        await addDishToCurrentOrder();
+        await addDishToCurrentOrder(maMon, 1);
     }
 
     async function restoreIngredientStockForDish(maMon, soLuongMon) {
@@ -4262,7 +4340,7 @@
             <tr>
                 <td>
                     <strong>${escHtml(d.tenMon)}</strong>
-                    <div style="font-size:11px; color:var(--text-muted);">${escHtml(d.moTa || 'Chưa có mô tả')}</div>
+                    ${d.moTa ? `<div style="font-size:11px; color:var(--text-muted);">${escHtml(d.moTa)}</div>` : ''}
                 </td>
                 <td><span class="badge badge-info">${escHtml(d.danhMuc ? d.danhMuc.tenDanhmuc : 'Chưa phân loại')}</span></td>
                 <td style="font-weight:700; color:var(--primary);">${formatVND(d.gia)}</td>
@@ -4848,7 +4926,7 @@
 
                 const nlName = p.nguyenLieu ? (p.nguyenLieu.tenNguyenLieu || p.nguyenLieu.tenNl || `NL #${p.nguyenLieu.nlId}`) : '—';
                 const dvt = p.nguyenLieu ? (p.nguyenLieu.donViTinh || p.nguyenLieu.dvt || '') : '';
-                const timeStr = p.ngayNhapXuat ? new Date(p.ngayNhapXuat).toLocaleString('vi-VN') : '—';
+                const timeStr = p.ngayNhapXuat ? new Date(p.ngayNhapXuat).toLocaleTimeString('vi-VN', {hour:'2-digit', minute:'2-digit'}) + ' ' + new Date(p.ngayNhapXuat).toLocaleDateString('vi-VN', {day:'2-digit', month:'2-digit'}) : '—';
                 const nccStr = p.nhaCungCap ? p.nhaCungCap.tenNcc : (p.ghiChu || '—');
 
                 const actionHtml = isNhap ? `
@@ -4916,7 +4994,7 @@
                 <tr>
                     <td><strong>#${o.maDon}</strong></td>
                     <td><strong>${escHtml(o.ban ? o.ban.tenBan : 'Mang về')}</strong></td>
-                    <td>${o.ngayDat ? new Date(o.ngayDat).toLocaleTimeString('vi-VN') : '--:--'}</td>
+                    <td>${o.ngayDat ? new Date(o.ngayDat).toLocaleTimeString('vi-VN', {hour:'2-digit', minute:'2-digit'}) : '--:--'}</td>
                     <td style="font-weight:700; color:var(--primary);">${formatVND(o.tongTien)}</td>
                     <td>
                         <button class="btn btn-success btn-sm" onclick="openPaymentForOrder(${o.maDon})">Thanh toán</button>
@@ -4989,7 +5067,7 @@
                 <tr>
                     <td><strong>#${p.maTt}</strong></td>
                     <td>#${p.donHang ? p.donHang.maDon : '—'}</td>
-                    <td style="font-size:12px; color:var(--text-muted);">${p.thoiGian ? new Date(p.thoiGian).toLocaleString('vi-VN') : '—'}</td>
+                    <td style="font-size:12px; color:var(--text-muted);">${p.thoiGian ? new Date(p.thoiGian).toLocaleTimeString('vi-VN', {hour:'2-digit', minute:'2-digit'}) + ' ' + new Date(p.thoiGian).toLocaleDateString('vi-VN', {day:'2-digit', month:'2-digit'}) : '—'}</td>
                     <td>${methodBadge}</td>
                     <td style="font-weight:700; color:var(--success);">${formatVND(p.soTien)}</td>
                     <td style="text-align:center;">${actionBtn}</td>
@@ -5370,9 +5448,11 @@
 
     function scrollToCashFlowLedger() {
         closeModal('finance-detail-modal');
+        const drawer = $('cashier-advanced-drawer');
+        if (drawer) drawer.open = true;
         const el = $('cash-flow-tbody');
         if (el) {
-            el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            setTimeout(() => el.scrollIntoView({ behavior: 'smooth', block: 'center' }), 80);
         }
     }
 
@@ -6376,105 +6456,62 @@
                         const isPrevCooked = isExtraOrderMode && cookedIdsSet.has(Number(item.maCtdh));
                         const isNewExtraDish = isExtraOrderMode && !cookedIdsSet.has(Number(item.maCtdh));
 
-                        const dishRecipes = allRecipes.filter(r => r.id && r.id.maMon === item.maMon);
-                        let recipeBreakdown = '';
-
-                        if (dishRecipes.length > 0) {
-                            recipeBreakdown = dishRecipes.map(r => {
-                                const nlFromStock = stockMap.get(r.id.nlId);
-                                const nl = nlFromStock || r.nguyenLieu;
-                                const nlName = nl ? (nl.tenNguyenLieu || nl.tenNl || `Nguyên liệu #${r.id.nlId}`) : `Nguyên liệu #${r.id.nlId}`;
-                                const dvt = nl ? (nl.donViTinh || nl.dvt || '') : '';
-                                const dinhLuong = Number(r.soLuongDung || 0);
-                                const tieuHao = (dinhLuong * (item.soLuong || 1)).toFixed(2).replace(/\.?0+$/, '');
-                                const tonKhoNum = nl && nl.soLuongTon != null ? Number(nl.soLuongTon) : null;
-                                const tonKhoStr = tonKhoNum != null ? tonKhoNum.toFixed(2).replace(/\.?0+$/, '') : '—';
-                                const isOut = tonKhoNum != null && tonKhoNum <= 0;
-                                const isLow = tonKhoNum != null && tonKhoNum <= 10;
-                                const stockColor = isOut ? '#dc2626' : (isLow ? '#d97706' : '#16a34a');
-                                const stockTag = isOut ? '<span style="color:#dc2626; font-weight:700;">(HẾT HÀNG)</span>' : (isLow ? '<span style="color:#d97706; font-weight:700;">(Sắp hết)</span>' : '');
-
-                                return `
-                                    <div style="display:flex; justify-content:space-between; align-items:center; padding:3px 0; font-size:12px; gap:8px;">
-                                        <div style="color:#334155; line-height:1.3;">
-                                            • <strong>${escHtml(nlName)}</strong>:
-                                            <span style="color:#ea580c; font-weight:700;">-${tieuHao} ${escHtml(dvt)}</span>
-                                            <span style="color:#64748b; font-size:11px;">(${dinhLuong} ${escHtml(dvt)}/phần)</span>
-                                        </div>
-                                        <div style="font-size:11px; color:${stockColor}; font-weight:600; white-space:nowrap;">
-                                            Tồn: ${tonKhoStr} ${escHtml(dvt)} ${stockTag}
-                                        </div>
-                                    </div>
-                                `;
-                            }).join('');
-                        } else {
-                            recipeBreakdown = `<div style="font-size:11px; color:#94a3b8; font-style:italic;">Món chưa cài công thức định lượng trừ kho</div>`;
-                        }
-
                         const itemStateBadge = isNewExtraDish
-                            ? `<span class="badge" style="background:#ea580c; color:#fff; font-size:10px; font-weight:800; padding:2px 7px; margin-left:6px;">MÓN MỚI GỌI THÊM</span>`
+                            ? `<span class="badge" style="background:#fff7ed; color:#c2410c; border:1px solid #fdba74; font-size:10px; padding:1px 6px; margin-left:6px;">Món thêm</span>`
                             : (isPrevCooked
-                                ? `<span class="badge" style="background:#dcfce7; color:#15803d; font-size:10px; font-weight:700; padding:2px 7px; margin-left:6px;">✓ Đã nấu xong đợt trước</span>`
+                                ? `<span style="color:#10b981; font-size:11px; font-weight:700; margin-left:6px;">✓ Đã xong</span>`
                                 : '');
 
-                        const rowStyle = isNewExtraDish
-                            ? `padding:10px; margin:6px 0; border:2px solid #fb923c; background:#fff7ed; border-radius:8px;`
-                            : (isPrevCooked
-                                ? `padding:8px 0; border-bottom:1px dashed #e2e8f0; opacity:0.65;`
-                                : `padding:8px 0; border-bottom:1px dashed #e2e8f0;`);
+                        const rowStyle = isPrevCooked
+                            ? `display:flex; justify-content:space-between; align-items:center; padding:8px 0; border-bottom:1px dashed #f1f5f9; opacity:0.55;`
+                            : `display:flex; justify-content:space-between; align-items:center; padding:9px 0; border-bottom:1px dashed #e2e8f0;`;
 
                         return `
                             <div style="${rowStyle}">
-                                <div style="display:flex; justify-content:space-between; align-items:center; gap:6px; flex-wrap:wrap;">
-                                    <div style="font-weight:700; font-size:14px; color:#1e293b; display:flex; align-items:center; flex-wrap:wrap;">
-                                        ${escHtml(item.tenMon)}
-                                        ${itemStateBadge}
-                                    </div>
-                                    <div style="background:#fff7ed; border:1px solid #fed7aa; color:#c2410c; font-weight:800; font-size:13px; padding:2px 8px; border-radius:6px;">
-                                        x${item.soLuong}
-                                    </div>
+                                <div style="font-weight:600; font-size:14px; color:var(--text-main); display:flex; align-items:center; flex-wrap:wrap;">
+                                    ${escHtml(item.tenMon)}
+                                    ${itemStateBadge}
                                 </div>
-                                <div style="margin-top:4px; background:#f8fafc; border:1px solid #edf2f7; border-radius:6px; padding:4px 8px;">
-                                    ${recipeBreakdown}
+                                <div style="background:#f8fafc; border:1px solid #e2e8f0; color:var(--text-main); font-weight:700; font-size:13px; padding:2px 9px; border-radius:8px;">
+                                    &times;${item.soLuong}
                                 </div>
                             </div>
                         `;
                     }).join('')
-                    : `<p style="color:var(--text-muted); font-size:12px; font-style:italic; padding:8px 0;">Chưa có món ăn trong đơn này</p>`;
+                    : `<p style="color:var(--text-muted); font-size:12px; padding:8px 0;">Chưa chọn món</p>`;
 
                 const actionHtml = isCompleted
                     ? `
-                        <div style="display:flex; gap:8px; margin-top:14px;">
-                            <div style="flex:1; background:#f0fdf4; color:#15803d; font-size:13px; font-weight:700; text-align:center; padding:10px; border-radius:8px; border:1px solid #bbf7d0;">
-                                Đã lên món cho khách
+                        <div style="display:flex; gap:8px; margin-top:12px;">
+                            <div style="flex:1; background:#f8fafc; color:#047857; font-size:12.5px; font-weight:600; text-align:center; padding:8px; border-radius:8px; border:1px solid #e2e8f0;">
+                                ✓ Đã lên món
                             </div>
-                            <button class="btn btn-secondary btn-sm" onclick="chefUpdateOrderStatus(${order.maDon}, 'DANG_CHE_BIEN')" title="Chuyển về trạng thái đang nấu nếu cần nấu bổ sung">
+                            <button class="btn btn-secondary btn-sm" onclick="chefUpdateOrderStatus(${order.maDon}, 'DANG_CHE_BIEN')">
                                 Nấu lại
                             </button>
                         </div>
                     `
                     : `
-                        <button class="btn btn-success" style="width:100%; margin-top:14px; padding:11px; font-weight:700; font-size:14px; box-shadow:0 2px 6px rgba(16,185,129,0.3);" onclick="chefUpdateOrderStatus(${order.maDon}, 'HOAN_THANH')">
-                            ${isExtraOrderMode ? `Báo nấu xong món thêm (${newlyAddedItems.length} món)` : 'Báo nấu xong (Lên món)'}
+                        <button class="btn btn-success" style="width:100%; margin-top:12px; padding:10px; font-weight:700; font-size:13.5px;" onclick="chefUpdateOrderStatus(${order.maDon}, 'HOAN_THANH')">
+                            ✓ Hoàn thành món
                         </button>
                     `;
 
-                const cardBorder = isCompleted ? '#86efac' : (isExtraOrderMode ? '#f97316' : '#fdba74');
-                const cardBg = isCompleted ? '#fafdfa' : '#fff';
+                const cardBorder = isCompleted ? '#e2e8f0' : '#fdba74';
 
                 return `
-                    <div class="card" style="border:2px solid ${cardBorder}; background:${cardBg}; border-radius:var(--radius-md); padding:16px; display:flex; flex-direction:column; justify-content:space-between; box-shadow:var(--shadow-sm);">
+                    <div class="card" style="border:1px solid ${cardBorder}; background:#ffffff; border-radius:14px; padding:16px; display:flex; flex-direction:column; justify-content:space-between;">
                         <div>
-                            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px; border-bottom:1px solid #f1f5f9; padding-bottom:10px;">
+                            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px; border-bottom:1px solid #f1f5f9; padding-bottom:10px;">
                                 <div>
-                                    <h4 style="margin:0; font-size:16px; font-weight:800; color:var(--primary);">
+                                    <h4 style="margin:0; font-size:15.5px; font-weight:700; color:var(--text-main);">
                                         ${escHtml(order.tenBan || 'Bàn ăn')}
                                     </h4>
-                                    <span style="font-size:11px; color:var(--text-muted);">Mã đơn: #${order.maDon} • Giờ gọi: ${timeStr}</span>
+                                    <span style="font-size:11.5px; color:var(--text-muted);">#${order.maDon} • ${timeStr}</span>
                                 </div>
                                 <div>${statusBadge}</div>
                             </div>
-                            <div style="margin-bottom:8px;">
+                            <div>
                                 ${itemsHtml}
                             </div>
                         </div>
