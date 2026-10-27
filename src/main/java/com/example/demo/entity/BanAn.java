@@ -47,6 +47,16 @@ public class BanAn {
         this.soChoNgoi = soChoNgoi;
     }
 
+    public Integer getSucChua() {
+        return soChoNgoi;
+    }
+
+    public void setSucChua(Integer sucChua) {
+        if (this.soChoNgoi == null) {
+            this.soChoNgoi = sucChua;
+        }
+    }
+
     public String getTrangThai() {
         return trangThai;
     }

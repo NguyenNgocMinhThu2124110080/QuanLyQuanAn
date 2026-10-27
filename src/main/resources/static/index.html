@@ -3691,7 +3691,7 @@
                     <span class="table-name">${escHtml(t.tenBan)}</span>
                     ${badgeHtml}
                 </div>
-                <div class="table-capacity">${t.sucChua || 4} ghế</div>
+                <div class="table-capacity">${t.soChoNgoi || t.sucChua || 4} ghế</div>
             </div>`;
         }).join('');
     }
@@ -4257,7 +4257,7 @@
         $('transfer-from-table-name').textContent = selectedTable.tenBan;
         $('transfer-from-order-id').textContent = `#${selectedOrder.maDon}`;
         $('transfer-to-table-select').innerHTML = emptyTables.map(t => `
-            <option value="${t.maBan}">${escHtml(t.tenBan)} (${t.sucChua || 4} ghế - Đang trống)</option>
+            <option value="${t.maBan}">${escHtml(t.tenBan)} (${t.soChoNgoi || t.sucChua || 4} ghế - Đang trống)</option>
         `).join('');
         $('transfer-table-modal').classList.add('active');
     }
@@ -4393,7 +4393,7 @@
         try {
             await apiFetch('/api/ban-an', {
                 method: 'POST',
-                body: JSON.stringify({ tenBan, sucChua, trangThai: 'TRONG' })
+                body: JSON.stringify({ tenBan, soChoNgoi: sucChua, sucChua, trangThai: 'TRONG' })
             });
             closeModal('add-table-modal');
             showToast(`Đã thêm ${tenBan} thành công!`);
