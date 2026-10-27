@@ -1518,9 +1518,7 @@
                     <button class="btn btn-primary btn-sm" onclick="resetFoodForm()">+ Thêm món</button>
                 </div>
 
-                <div id="menu-waiter-notice" style="display:none; background:#eff6ff; color:#1e40af; padding:6px 10px; border-radius:6px; font-size:12px; margin-bottom:10px; border:1px solid #bfdbfe;">
-                    Quyền <strong>Phục vụ</strong>: Chỉ xem thực đơn.
-                </div>
+
 
                 <!-- FORM THÊM / SỬA MÓN ĂN -->
                 <form id="food-form" onsubmit="saveFood(event)" style="background:#f8fafc; padding:14px; border-radius:var(--radius-sm); border:1px solid var(--border); margin-bottom:16px;">
@@ -1567,7 +1565,7 @@
                                 <th>Tên món</th>
                                 <th>Danh mục</th>
                                 <th>Đơn giá</th>
-                                <th>Thao tác</th>
+                                <th id="food-action-th">Thao tác</th>
                             </tr>
                         </thead>
                         <tbody id="food-list-tbody">
@@ -1605,7 +1603,7 @@
                                 <th>ID</th>
                                 <th>Tên danh mục</th>
                                 <th>Mô tả</th>
-                                <th>Thao tác</th>
+                                <th id="cat-action-th">Thao tác</th>
                             </tr>
                         </thead>
                         <tbody id="category-list-tbody">
@@ -1706,9 +1704,7 @@
                 <div class="card-header">
                     <div class="card-title" id="stock-form-title">Lập phiếu nhập / xuất kho</div>
                 </div>
-                <div id="chef-inventory-notice" style="display:none; background:#eff6ff; color:#1e40af; padding:6px 10px; border-radius:6px; font-size:12px; margin-bottom:10px; border:1px solid #bfdbfe;">
-                    <strong>Quyền Đầu bếp:</strong> Chỉ lập phiếu Xuất kho.
-                </div>
+
                 <form id="stock-movement-form" onsubmit="submitStockMovement(event)">
                     <label>Loại phiếu <span style="color:red">*</span></label>
                     <select id="movement-type" onchange="toggleMovementFields()">
@@ -3187,8 +3183,7 @@
         const isChef = (role === 'DAU_BEP');
         const cardImport = $('kpi-card-total-import');
         const cardChefSafe = $('kpi-card-chef-safe');
-        const notice = $('chef-inventory-notice');
-        const formTitle = $('stock-form-title');
+                const formTitle = $('stock-form-title');
         const priceBox = $('movement-price-box');
         const supplierBox = $('supplier-field-box');
         const movementTypeSel = $('movement-type');
@@ -3197,8 +3192,7 @@
         if (isChef) {
             if (cardImport) cardImport.style.display = 'none';
             if (cardChefSafe) cardChefSafe.style.display = 'flex';
-            if (notice) notice.style.display = 'block';
-            if (formTitle) formTitle.textContent = 'Lập phiếu Xuất kho nguyên liệu bếp';
+                        if (formTitle) formTitle.textContent = 'Lập phiếu Xuất kho nguyên liệu bếp';
             if (priceBox) priceBox.style.display = 'none';
             if (supplierBox) supplierBox.style.display = 'none';
             if (btnSubmit) btnSubmit.textContent = 'Xác nhận xuất kho';
@@ -3210,8 +3204,7 @@
         } else {
             if (cardImport) cardImport.style.display = 'flex';
             if (cardChefSafe) cardChefSafe.style.display = 'none';
-            if (notice) notice.style.display = 'none';
-            if (formTitle) formTitle.textContent = 'Lập phiếu Nhập / Xuất kho';
+                        if (formTitle) formTitle.textContent = 'Lập phiếu Nhập / Xuất kho';
             if (priceBox) priceBox.style.display = 'block';
             if (btnSubmit) btnSubmit.textContent = 'Xác nhận lập phiếu';
             if (movementTypeSel && movementTypeSel.options.length < 2) {
@@ -3228,12 +3221,10 @@
     function setMenuEditingAllowed(allowed) {
         const foodForm = $('food-form');
         const catForm = $('category-form');
-        const waiterNotice = $('menu-waiter-notice');
-        const btnResetFood = document.querySelector('#tab-menu button[onclick="resetFoodForm()"]');
+                const btnResetFood = document.querySelector('#tab-menu button[onclick="resetFoodForm()"]');
         const btnResetCat = document.querySelector('#tab-menu button[onclick="resetCategoryForm()"]');
 
-        if (waiterNotice) waiterNotice.style.display = allowed ? 'none' : 'block';
-        if (foodForm) foodForm.style.display = allowed ? 'block' : 'none';
+                if (foodForm) foodForm.style.display = allowed ? 'block' : 'none';
         if (catForm) catForm.style.display = allowed ? 'block' : 'none';
         if (btnResetFood) btnResetFood.style.display = allowed ? 'inline-flex' : 'none';
         if (btnResetCat) btnResetCat.style.display = allowed ? 'inline-flex' : 'none';
@@ -4335,6 +4326,8 @@
         }
 
         const isChefOrAdmin = currentUser && ['ADMIN', 'QUAN_LY', 'DAU_BEP'].includes(currentUser.vaiTro);
+        const actionTh = $('food-action-th');
+        if (actionTh) actionTh.style.display = isChefOrAdmin ? '' : 'none';
 
         tbody.innerHTML = displayDishes.map(d => `
             <tr>
@@ -4344,12 +4337,12 @@
                 </td>
                 <td><span class="badge badge-info">${escHtml(d.danhMuc ? d.danhMuc.tenDanhmuc : 'Chưa phân loại')}</span></td>
                 <td style="font-weight:700; color:var(--primary);">${formatVND(d.gia)}</td>
+                ${isChefOrAdmin ? `
                 <td>
-                    ${isChefOrAdmin ? `
                     <button class="btn btn-secondary btn-sm food-action-btn" onclick="editFood(${d.maMon})">Sửa</button>
                     <button class="btn btn-danger btn-sm food-action-btn" onclick="deleteFood(${d.maMon})">Xóa</button>
-                    ` : '<span style="color:var(--text-muted); font-size:11px;">Chỉ xem</span>'}
                 </td>
+                ` : ''}
             </tr>
         `).join('');
     }
@@ -4474,15 +4467,21 @@
             return;
         }
 
+        const isChefOrAdmin = currentUser && ['ADMIN', 'QUAN_LY'].includes(currentUser.vaiTro);
+        const actionTh = $('cat-action-th');
+        if (actionTh) actionTh.style.display = isChefOrAdmin ? '' : 'none';
+
         tbody.innerHTML = allCategories.map(c => `
             <tr>
                 <td><strong>#${c.maDanhmuc}</strong></td>
                 <td><strong>${escHtml(c.tenDanhmuc)}</strong></td>
                 <td style="color:var(--text-muted); font-size:12px;">${escHtml(c.moTa || '—')}</td>
+                ${isChefOrAdmin ? `
                 <td>
                     <button class="btn btn-secondary btn-sm" onclick="editCategory(${c.maDanhmuc})">Sửa</button>
                     <button class="btn btn-danger btn-sm" onclick="deleteCategory(${c.maDanhmuc})">Xóa</button>
                 </td>
+                ` : ''}
             </tr>
         `).join('');
     }
