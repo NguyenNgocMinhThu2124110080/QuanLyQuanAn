@@ -2389,7 +2389,7 @@
 <div class="modal-overlay" id="transfer-table-modal">
     <div class="modal-dialog" style="max-width:440px;">
         <div class="modal-header">
-            <h3>Đổi bàn / Chuyển bàn cho khách</h3>
+            <h3>Đổi bàn</h3>
             <button class="modal-close" onclick="closeModal('transfer-table-modal')">&times;</button>
         </div>
         <div class="modal-body">
@@ -2414,7 +2414,7 @@
 <div class="modal-overlay" id="add-ingredient-modal">
     <div class="modal-dialog" style="max-width:460px;">
         <div class="modal-header">
-            <h3>Thêm Nguyên liệu mới vào danh mục Kho</h3>
+            <h3>Thêm nguyên liệu</h3>
             <button class="modal-close" onclick="closeModal('add-ingredient-modal')">&times;</button>
         </div>
         <div class="modal-body">
@@ -2457,7 +2457,7 @@
 <div class="modal-overlay" id="add-supplier-modal">
     <div class="modal-dialog" style="max-width:460px;">
         <div class="modal-header">
-            <h3>Thêm Nhà cung cấp mới</h3>
+            <h3>Thêm nhà cung cấp</h3>
             <button class="modal-close" onclick="closeModal('add-supplier-modal')">&times;</button>
         </div>
         <div class="modal-body">
@@ -2525,41 +2525,41 @@
     </div>
 </div>
 
-<!-- ===== MODAL: ĐĂNG NHẬP / CHUYỂN TÀI KHOẢN ===== -->
+<!-- ===== MODAL: ĐĂNG NHẬP ===== -->
 <div class="modal-overlay" id="login-modal">
-    <div class="modal-dialog" style="max-width:460px;">
+    <div class="modal-dialog" style="max-width:380px;">
         <div class="modal-header">
-            <h3>Đăng Nhập & Chuyển Ca Nhân Sự</h3>
+            <h3>Đăng nhập</h3>
             <button class="modal-close" onclick="closeModal('login-modal')">&times;</button>
         </div>
-        <div class="modal-body">
-            <label style="margin-bottom:8px; display:block;">Chọn nhanh tài khoản nhân sự (Mật khẩu: 123456):</label>
-            <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-bottom:14px;">
-                <button type="button" class="btn btn-secondary btn-sm" onclick="quickLogin('admin', '123456')" style="display:flex; flex-direction:column; align-items:flex-start; padding:8px 10px; text-align:left; line-height:1.3;">
-                    <span style="font-size:10px; color:#c2410c; font-weight:800; text-transform:uppercase;">Chủ quán / Admin</span>
-                    <strong id="quick-label-admin" style="font-size:13px; color:#1e293b;">Nguyễn Minh Hoàng</strong>
+        <div class="modal-body" style="padding:16px;">
+            <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px;">
+                <button type="button" class="btn btn-secondary" onclick="quickLogin('admin', '123456')" style="display:flex; flex-direction:column; align-items:flex-start; padding:10px 12px; border-radius:10px; gap:2px; text-align:left;">
+                    <span style="font-size:11px; color:var(--primary); font-weight:700;">Chủ quán</span>
+                    <strong id="quick-label-admin" style="font-size:13px; color:var(--text-main);">Nguyễn Minh Hoàng</strong>
                 </button>
-                <button type="button" class="btn btn-secondary btn-sm" onclick="quickLogin('quanly01', '123456')" style="display:flex; flex-direction:column; align-items:flex-start; padding:8px 10px; text-align:left; line-height:1.3;">
-                    <span style="font-size:10px; color:#1d4ed8; font-weight:800; text-transform:uppercase;">Quản lý cửa hàng</span>
-                    <strong id="quick-label-quanly01" style="font-size:13px; color:#1e293b;">Lê Ngọc Bảo Trân</strong>
+                <button type="button" class="btn btn-secondary" onclick="quickLogin('quanly01', '123456')" style="display:flex; flex-direction:column; align-items:flex-start; padding:10px 12px; border-radius:10px; gap:2px; text-align:left;">
+                    <span style="font-size:11px; color:#2563eb; font-weight:700;">Quản lý</span>
+                    <strong id="quick-label-quanly01" style="font-size:13px; color:var(--text-main);">Lê Ngọc Bảo Trân</strong>
                 </button>
-                <button type="button" class="btn btn-secondary btn-sm" onclick="quickLogin('phucvu01', '123456')" style="display:flex; flex-direction:column; align-items:flex-start; padding:8px 10px; text-align:left; line-height:1.3;">
-                    <span style="font-size:10px; color:#15803d; font-weight:800; text-transform:uppercase;">Nhân viên Phục vụ</span>
-                    <strong id="quick-label-phucvu01" style="font-size:13px; color:#1e293b;">Võ Hoàng Nam</strong>
+                <button type="button" class="btn btn-secondary" onclick="quickLogin('phucvu01', '123456')" style="display:flex; flex-direction:column; align-items:flex-start; padding:10px 12px; border-radius:10px; gap:2px; text-align:left;">
+                    <span style="font-size:11px; color:#059669; font-weight:700;">Phục vụ</span>
+                    <strong id="quick-label-phucvu01" style="font-size:13px; color:var(--text-main);">Võ Hoàng Nam</strong>
                 </button>
-                <button type="button" class="btn btn-secondary btn-sm" onclick="quickLogin('daubep01', '123456')" style="display:flex; flex-direction:column; align-items:flex-start; padding:8px 10px; text-align:left; line-height:1.3;">
-                    <span style="font-size:10px; color:#7c3aed; font-weight:800; text-transform:uppercase;">Bếp trưởng / Kho</span>
-                    <strong id="quick-label-daubep01" style="font-size:13px; color:#1e293b;">Phạm Gia Huy</strong>
+                <button type="button" class="btn btn-secondary" onclick="quickLogin('daubep01', '123456')" style="display:flex; flex-direction:column; align-items:flex-start; padding:10px 12px; border-radius:10px; gap:2px; text-align:left;">
+                    <span style="font-size:11px; color:#7c3aed; font-weight:700;">Đầu bếp</span>
+                    <strong id="quick-label-daubep01" style="font-size:13px; color:var(--text-main);">Phạm Gia Huy</strong>
                 </button>
             </div>
 
-            <form onsubmit="handleManualLogin(event)">
-                <label>Tên đăng nhập <span style="color:red">*</span></label>
-                <input type="text" id="login-username" required placeholder="admin / quanly01 / phucvu01 / daubep01">
-                <label>Mật khẩu <span style="color:red">*</span></label>
-                <input type="password" id="login-password" required placeholder="123456">
-                <button type="submit" class="btn btn-primary" style="width:100%; margin-top:16px;">Đăng nhập</button>
-            </form>
+            <details style="margin-top:14px; font-size:12px;">
+                <summary style="cursor:pointer; color:var(--text-muted); text-align:center; padding:4px;">Nhập tài khoản khác ▾</summary>
+                <form onsubmit="handleManualLogin(event)" style="margin-top:10px;">
+                    <input type="text" id="login-username" placeholder="Tên đăng nhập" style="margin-bottom:8px;">
+                    <input type="password" id="login-password" placeholder="Mật khẩu" style="margin-bottom:10px;">
+                    <button type="submit" class="btn btn-primary" style="width:100%;">Đăng nhập</button>
+                </form>
+            </details>
         </div>
     </div>
 </div>
@@ -2568,7 +2568,7 @@
 <div class="modal-overlay" id="edit-accounts-modal">
     <div class="modal-dialog" style="max-width:520px;">
         <div class="modal-header">
-            <h3>Đổi tên Tài khoản & Nhân sự</h3>
+            <h3>Đổi tên tài khoản</h3>
             <button class="modal-close" onclick="closeModal('edit-accounts-modal')">&times;</button>
         </div>
         <div class="modal-body">
