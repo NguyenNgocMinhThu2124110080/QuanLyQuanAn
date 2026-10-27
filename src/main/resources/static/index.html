@@ -1348,7 +1348,7 @@
             </button>
             <div id="notification-dropdown" class="notification-dropdown" style="display:none;">
                 <div class="notification-header">
-                    <h4>Thông báo Bếp chế biến</h4>
+                    <h4>Thông báo</h4>
                     <span class="mark-read-link" onclick="markAllNotificationsRead()">Đã đọc tất cả</span>
                 </div>
                 <div id="notification-list" class="notification-list"></div>
@@ -2901,6 +2901,14 @@
             $('current-user-name').textContent = currentUser.hoTen || currentUser.username;
             $('current-user-role').textContent = ROLE_DISPLAY_LABEL[currentUser.vaiTro] || currentUser.vaiTro || 'Nhân viên';
             authActions.innerHTML = `<button class="btn-logout" onclick="handleLogout()">Đăng xuất</button>`;
+
+            // Lọc thông báo phù hợp vai trò: Đầu bếp không nhận thông báo "Đã nấu xong" của chính mình
+            if (currentUser.vaiTro === 'DAU_BEP') {
+                notificationsStore = notificationsStore.filter(n => n.type !== 'BEP_XONG');
+            } else {
+                notificationsStore = notificationsStore.filter(n => n.type !== 'DON_MOI');
+            }
+            renderNotificationList();
         } else {
             userBadge.style.display = 'none';
             authActions.innerHTML = `<button class="btn btn-primary btn-sm" onclick="openLoginModal()">Đăng nhập</button>`;
@@ -3399,9 +3407,20 @@
 
         listEl.innerHTML = notificationsStore.map(n => {
             const isKho = n.type === 'KHO_CANH_BAO';
-            const tagClass = isKho ? (n.isOut ? 'notification-tag-out' : 'notification-tag-kho') : 'notification-tag-bep';
-            const tagText = isKho ? (n.isOut ? 'Hết hàng' : 'Kho') : 'Bếp';
-            const dotColor = isKho ? (n.isOut ? '#ef4444' : '#f59e0b') : '#10b981';
+            const isDonMoi = n.type === 'DON_MOI';
+            let tagClass = 'notification-tag-bep';
+            let tagText = 'Lên món';
+            let dotColor = '#10b981';
+
+            if (isKho) {
+                tagClass = n.isOut ? 'notification-tag-out' : 'notification-tag-kho';
+                tagText = n.isOut ? 'Hết hàng' : 'Kho';
+                dotColor = n.isOut ? '#ef4444' : '#f59e0b';
+            } else if (isDonMoi) {
+                tagClass = 'notification-tag-kho';
+                tagText = 'Cần nấu';
+                dotColor = '#ea580c';
+            }
 
             return `
             <div class="notification-item ${n.unread ? 'unread' : ''}" onclick="handleClickNotification('${n.id}')">
@@ -3430,16 +3449,16 @@
             if (dd) dd.style.display = 'none';
 
             if (item.type === 'KHO_CANH_BAO') {
-                // Chuyển tới tab Kho & Nguyên liệu
                 const navInv = $('nav-btn-inventory');
                 if (navInv) switchNav('inventory', navInv);
                 await loadInventoryReport();
+            } else if (item.type === 'DON_MOI') {
+                const navKitchen = $('nav-btn-kitchen');
+                if (navKitchen) switchNav('kitchen', navKitchen);
+                await loadKitchenOrders();
             } else {
-                // Chuyển tới sơ đồ bàn
                 const navTables = $('nav-btn-tables');
                 if (navTables) switchNav('tables', navTables);
-
-                // Mở bàn tương ứng để phục vụ lên món
                 if (item.maBan) {
                     await selectTable(item.maBan);
                 }
@@ -3464,10 +3483,11 @@
     // Kiểm tra định kỳ và cập nhật thông báo (Đơn nấu xong & Cảnh báo kho nguyên liệu)
     async function checkCookedOrdersNotification() {
         try {
+            const isChef = currentUser && currentUser.vaiTro === 'DAU_BEP';
             // 1. KIỂM TRA ĐƠN HÀNG BẾP NẤU XONG
             const orders = await apiFetch('/api/don-hang');
             const newTablesWithCooked = new Map();
-            let cookedNotifications = [];
+            let roleOrderNotifications = [];
 
             if (Array.isArray(orders)) {
                 // CHỈ LẤY CÁC ĐƠN ĐÃ NẤU XONG CỦA BÀN ĐANG CÓ KHÁCH (CO_KHACH)
@@ -3501,32 +3521,37 @@
                     if (newlyCooked.length > 0) {
                         newlyCooked.forEach(o => {
                             knownCookedOrderIds.add(o.maDon);
-                            // Xoá trạng thái đã đọc cũ của thông báo đơn này để hiện chấm đỏ mới
-                            notificationsStore = notificationsStore.filter(n => String(n.id) !== `order_${o.maDon}`);
-                            const tableName = o.ban ? o.ban.tenBan : `Bàn #${o.maBan}`;
-                            playKitchenNotificationChime();
-                            showToast(`Bếp đã nấu xong món cho ${tableName} (Đơn #${o.maDon})! Nhân viên vui lòng lên món cho khách.`, 'success');
+                            // Chỉ nhân viên phục vụ / quản lý mới nhận chuông báo và toast lên món
+                            if (!isChef) {
+                                notificationsStore = notificationsStore.filter(n => String(n.id) !== `order_${o.maDon}`);
+                                const tableName = o.ban ? o.ban.tenBan : `Bàn #${o.maBan}`;
+                                playKitchenNotificationChime();
+                                showToast(`Bếp đã nấu xong món cho ${tableName} (Đơn #${o.maDon})! Nhân viên vui lòng lên món cho khách.`, 'success');
+                            }
                         });
                     }
                 }
 
                 tablesWithCookedOrders = newTablesWithCooked;
 
-                currentCooked.forEach(o => {
-                    const tableName = o.ban ? o.ban.tenBan : `Bàn #${o.maBan}`;
-                    const timeStr = o.ngayDat ? new Date(o.ngayDat).toLocaleTimeString('vi-VN', { hour:'2-digit', minute:'2-digit' }) : 'Vừa xong';
-                    cookedNotifications.push({
-                        id: `order_${o.maDon}`,
-                        type: 'BEP_XONG',
-                        maDon: o.maDon,
-                        maBan: o.ban ? o.ban.maBan : null,
-                        tenBan: tableName,
-                        title: `${tableName} — Đã nấu xong`,
-                        message: `Đơn #${o.maDon} sẵn sàng lên món.`, 
-                        time: timeStr,
-                        unread: true
+                // NẾU LÀ PHỤC VỤ / QUẢN LÝ / ADMIN: nhận thông báo Bếp đã nấu xong để lên món
+                if (!isChef) {
+                    currentCooked.forEach(o => {
+                        const tableName = o.ban ? o.ban.tenBan : `Bàn #${o.maBan}`;
+                        const timeStr = o.ngayDat ? new Date(o.ngayDat).toLocaleTimeString('vi-VN', { hour:'2-digit', minute:'2-digit' }) : 'Vừa xong';
+                        roleOrderNotifications.push({
+                            id: `order_${o.maDon}`,
+                            type: 'BEP_XONG',
+                            maDon: o.maDon,
+                            maBan: o.ban ? o.ban.maBan : null,
+                            tenBan: tableName,
+                            title: `${tableName} — Đã nấu xong`,
+                            message: `Đơn #${o.maDon} sẵn sàng lên món.`, 
+                            time: timeStr,
+                            unread: true
+                        });
                     });
-                });
+                }
             }
 
             // 2. KIỂM TRA CẢNH BÁO TỒN KHO NGUYÊN LIỆU (SẮP HẾT / HẾT HÀNG)
@@ -3575,7 +3600,7 @@
 
             // 3. HỢP NHẤT DANH SÁCH THÔNG BÁO VÀ BẢO LƯU TRẠNG THÁI ĐÃ ĐỌC
             const readIdSet = new Set(notificationsStore.filter(n => !n.unread).map(n => String(n.id)));
-            const merged = [...cookedNotifications, ...stockNotifications];
+            const merged = [...roleOrderNotifications, ...stockNotifications];
             merged.forEach(n => {
                 if (readIdSet.has(String(n.id))) {
                     n.unread = false;
