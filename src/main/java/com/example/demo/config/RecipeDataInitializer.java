@@ -48,6 +48,8 @@ public class RecipeDataInitializer implements CommandLineRunner {
         NhaCungCap nccRau = nhaCungCapRepository.findById(1).orElse(null);
         NhaCungCap nccThit = nhaCungCapRepository.findById(2).orElse(null);
         NhaCungCap nccDoUong = nhaCungCapRepository.findById(3).orElse(null);
+        NhaCungCap nccHaiSan = nhaCungCapRepository.findById(4).orElse(null);
+        NhaCungCap nccMienTay = nhaCungCapRepository.findById(5).orElse(null);
 
         createIngredientIfMissing(nlMap, "Sườn heo non", "kg", new BigDecimal("110000"), new BigDecimal("30"), nccThit);
         createIngredientIfMissing(nlMap, "Giò heo rút xương", "kg", new BigDecimal("85000"), new BigDecimal("25"), nccThit);
@@ -64,6 +66,23 @@ public class RecipeDataInitializer implements CommandLineRunner {
         createIngredientIfMissing(nlMap, "Khúc bạch & Hạnh nhân", "kg", new BigDecimal("80000"), new BigDecimal("20"), nccDoUong);
         createIngredientIfMissing(nlMap, "Cùi bưởi & Cốt dừa", "kg", new BigDecimal("60000"), new BigDecimal("25"), nccRau);
 
+        // Nguyên liệu mở rộng cho thực đơn phong phú
+        createIngredientIfMissing(nlMap, "Cốt lẩu Thái Tomyum", "hộp", new BigDecimal("45000"), new BigDecimal("30"), nccDoUong);
+        createIngredientIfMissing(nlMap, "Nấm kim châm tươi", "kg", new BigDecimal("40000"), new BigDecimal("25"), nccRau);
+        createIngredientIfMissing(nlMap, "Ba chỉ bò Mỹ", "kg", new BigDecimal("190000"), new BigDecimal("30"), nccThit);
+        createIngredientIfMissing(nlMap, "Cánh gà tươi CP", "kg", new BigDecimal("65000"), new BigDecimal("35"), nccThit);
+        createIngredientIfMissing(nlMap, "Ngó sen tươi", "kg", new BigDecimal("50000"), new BigDecimal("20"), nccRau);
+        createIngredientIfMissing(nlMap, "Bánh tráng cuốn chả giò", "hộp", new BigDecimal("20000"), new BigDecimal("40"), nccRau);
+        createIngredientIfMissing(nlMap, "Xà lách & Cà chua bi", "kg", new BigDecimal("30000"), new BigDecimal("25"), nccRau);
+        createIngredientIfMissing(nlMap, "Hủ tiếu gạo Sa Đéc", "kg", new BigDecimal("35000"), new BigDecimal("30"), nccRau);
+        createIngredientIfMissing(nlMap, "Mì Ý Spaghetti", "kg", new BigDecimal("45000"), new BigDecimal("25"), nccDoUong);
+        createIngredientIfMissing(nlMap, "Thịt bò lúc lắc", "kg", new BigDecimal("260000"), new BigDecimal("20"), nccThit);
+        createIngredientIfMissing(nlMap, "Mãng cầu xiêm tươi", "kg", new BigDecimal("40000"), new BigDecimal("30"), nccMienTay != null ? nccMienTay : nccRau);
+        createIngredientIfMissing(nlMap, "Ổi hồng ruột đỏ", "kg", new BigDecimal("35000"), new BigDecimal("30"), nccMienTay != null ? nccMienTay : nccRau);
+        createIngredientIfMissing(nlMap, "Trái bơ sáp Đắk Lắk", "kg", new BigDecimal("55000"), new BigDecimal("25"), nccMienTay != null ? nccMienTay : nccRau);
+        createIngredientIfMissing(nlMap, "Dừa xiêm tươi Bến Tre", "trái", new BigDecimal("15000"), new BigDecimal("50"), nccMienTay != null ? nccMienTay : nccRau);
+        createIngredientIfMissing(nlMap, "Sữa chua dẻo & Dâu tây", "hộp", new BigDecimal("40000"), new BigDecimal("30"), nccDoUong);
+
         // Nạp lại danh sách nguyên liệu
         nlMap.clear();
         for (NguyenLieu nl : nguyenLieuRepository.findAll()) {
@@ -72,7 +91,7 @@ public class RecipeDataInitializer implements CommandLineRunner {
             }
         }
 
-        // Định nghĩa công thức chuẩn cho 19 món ăn
+        // Định nghĩa công thức chuẩn cho toàn bộ 34 món ăn
         addRecipeIfMissing(1, "thịt gà", new BigDecimal("0.20"), nlMap);
         addRecipeIfMissing(2, "thịt bò", new BigDecimal("0.15"), nlMap);
         addRecipeIfMissing(3, "khoai tây", new BigDecimal("0.30"), nlMap);
@@ -98,6 +117,36 @@ public class RecipeDataInitializer implements CommandLineRunner {
         addRecipeIfMissing(17, "khúc bạch & hạnh nhân", new BigDecimal("0.15"), nlMap);
         addRecipeIfMissing(18, "cùi bưởi & cốt dừa", new BigDecimal("0.15"), nlMap);
         addRecipeIfMissing(19, "trứng gà & sữa tươi", new BigDecimal("0.10"), nlMap);
+
+        // Công thức cho các món mới (20 -> 34)
+        addRecipeIfMissing(20, "cốt lẩu thái tomyum", new BigDecimal("0.20"), nlMap);
+        addRecipeIfMissing(20, "tôm sú tươi", new BigDecimal("0.10"), nlMap);
+        addRecipeIfMissing(20, "mực ống tươi", new BigDecimal("0.10"), nlMap);
+        addRecipeIfMissing(20, "nấm kim châm tươi", new BigDecimal("0.15"), nlMap);
+        addRecipeIfMissing(21, "ba chỉ bò mỹ", new BigDecimal("0.20"), nlMap);
+        addRecipeIfMissing(21, "nấm kim châm tươi", new BigDecimal("0.10"), nlMap);
+        addRecipeIfMissing(22, "cánh gà tươi cp", new BigDecimal("0.30"), nlMap);
+        addRecipeIfMissing(23, "sườn heo non", new BigDecimal("0.35"), nlMap);
+        addRecipeIfMissing(24, "thịt bò", new BigDecimal("0.12"), nlMap);
+        addRecipeIfMissing(24, "xà lách & cà chua bi", new BigDecimal("0.15"), nlMap);
+        addRecipeIfMissing(25, "ngó sen tươi", new BigDecimal("0.20"), nlMap);
+        addRecipeIfMissing(25, "tôm sú tươi", new BigDecimal("0.08"), nlMap);
+        addRecipeIfMissing(26, "bánh tráng cuốn chả giò", new BigDecimal("1.00"), nlMap);
+        addRecipeIfMissing(26, "tôm sú tươi", new BigDecimal("0.08"), nlMap);
+        addRecipeIfMissing(27, "thịt bò lúc lắc", new BigDecimal("0.15"), nlMap);
+        addRecipeIfMissing(27, "khoai tây", new BigDecimal("0.10"), nlMap);
+        addRecipeIfMissing(27, "gạo thơm st25", new BigDecimal("0.15"), nlMap);
+        addRecipeIfMissing(28, "hủ tiếu gạo sa đéc", new BigDecimal("0.18"), nlMap);
+        addRecipeIfMissing(28, "tôm sú tươi", new BigDecimal("0.06"), nlMap);
+        addRecipeIfMissing(29, "mì ý spaghetti", new BigDecimal("0.15"), nlMap);
+        addRecipeIfMissing(29, "thịt bò", new BigDecimal("0.10"), nlMap);
+        addRecipeIfMissing(30, "trà đen", new BigDecimal("0.02"), nlMap);
+        addRecipeIfMissing(30, "mãng cầu xiêm tươi", new BigDecimal("0.15"), nlMap);
+        addRecipeIfMissing(31, "trà đen", new BigDecimal("0.02"), nlMap);
+        addRecipeIfMissing(31, "ổi hồng ruột đỏ", new BigDecimal("0.15"), nlMap);
+        addRecipeIfMissing(32, "trái bơ sáp đắk lắk", new BigDecimal("0.20"), nlMap);
+        addRecipeIfMissing(33, "dừa xiêm tươi bến tre", new BigDecimal("1.00"), nlMap);
+        addRecipeIfMissing(34, "sữa chua dẻo & dâu tây", new BigDecimal("1.00"), nlMap);
     }
 
     private void updateAccountDisplayNameIfLegacy(Integer userId, String oldName, String newName, String gioiTinh) {
