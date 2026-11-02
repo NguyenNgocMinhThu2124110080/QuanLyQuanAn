@@ -34,7 +34,14 @@ build/
 
 ### Python / Virtualenv ###
 .venv/
+.tools/
 *.py
+__pycache__/
+*.pyc
+
+# Temporary / Lock files
+~$*
+*.tmp
 
 hs_err_pid*.log
 replay_pid*.log
