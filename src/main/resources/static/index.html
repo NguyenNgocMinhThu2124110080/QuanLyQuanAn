@@ -1497,7 +1497,7 @@
                             <div style="display:grid; grid-template-columns:1fr 1fr 1.5fr; gap:8px; margin-top:8px;">
                                 <button class="btn btn-secondary btn-sm" onclick="openTransferTableModal()" style="padding:9px 8px;">Đổi bàn</button>
                                 <button class="btn btn-secondary btn-sm" onclick="cancelCurrentOrder()" style="padding:9px 8px; color:#b91c1c;">Hủy đơn</button>
-                                <button class="btn btn-success" onclick="openPaymentForCurrentOrder()" style="padding:9px 12px; font-weight:700;">Thanh toán</button>
+                                <button class="btn btn-success" id="btn-pay-current-order" onclick="openPaymentForCurrentOrder()" style="padding:9px 12px; font-weight:700;">Thanh toán</button>
                             </div>
                         </div>
                     </div>
@@ -1860,11 +1860,12 @@
                                 <th>Bàn</th>
                                 <th>Giờ gọi</th>
                                 <th>Tổng tiền</th>
+                                <th>Trạng thái bếp</th>
                                 <th>Thao tác</th>
                             </tr>
                         </thead>
                         <tbody id="pending-orders-tbody">
-                            <tr><td colspan="5" style="text-align:center; color:var(--text-muted);">Đang tải...</td></tr>
+                            <tr><td colspan="6" style="text-align:center; color:var(--text-muted);">Đang tải...</td></tr>
                         </tbody>
                     </table>
                 </div>
@@ -3980,6 +3981,29 @@
             }
         }
 
+        // Cập nhật trạng thái nút Thanh toán theo tiến độ nấu của Bếp
+        const payBtn = $('btn-pay-current-order');
+        if (payBtn) {
+            const hasDishes = Array.isArray(order.danhSachMon) && order.danhSachMon.length > 0;
+            if (!hasDishes || Number(order.tongTien || 0) <= 0) {
+                payBtn.className = 'btn btn-secondary';
+                payBtn.innerHTML = 'Chưa có món';
+                payBtn.title = 'Bàn chưa gọi món ăn nào';
+            } else if (order.trangThai === 'HOAN_THANH') {
+                payBtn.className = 'btn btn-success';
+                payBtn.innerHTML = 'Thanh toán';
+                payBtn.title = 'Món đã nấu xong, sẵn sàng thanh toán';
+            } else if (order.trangThai === 'DANG_CHE_BIEN') {
+                payBtn.className = 'btn btn-warning';
+                payBtn.innerHTML = 'Chờ bếp nấu';
+                payBtn.title = 'Món ăn đang nấu, bếp chưa báo hoàn thành';
+            } else {
+                payBtn.className = 'btn btn-secondary';
+                payBtn.innerHTML = 'Thanh toán';
+                payBtn.title = 'Chưa hoàn thành';
+            }
+        }
+
         // Nạp danh sách món ăn vào dropdown có lọc tìm kiếm
         populateDishSelect();
 
@@ -5073,7 +5097,7 @@
 
     async function loadPendingOrders() {
         const tbody = $('pending-orders-tbody');
-        tbody.innerHTML = `<tr><td colspan="5"><div class="ui-loading-box"><div class="spinner"></div><span>Đang tìm đơn hàng chờ thanh toán...</span></div></td></tr>`;
+        tbody.innerHTML = `<tr><td colspan="6"><div class="ui-loading-box"><div class="spinner"></div><span>Đang tìm đơn hàng chờ thanh toán...</span></div></td></tr>`;
         try {
             const data = await apiFetch('/api/don-hang');
             pendingOrdersList = (Array.isArray(data) ? data : []).filter(o => 
@@ -5081,26 +5105,48 @@
             );
 
             if (pendingOrdersList.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="5" style="text-align:center; padding:36px 12px; color:var(--text-muted); font-size:13px;">Không có đơn chờ thanh toán</td></tr>`;
+                tbody.innerHTML = `<tr><td colspan="6" style="text-align:center; padding:36px 12px; color:var(--text-muted); font-size:13px;">Không có đơn chờ thanh toán</td></tr>`;
                 return;
             }
 
-            tbody.innerHTML = pendingOrdersList.map(o => `
+            tbody.innerHTML = pendingOrdersList.map(o => {
+                const isCooked = o.trangThai === 'HOAN_THANH';
+                const isCooking = o.trangThai === 'DANG_CHE_BIEN';
+                let statusBadge = '';
+                let payBtnClass = '';
+                let payBtnText = '';
+
+                if (isCooked) {
+                    statusBadge = `<span class="badge" style="background:#ecfdf5; color:#065f46; font-size:11px; font-weight:700; padding:3px 8px; border-radius:6px;">✓ Đã nấu xong</span>`;
+                    payBtnClass = 'btn btn-success btn-sm';
+                    payBtnText = 'Thanh toán';
+                } else if (isCooking) {
+                    statusBadge = `<span class="badge" style="background:#fffbeb; color:#92400e; font-size:11px; font-weight:700; padding:3px 8px; border-radius:6px;">⏳ Bếp đang nấu</span>`;
+                    payBtnClass = 'btn btn-warning btn-sm';
+                    payBtnText = 'Chờ bếp nấu';
+                } else {
+                    statusBadge = `<span class="badge" style="background:#f1f5f9; color:#475569; font-size:11px; font-weight:700; padding:3px 8px; border-radius:6px;">Chưa có món</span>`;
+                    payBtnClass = 'btn btn-secondary btn-sm';
+                    payBtnText = 'Chưa có món';
+                }
+
+                return `
                 <tr>
                     <td><strong>#${o.maDon}</strong></td>
                     <td><strong>${escHtml(o.ban ? o.ban.tenBan : 'Mang về')}</strong></td>
                     <td>${o.ngayDat ? new Date(o.ngayDat).toLocaleTimeString('vi-VN', {hour:'2-digit', minute:'2-digit'}) : '--:--'}</td>
                     <td style="font-weight:700; color:var(--primary);">${formatVND(o.tongTien)}</td>
+                    <td>${statusBadge}</td>
                     <td>
-                        <button class="btn btn-success btn-sm" onclick="openPaymentForOrder(${o.maDon})">Thanh toán</button>
+                        <button class="${payBtnClass}" onclick="openPaymentForOrder(${o.maDon})">${payBtnText}</button>
                         ${Number(o.tongTien) === 0 ? `<button class="btn btn-secondary btn-sm" style="margin-left:4px;" onclick="cancelEmptyOrder(${o.maDon})" title="Hủy đơn trống">Hủy</button>` : ''}
                     </td>
                 </tr>
-            `).join('');
+            `}).join('');
         } catch (e) {
             pendingOrdersList = [];
             tbody.innerHTML = `
-                <tr><td colspan="5">
+                <tr><td colspan="6">
                     <div class="ui-error-box">
                         <div class="error-title">Lỗi tải danh sách đơn chờ thanh toán</div>
                         <div class="error-desc">${escHtml(e.message)}</div>
@@ -5873,6 +5919,26 @@
     async function openPaymentForOrder(maDon) {
         try {
             currentPayingOrder = await apiFetch(`/api/don-hang/${maDon}/chi-tiet-hoa-don`);
+
+            // RÀNG BUỘC CHẶT CHẼ: Kiểm tra đơn hàng trước khi mở thanh toán
+            if (currentPayingOrder.trangThai === 'DA_THANH_TOAN') {
+                showToast('Đơn hàng này đã được thanh toán trước đó rồi!', 'warning');
+                return;
+            }
+            if (currentPayingOrder.trangThai === 'HUY') {
+                showToast('Đơn hàng này đã bị hủy, không thể thanh toán!', 'error');
+                return;
+            }
+            const items = currentPayingOrder.danhSachMon || [];
+            if (items.length === 0 || Number(currentPayingOrder.tongTien || 0) <= 0) {
+                showToast('⚠️ Bàn chưa gọi món nào! Vui lòng gọi món trước khi thanh toán.', 'warning');
+                return;
+            }
+            if (currentPayingOrder.trangThai !== 'HOAN_THANH') {
+                showToast('⚠️ Món ăn chưa nấu xong (Bếp đang chế biến)! Vui lòng chờ Bếp bấm "✓ Hoàn thành món" trước khi thanh toán.', 'warning');
+                return;
+            }
+
             $('pay-order-id').value = currentPayingOrder.maDon;
             $('pay-table-name').textContent = currentPayingOrder.tenBan;
             $('pay-order-code').textContent = `#${currentPayingOrder.maDon}`;
