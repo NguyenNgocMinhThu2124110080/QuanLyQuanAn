@@ -53,8 +53,8 @@ public class RecipeDataInitializer implements CommandLineRunner {
 
         createIngredientIfMissing(nlMap, "Sườn heo non", "kg", new BigDecimal("110000"), new BigDecimal("30"), nccThit);
         createIngredientIfMissing(nlMap, "Giò heo rút xương", "kg", new BigDecimal("85000"), new BigDecimal("25"), nccThit);
-        createIngredientIfMissing(nlMap, "Mực ống tươi", "kg", new BigDecimal("140000"), new BigDecimal("25"), nccThit);
-        createIngredientIfMissing(nlMap, "Tôm sú tươi", "kg", new BigDecimal("180000"), new BigDecimal("20"), nccThit);
+        createIngredientIfMissing(nlMap, "Mực ống tươi", "kg", new BigDecimal("140000"), new BigDecimal("25"), nccHaiSan != null ? nccHaiSan : nccThit);
+        createIngredientIfMissing(nlMap, "Tôm sú tươi", "kg", new BigDecimal("180000"), new BigDecimal("20"), nccHaiSan != null ? nccHaiSan : nccThit);
         createIngredientIfMissing(nlMap, "Gạo thơm ST25", "kg", new BigDecimal("25000"), new BigDecimal("50"), nccRau);
         createIngredientIfMissing(nlMap, "Nem chua tươi", "kg", new BigDecimal("90000"), new BigDecimal("20"), nccThit);
         createIngredientIfMissing(nlMap, "Trứng gà & Sữa tươi", "kg", new BigDecimal("40000"), new BigDecimal("30"), nccDoUong);

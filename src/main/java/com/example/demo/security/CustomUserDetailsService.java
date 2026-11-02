@@ -9,7 +9,6 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
-import java.util.Collections;
 
 // PHẦN CỦA: ĐẶNG VŨ THANH PHÁT
 // Buổi 4: Load thông tin người dùng và quyền hạn từ Database cho Spring Security
